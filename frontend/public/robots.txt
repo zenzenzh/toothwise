@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /login
+Disallow: /patient-portal
+Disallow: /api/
+
+# Replace with your real production domain once deployed (see sitemap.xml).
+Sitemap: https://your-toothwise-domain.example.com/sitemap.xml

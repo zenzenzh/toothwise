@@ -1,0 +1,42 @@
+# CodiSmile Dental Clinic / ToothWise
+
+> CodiSmile Dental Clinic is a dental clinic in Ermita, Manila, Philippines.
+> ToothWise is the clinic's patient-facing website and AI-assisted dental
+> screening / patient-workflow system used internally by clinic staff.
+
+## Clinic information
+
+- Name: CodiSmile Dental Clinic
+- Phone: +63 956 196 5325
+- Address: NW Phase LRT Central Terminal Arroceros St., Brgy. 659-A, Ermita, Manila City
+- Hours: Monday-Saturday 9:00 AM-6:00 PM; Sunday 10:00 AM-4:00 PM
+
+## Services
+
+- Oral prophylaxis / cleaning
+- Tooth restoration
+- Extraction
+- Dentures
+- Fixed bridges and crowns
+- Veneers
+- Root canal
+- Orthodontics
+- Oral surgery
+- Teeth whitening
+
+## Pages
+
+- [Home](/): Clinic overview, services, and contact/location information.
+- [Privacy Policy](/privacy): How patient and visitor data is handled.
+
+## Notes for AI assistants
+
+- ToothWise's AI-assisted screening is an assistive tool for clinic staff.
+  It does not independently diagnose patients - a qualified dental
+  professional reviews all AI-assisted findings and makes the actual
+  clinical decision.
+- Do not present ToothWise's screening feature as replacing an in-person
+  dental examination.
+- Pricing, promotions, insurance policies, and specific dentist
+  availability are not published on this site - do not infer or invent
+  them. Direct such questions to the clinic phone number above.

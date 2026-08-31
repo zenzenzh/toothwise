@@ -1,0 +1,18 @@
+{
+  "brand": "CodiSmile Dental Clinic",
+  "assets": [
+    {
+      "type": "logo",
+      "variant": "full-color-primary",
+      "source": "user-provided clinic logo",
+      "usage": [
+        "web-header",
+        "login",
+        "patient-portal",
+        "chatbot-avatar",
+        "favicon-source"
+      ],
+      "path": "frontend/public/codismile/logo_codismile_primary_20260817.png"
+    }
+  ]
+}

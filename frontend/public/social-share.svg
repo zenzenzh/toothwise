@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+<rect width="1200" height="630" fill="#0B2B37"/>
+<circle cx="1000" cy="90" r="240" fill="#20A4A5" opacity=".18"/>
+<circle cx="160" cy="600" r="260" fill="#73D8D8" opacity=".10"/>
+<rect x="85" y="95" width="96" height="96" rx="25" fill="#20A4A5"/>
+<text x="210" y="155" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="54" font-weight="700">ToothWise</text>
+<text x="88" y="270" fill="#73D8D8" font-family="Arial, sans-serif" font-size="28" font-weight="700">CODISMILE DENTAL CLINIC</text>
+<text x="88" y="345" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="50" font-weight="700">AI-assisted dental screening</text>
+<text x="88" y="405" fill="#B9D1D7" font-family="Arial, sans-serif" font-size="26">Patient care, screening results, and prevention guidance.</text>
+</svg>

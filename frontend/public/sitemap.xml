@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  IMPORTANT: replace https://your-toothwise-domain.example.com below with
+  your real production domain once deployed (same placeholder convention
+  as REACT_APP_API_URL in .env.example). The sitemap spec requires
+  absolute URLs - relative ones like "/privacy" are invalid and search
+  engines will ignore/reject them.
+
+  Only the two public, indexable pages are listed here. /login,
+  /patient-portal, and /thank-you are intentionally excluded - they're
+  already marked noindex in the app (see SEO usages) and disallowed in
+  robots.txt, so they shouldn't be in the sitemap either.
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://your-toothwise-domain.example.com/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://your-toothwise-domain.example.com/privacy</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+</urlset>

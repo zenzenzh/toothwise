@@ -1,0 +1,158 @@
+{
+  "name": "ToothWise Design Tokens",
+  "primitive": {
+    "color": {
+      "plum": {
+        "500": "#4B2F35",
+        "700": "#352126"
+      },
+      "rose": {
+        "500": "#BA7976",
+        "700": "#925C5A",
+        "200": "#E8C5C2"
+      },
+      "blush": {
+        "50": "#FBF7F5",
+        "100": "#F5EFEC",
+        "200": "#F1E4E2"
+      },
+      "white": {
+        "500": "#FFFFFF"
+      },
+      "neutral": {
+        "500": "#6F5B61",
+        "300": "#B9A6AA",
+        "200": "#E5DADC"
+      },
+      "success": {
+        "600": "#27734E",
+        "100": "#E9F5EE"
+      },
+      "warning": {
+        "600": "#A96605",
+        "100": "#FFF4E1"
+      },
+      "error": {
+        "600": "#B33A45",
+        "100": "#FCE9EB"
+      },
+      "brandPlum": {
+        "500": "#5C3A4A",
+        "700": "#3B2831"
+      },
+      "brandRose": {
+        "500": "#C4847E",
+        "300": "#E7B8B4"
+      },
+      "brandCream": {
+        "50": "#FBF6F4"
+      }
+    },
+    "space": {
+      "1": "4px",
+      "2": "8px",
+      "3": "12px",
+      "4": "16px",
+      "5": "20px",
+      "6": "24px",
+      "8": "32px",
+      "10": "40px",
+      "12": "48px",
+      "16": "64px",
+      "20": "80px",
+      "24": "96px"
+    },
+    "radius": {
+      "sm": "8px",
+      "md": "12px",
+      "lg": "16px",
+      "xl": "20px",
+      "2xl": "28px",
+      "full": "999px"
+    },
+    "shadow": {
+      "sm": "0 4px 14px rgba(53,33,38,.06)",
+      "md": "0 14px 36px rgba(53,33,38,.09)",
+      "lg": "0 24px 60px rgba(53,33,38,.12)"
+    },
+    "motion": {
+      "fast": "140ms",
+      "normal": "220ms",
+      "slow": "280ms",
+      "reveal": "680ms",
+      "easeOut": "cubic-bezier(.32,.72,0,1)",
+      "easeSpring": "cubic-bezier(.22,1,.36,1)"
+    }
+  },
+  "semantic": {
+    "color": {
+      "background": "{primitive.color.blush.50}",
+      "surface": "{primitive.color.white.500}",
+      "surfaceSubtle": "{primitive.color.blush.100}",
+      "text": "{primitive.color.plum.700}",
+      "textMuted": "{primitive.color.neutral.500}",
+      "primary": "{primitive.color.plum.500}",
+      "primaryHover": "{primitive.color.plum.700}",
+      "secondary": "{primitive.color.rose.500}",
+      "border": "{primitive.color.neutral.200}",
+      "success": "{primitive.color.success.600}",
+      "warning": "{primitive.color.warning.600}",
+      "error": "{primitive.color.error.600}",
+      "brandPrimary": "{primitive.color.brandPlum.500}",
+      "brandSecondary": "{primitive.color.brandRose.500}",
+      "brandBackground": "{primitive.color.brandCream.50}"
+    }
+  },
+  "component": {
+    "button": {
+      "height": "44px",
+      "radius": "{primitive.radius.md}",
+      "paddingX": "20px",
+      "gap": "8px",
+      "bg": "{semantic.color.primary}",
+      "bgHover": "{semantic.color.primaryHover}"
+    },
+    "card": {
+      "radius": "{primitive.radius.xl}",
+      "padding": "{primitive.space.6}",
+      "border": "{semantic.color.border}",
+      "shadow": "{primitive.shadow.md}"
+    },
+    "input": {
+      "height": "48px",
+      "radius": "{primitive.radius.md}",
+      "border": "{semantic.color.border}"
+    }
+  },
+  "marketing": {
+    "fontDisplay": "Manrope",
+    "fontBody": "Source Sans 3",
+    "colorModel": "OKLCH",
+    "colors": {
+      "ink": "oklch(26% .045 350)",
+      "plum": "oklch(34% .055 348)",
+      "rose": "oklch(66% .075 26)",
+      "roseSoft": "oklch(84% .055 26)",
+      "cream": "oklch(97% .012 38)",
+      "paper": "oklch(99% .006 38)",
+      "line": "oklch(88% .022 350)",
+      "muted": "oklch(53% .025 350)",
+      "dark": "oklch(23% .045 348)"
+    },
+    "hero": {
+      "maxWidth": "900px",
+      "lineLimit": "2-3 lines"
+    },
+    "motion": {
+      "easeOut": "cubic-bezier(.23,1,.32,1)",
+      "easeInOut": "cubic-bezier(.77,0,.175,1)",
+      "uiMax": "300ms",
+      "marketingReveal": "680ms"
+    },
+    "modal": {
+      "desktopWidth": "980px",
+      "compactWidth": "560px",
+      "layout": "context rail + task form"
+    }
+  }
+}

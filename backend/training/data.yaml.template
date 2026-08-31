@@ -1,0 +1,19 @@
+# Template data.yaml for training the Toothwise YOLOv8 / YOLO12 models.
+#
+# If you export a dataset from Roboflow, it generates this file for you —
+# just make sure the `names` list matches (or gets normalized to, see
+# backend/app/ml/labels.py::LABEL_ALIASES) our 8 canonical labels below.
+# Order does not matter to our backend (it reads label strings from the
+# model, not index position) but keeping it consistent avoids confusion.
+
+path: .  # dataset root, set by Roboflow export / your folder structure
+train: train/images
+val: valid/images
+test: test/images
+
+names:
+  0: healthy_tooth
+  1: cavity
+  2: gum_inflammation
+  3: plaque
+  4: tartar

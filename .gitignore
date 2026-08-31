@@ -1,0 +1,46 @@
+# Python / Backend
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Environment / secrets — never commit
+backend/.env
+.env
+
+# ML model weights (large binary files)
+backend/models_weights/*.pt
+backend/models_weights/*.pth
+
+# Uploads — patient images (privacy + large size)
+backend/uploads/
+
+# KNN artifact (auto-generated on first boot)
+backend/app/ml/artifacts/
+
+# Temp files
+*.tmp
+*.log
+database/backups/
+toothwise_reports/
+
+# Node / Frontend
+node_modules/
+frontend/build/
+frontend/.env.local
+frontend/.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db

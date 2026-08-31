@@ -1,0 +1,45 @@
+':root {
+  /* ToothWise v9 CodiSmile brand additions */
+  --tw-brand-plum-500:#5C3A4A;--tw-brand-plum-700:#3B2831;
+  --tw-brand-rose-500:#C4847E;--tw-brand-rose-300:#E7B8B4;
+  --tw-brand-cream-50:#FBF6F4;
+  /* Primitive */
+  --tw-color-plum-500:#4B2F35;
+  --tw-color-plum-700:#352126;
+  --tw-color-rose-500:#BA7976;
+  --tw-color-rose-700:#925C5A;
+  --tw-color-rose-200:#E8C5C2;
+  --tw-color-blush-50:#FBF7F5;
+  --tw-color-blush-100:#F5EFEC;
+  --tw-color-neutral-500:#6F5B61;
+  --tw-color-neutral-300:#B9A6AA;
+  --tw-color-neutral-200:#E5DADC;
+  --tw-color-white:#FFFFFF;
+  --tw-color-success-600:#27734E;
+  --tw-color-success-100:#E9F5EE;
+  --tw-color-warning-600:#A96605;
+  --tw-color-warning-100:#FFF4E1;
+  --tw-color-error-600:#B33A45;
+  --tw-color-error-100:#FCE9EB;
+  --tw-space-1:4px;--tw-space-2:8px;--tw-space-3:12px;--tw-space-4:16px;--tw-space-5:20px;--tw-space-6:24px;--tw-space-8:32px;--tw-space-10:40px;--tw-space-12:48px;--tw-space-16:64px;--tw-space-20:80px;--tw-space-24:96px;
+  --tw-radius-sm:8px;--tw-radius-md:12px;--tw-radius-lg:16px;--tw-radius-xl:20px;--tw-radius-2xl:28px;--tw-radius-full:999px;
+  --tw-shadow-sm:0 4px 14px rgba(53,33,38,.06);--tw-shadow-md:0 14px 36px rgba(53,33,38,.09);--tw-shadow-lg:0 24px 60px rgba(53,33,38,.12);
+  --tw-duration-fast:140ms;--tw-duration-normal:220ms;--tw-duration-slow:280ms;--tw-duration-reveal:680ms;
+  --tw-ease-out:cubic-bezier(.32,.72,0,1);--tw-ease-spring:cubic-bezier(.22,1,.36,1);
+  /* Semantic */
+  --color-background:var(--tw-color-blush-50);--color-surface:var(--tw-color-white);--color-surface-subtle:var(--tw-color-blush-100);--color-text:var(--tw-color-plum-700);--color-text-muted:var(--tw-color-neutral-500);--color-primary:var(--tw-color-plum-500);--color-primary-hover:var(--tw-color-plum-700);--color-secondary:var(--tw-color-rose-500);--color-border:var(--tw-color-neutral-200);
+  /* Component */
+  --button-bg:var(--color-primary);--button-bg-hover:var(--color-primary-hover);--button-fg:#fff;--button-radius:var(--tw-radius-md);--button-height:44px;--button-px:20px;--input-height:48px;--input-radius:var(--tw-radius-md);--card-radius:var(--tw-radius-xl);--card-shadow:var(--tw-shadow-md);
+  /* v10 marketing */
+  --tw-marketing-ink:oklch(26% .045 350);
+  --tw-marketing-plum:oklch(34% .055 348);
+  --tw-marketing-rose:oklch(66% .075 26);
+  --tw-marketing-rose-soft:oklch(84% .055 26);
+  --tw-marketing-cream:oklch(97% .012 38);
+  --tw-marketing-paper:oklch(99% .006 38);
+  --tw-marketing-line:oklch(88% .022 350);
+  --tw-marketing-muted:oklch(53% .025 350);
+  --tw-marketing-dark:oklch(23% .045 348);
+  --tw-marketing-ease-out:cubic-bezier(.23,1,.32,1);
+  --tw-marketing-ease-in-out:cubic-bezier(.77,0,.175,1);
+}
