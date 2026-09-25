@@ -1,10 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { Search } from 'lucide-react';
 
-/**
- * EmptyState component following the ToothWise design system.
- * Used for lists, tables, or dashboard widgets with no data.
- */
 const EmptyState = ({
   icon: Icon,
   title,
@@ -15,7 +12,7 @@ const EmptyState = ({
   return (
     <div className={`tw-state ${className}`}>
       <div className="tw-state__icon">
-        {Icon ? <Icon size={48} strokeWidth={1.5} /> : '🔍'}
+        {Icon ? <Icon size={48} strokeWidth={1.5} /> : <Search size={48} strokeWidth={1.5} />}
       </div>
       <h3 className="tw-state__title">{title || 'No data available'}</h3>
       <p className="tw-state__text">{message || 'There is nothing to display at the moment.'}</p>

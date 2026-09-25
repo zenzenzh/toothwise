@@ -153,13 +153,24 @@ def _backfill_name_parts():
 def on_startup():
     Path(settings.UPLOAD_DIR).mkdir(parents=True, exist_ok=True)
 
-    # Functional Suitability: schema is created automatically so `docker
-    # compose up` gives a working system with zero manual DB steps.
-    Base.metadata.create_all(bind=engine)
-    _ensure_new_columns()
-    _backfill_name_parts()
-    logger.info("Database tables ensured.")
+    # --- Database setup (with retry for Docker/k8s where DB may start later) ---
+    import time as _time
+    for attempt in range(1, 4):
+        try:
+            Base.metadata.create_all(bind=engine)
+            _ensure_new_columns()
+            _backfill_name_parts()
+            logger.info("Database tables ensured.")
+            break
+        except Exception as exc:
+            logger.warning("DB connection attempt %d/3 failed: %s", attempt, exc)
+            if attempt < 3:
+                _time.sleep(2 ** attempt)
+            else:
+                logger.error("Could not connect to database after 3 attempts. Startup aborted.")
+                raise
 
+    # --- Seed admin ---
     db = SessionLocal()
     try:
         seed_values = (
@@ -168,7 +179,8 @@ def on_startup():
             settings.SEED_ADMIN_NAME.strip(),
             settings.SEED_ADMIN_LICENSE.strip(),
         )
-        if db.query(models.Dentist).count() == 0 and all(seed_values):
+        dentist_count = db.query(models.Dentist).count()
+        if dentist_count == 0 and all(seed_values):
             seed_first, seed_middle, seed_last = split_name(settings.SEED_ADMIN_NAME.strip())
             admin = models.Dentist(
                 full_name=settings.SEED_ADMIN_NAME.strip(),
@@ -183,31 +195,32 @@ def on_startup():
             db.add(admin)
             db.commit()
             logger.info("Seeded admin account from environment configuration.")
-        elif db.query(models.Dentist).count() == 0:
+        elif dentist_count == 0:
             logger.warning("No staff account exists. Set SEED_ADMIN_* values or create an account with the seed script.")
     finally:
         db.close()
 
-    # Warm up the detector + recommender once at boot rather than on the
-    # first request, so the first screening a dentist runs isn't slow.
-    from app.ml.yolo_detector import get_detector
-    from app.ml.recommender import _ensure_trained
+    # --- ML warm-up (non-fatal — detection endpoints guard via DETECTION_ENABLED) ---
+    try:
+        from app.ml.yolo_detector import get_detector
+        detector = get_detector()
+        logger.info(
+            "Detector ready (yolov8_mock=%s, yolov12_mock=%s).",
+            detector.v8_mock, detector.v12_mock,
+        )
+        if not detector.v8_mock:
+            logger.info("YOLOv8 model classes: %s", list(detector.model_v8.names.values()))
+        if not detector.v12_mock:
+            logger.info("YOLOv12 model classes: %s", list(detector.model_v12.names.values()))
+    except Exception as exc:
+        logger.error("YOLO detector warm-up failed (screenings disabled): %s", exc)
 
-    detector = get_detector()
-    logger.info(
-        "Detector ready (yolov8_mock=%s, yolov12_mock=%s).",
-        detector.v8_mock, detector.v12_mock,
-    )
-    # Log each real model's own embedded class names (not our canonical
-    # list) so a training-time label mismatch shows up immediately in the
-    # startup log instead of silently producing unmapped detection labels
-    # later. See app/ml/labels.py::normalize_label / LABEL_ALIASES.
-    if not detector.v8_mock:
-        logger.info("YOLOv8 model classes: %s", list(detector.model_v8.names.values()))
-    if not detector.v12_mock:
-        logger.info("YOLOv12 model classes: %s", list(detector.model_v12.names.values()))
-    _ensure_trained()
-    logger.info("KNN recommender ready.")
+    try:
+        from app.ml.recommender import _ensure_trained
+        _ensure_trained()
+        logger.info("KNN recommender ready.")
+    except Exception as exc:
+        logger.error("KNN recommender warm-up failed: %s", exc)
 
 
 app.include_router(auth.router, prefix=settings.API_V1_PREFIX)

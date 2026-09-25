@@ -120,12 +120,14 @@ def reset_password(
 def deactivate_dentist(
     dentist_id: int,
     db: Session = Depends(get_db),
-    _: models.Dentist = Depends(require_admin),
+    current: models.Dentist = Depends(require_admin),
 ):
     dentist = db.query(models.Dentist).get(dentist_id)
     if not dentist:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Dentist not found.")
     dentist.is_active = not dentist.is_active
+    action = "dentist.deactivate" if not dentist.is_active else "dentist.activate"
+    log_action(db, current, action, "dentist", dentist.id, dentist.email)
     db.commit()
     db.refresh(dentist)
     return dentist

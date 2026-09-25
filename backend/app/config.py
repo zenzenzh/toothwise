@@ -23,6 +23,16 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 12
 
+    def model_post_init(self, __context) -> None:
+        """Reject known-weak secrets in production."""
+        if self.ENV == "production":
+            weak = {"change-this-secret-in-production", ""}
+            if self.SECRET_KEY in weak:
+                raise ValueError(
+                    "SECRET_KEY must be set to a strong random value in production. "
+                    "Generate one with: python -c \"import secrets; print(secrets.token_hex(32))\""
+                )
+
     # --- Database ---
     DATABASE_URL: str = "postgresql+psycopg://toothwise:toothwise@db:5432/toothwise"
 
@@ -38,7 +48,9 @@ class Settings(BaseSettings):
     # deterministic, seeded fake detector so the app is fully demoable
     # without needing trained weights yet. Flip to false once you drop your
     # real .pt files into models_weights/.
-    USE_MOCK_MODEL: bool = True
+    USE_MOCK_MODEL: bool = False
+    # Set to false to use only YOLOv8 for detection (skips YOLOv12 entirely).
+    USE_YOLOV12: bool = True
     # Master switch for ALL AI inference (YOLOv8/YOLOv12 ensemble + live
     # preview). When false, screening endpoints answer 503 with a clear
     # message - the rest of the app (patients, records, portal) keeps
@@ -51,6 +63,11 @@ class Settings(BaseSettings):
 
     KNN_MODEL_PATH: str = "app/ml/artifacts/knn_recommender.joblib"
     KNN_NEIGHBORS: int = 5
+    # Append-only journal of clinician-confirmed tiers. Each line is one
+    # labeled case ({features, tier}) written when a dentist finalizes a
+    # screening's tier. The KNN retrains from bootstrap synthetic data plus
+    # every case in this file, so real labels accumulate into the model.
+    KNN_LABELED_CASES_PATH: str = "app/ml/artifacts/labeled_cases.jsonl"
 
     # --- Public AI assistant ---
     # Gemini free-tier model for general clinic/dental information only.

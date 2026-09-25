@@ -5,14 +5,10 @@ import { Microscope, Users, TriangleAlert, CalendarDays, UserPlus, ScanLine, Arr
 import { dashboardAPI } from '../api';
 import { SkeletonCard, SkeletonBlock } from '../components/Skeleton';
 import toast from 'react-hot-toast';
+import T from '../tokens';
 
-const BURGUNDY = '#4B2F35';
-const ROSE = '#BA7976';
-const WHITE = '#FFFFFF';
-const MUTED = '#6F5B61';
-const INK = '#241A1E';
-
-const PIE_COLORS = ['#BA7976', '#4B2F35', '#4CAF82'];
+const { burgundy: BURGUNDY, rose: ROSE, white: WHITE, muted: MUTED } = T;
+const PIE_COLORS = [T.rose, T.burgundy, T.success];
 
 export default function Dashboard() {
   const [stats, setStats] = useState(null);
@@ -70,7 +66,7 @@ export default function Dashboard() {
         ].map(({ label, value, Icon, danger }, i) => (
           <div key={label} className="dash6-stat-card" style={{ ...s.statCard, '--stagger-index': i }}>
             <div style={{ ...s.statIconWrap, ...(danger ? s.statIconDanger : {}) }}>
-              <Icon size={20} strokeWidth={1.75} color={danger ? '#C4505A' : BURGUNDY} />
+                  <Icon size={20} strokeWidth={1.75} color={danger ? T.danger : BURGUNDY} />
             </div>
             <div style={s.statValue}>{value}</div>
             <div style={s.statLabel}>{label}</div>
@@ -92,7 +88,7 @@ export default function Dashboard() {
               <XAxis dataKey="month" tick={{ fontSize: 11, fill: MUTED }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 11, fill: MUTED }} axisLine={false} tickLine={false} />
               <Tooltip
-                contentStyle={{ background: WHITE, border: '1px solid #E5DADC', borderRadius: 10, fontSize: 12 }}
+                contentStyle={{ background: WHITE, border: `1px solid ${T.border}`, borderRadius: 10, fontSize: 12 }}
                 cursor={{ fill: 'rgba(196,132,126,0.08)' }}
               />
               <Bar dataKey="count" fill="url(#dash6-bar-grad)" radius={[6, 6, 0, 0]} />
@@ -123,7 +119,7 @@ export default function Dashboard() {
                       <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip contentStyle={{ background: WHITE, border: '1px solid #E5DADC', borderRadius: 10, fontSize: 12 }} />
+                   <Tooltip contentStyle={{ background: WHITE, border: `1px solid ${T.border}`, borderRadius: 10, fontSize: 12 }} />
                 </PieChart>
               </ResponsiveContainer>
               <div style={s.legend}>
@@ -181,24 +177,24 @@ const s = {
   },
   statCard: {
     background: WHITE, borderRadius: 16, padding: '20px',
-    border: '1px solid #E5DADC',
-    boxShadow: '0 4px 20px rgba(75,47,53,0.05)',
+    border: `1px solid ${T.border}`,
+    boxShadow: '0 4px 20px rgba(0,0,0,.06)',
     display: 'flex', flexDirection: 'column', gap: 8,
   },
   statIconWrap: {
     width: 42, height: 42, borderRadius: 12,
     display: 'flex', alignItems: 'center', justifyContent: 'center',
-    background: '#FBF7F5', border: '1px solid #E5DADC',
+    background: T.blush, border: `1px solid ${T.border}`,
   },
-  statIconDanger: { background: '#FCE8EA', border: '1px solid #F5C0C4' },
+  statIconDanger: { background: T.dangerBg, border: `1px solid ${T.dangerBorder}` },
   statValue: { fontSize: 32, fontWeight: 700, lineHeight: 1, color: BURGUNDY, letterSpacing: '-0.02em' },
   statLabel: { fontSize: 12, color: MUTED, fontWeight: 600 },
 
   chartsRow: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 18, marginBottom: 20 },
   chartCard: {
     background: WHITE, borderRadius: 18, padding: '22px 24px',
-    border: '1px solid #E5DADC',
-    boxShadow: '0 4px 20px rgba(75,47,53,0.04)',
+    border: `1px solid ${T.border}`,
+    boxShadow: '0 4px 20px rgba(0,0,0,.05)',
   },
   chartHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 },
   chartTitle: { fontSize: 15, fontWeight: 700, color: BURGUNDY, margin: 0, letterSpacing: '-0.01em' },

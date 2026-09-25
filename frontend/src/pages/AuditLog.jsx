@@ -6,15 +6,11 @@ import { formatDateTimePH } from '../utils/datetime';
 import { SkeletonTableRows } from '../components/Skeleton';
 import toast from 'react-hot-toast';
 
-const BURGUNDY = '#4B2F35';
-const MUTED = '#6F5B61';
-const WHITE = '#FFFFFF';
-
 const ACTION_COLOR = (action) => {
-  if (action.includes('delete')) return '#C4505A';
-  if (action.includes('create')) return '#2D7A52';
-  if (action.includes('login.failed') || action.includes('rejected')) return '#D4850A';
-  return '#4B2F35';
+  if (action.includes('delete')) return 'var(--tw-danger)';
+  if (action.includes('create')) return 'var(--tw-success)';
+  if (action.includes('login.failed') || action.includes('rejected')) return 'var(--tw-warning)';
+  return 'var(--tw-navy)';
 };
 
 export default function AuditLog() {
@@ -129,45 +125,45 @@ export default function AuditLog() {
 
 const s = {
   filterSelect: {
-    background: WHITE, border: '1px solid #E5DADC', borderRadius: 11,
-    padding: '10px 14px', fontSize: 13, color: BURGUNDY, fontFamily: 'inherit',
+    background: 'var(--tw-surface)', border: '1px solid var(--tw-border)', borderRadius: 11,
+    padding: '10px 14px', fontSize: 13, color: 'var(--tw-text)', fontFamily: 'inherit',
     minWidth: 220,
   },
   emptyState: {
     display: 'flex', flexDirection: 'column', alignItems: 'center',
     justifyContent: 'center', padding: 80, gap: 16,
-    background: WHITE, borderRadius: 18,
-    border: '1px solid #E5DADC',
-    boxShadow: '0 10px 30px rgba(75,47,53,0.05)',
+    background: 'var(--tw-surface)', borderRadius: 18,
+    border: '1px solid var(--tw-border)',
+    boxShadow: 'var(--tw-shadow)',
   },
-  emptyIcon: { fontSize: 48, color: MUTED },
-  emptyTitle: { fontSize: 20, fontWeight: 700, color: BURGUNDY },
-  emptyDesc: { fontSize: 13, color: MUTED },
+  emptyIcon: { fontSize: 48, color: 'var(--tw-muted)' },
+  emptyTitle: { fontSize: 20, fontWeight: 700, color: 'var(--tw-text)' },
+  emptyDesc: { fontSize: 13, color: 'var(--tw-muted)' },
   tableCard: {
-    background: WHITE, borderRadius: 18,
-    border: '1px solid #E5DADC',
-    boxShadow: '0 10px 30px rgba(75,47,53,0.05)',
+    background: 'var(--tw-surface)', borderRadius: 18,
+    border: '1px solid var(--tw-border)',
+    boxShadow: 'var(--tw-shadow)',
     overflow: 'hidden',
   },
   table: { width: '100%', borderCollapse: 'collapse' },
   th: {
     padding: '13px 18px', fontSize: 10.5, fontWeight: 700,
-    color: MUTED, textTransform: 'uppercase', letterSpacing: '0.07em',
-    borderBottom: '1px solid #E5DADC', textAlign: 'left',
-    background: WHITE,
+    color: 'var(--tw-muted)', textTransform: 'uppercase', letterSpacing: '0.07em',
+    borderBottom: '1px solid var(--tw-border)', textAlign: 'left',
+    background: 'var(--tw-surface)',
   },
   tr: { transition: 'background 0.12s ease' },
-  td: { padding: '13px 18px', fontSize: 13, color: '#352126', borderBottom: '1px solid #F0E4E2' },
+  td: { padding: '13px 18px', fontSize: 13, color: 'var(--tw-text)', borderBottom: '1px solid var(--tw-border)' },
   actionBadge: {
     display: 'inline-block', border: '1px solid', borderRadius: 20,
     padding: '3px 10px', fontSize: 11, fontWeight: 700, fontFamily: 'monospace',
   },
-  detailsText: { color: MUTED, fontSize: 12 },
+  detailsText: { color: 'var(--tw-muted)', fontSize: 12 },
   forbidden: {
     display: 'flex', flexDirection: 'column', alignItems: 'center',
     justifyContent: 'center', height: 400, gap: 16,
   },
-  forbiddenIcon: { fontSize: 48, color: MUTED },
-  forbiddenTitle: { fontSize: 20, fontWeight: 700, color: BURGUNDY },
-  forbiddenText: { fontSize: 14, color: MUTED, textAlign: 'center', maxWidth: 360 },
+  forbiddenIcon: { fontSize: 48, color: 'var(--tw-muted)' },
+  forbiddenTitle: { fontSize: 20, fontWeight: 700, color: 'var(--tw-text)' },
+  forbiddenText: { fontSize: 14, color: 'var(--tw-muted)', textAlign: 'center', maxWidth: 360 },
 };

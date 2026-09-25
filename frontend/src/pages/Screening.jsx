@@ -6,17 +6,19 @@ import api, { screeningsAPI } from '../api';
 import { validateImageFile } from '../utils/validation';
 import toast from 'react-hot-toast';
 
-const C = { 
-  burgundy: '#4B2F35', 
-  rose: '#BA7976', 
-  gold: '#C78C8A', 
-  blush: '#FBF7F5', 
-  white: '#FFFFFF', 
-  muted: '#6F5B61',
-  border: '#E5DADC'
+import T from '../tokens';
+
+const C = {
+  burgundy: T.burgundy,
+  rose: T.rose,
+  gold: T.rosegold,
+  blush: T.blush,
+  white: T.white,
+  muted: T.muted,
+  border: T.border
 };
 
-const CARD = { background: '#FFFFFF', borderRadius: 14, padding: '24px', boxShadow: '0 2px 12px rgba(92,58,74,0.07)', border: '1px solid #FBF7F5' };
+const CARD = { background: T.white, borderRadius: 14, padding: '24px', boxShadow: '0 2px 12px rgba(0,0,0,.08)', border: `1px solid ${T.border}` };
 
 export default function Screening() {
   const { id: patientId } = useParams();
@@ -211,7 +213,7 @@ export default function Screening() {
                   style={{ 
                     width: '100%', 
                     borderRadius: 12, 
-                    border: `4px solid ${C.blush}`,
+                    border: `2px solid ${C.border}`,
                     display: 'block',
                     // Apply a software "Flash" filter if torch is on
                     filter: torch ? 'brightness(1.1) contrast(1.1)' : 'none'
@@ -262,9 +264,9 @@ export default function Screening() {
                   onClick={toggleTorch} 
                   className="tw-secondary-action-btn"
                   style={{ 
-                    background: torch ? '#EAB308' : 'rgba(92,58,74,0.08)', 
-                    color: torch ? '#000' : C.burgundy,
-                    borderColor: torch ? '#EAB308' : C.border
+                    background: torch ? '#EAB308' : 'rgba(255,255,255,.08)', 
+                    color: torch ? '#000' : 'var(--tw-text)',
+                    borderColor: torch ? '#EAB308' : 'var(--tw-border)'
                   }}>
                   {torch ? <><Flashlight size={15} /> Flash On</> : <><Lightbulb size={15} /> Flash Off</>}
                 </button>
@@ -274,9 +276,9 @@ export default function Screening() {
                     onClick={() => setLivePreview(v => !v)}
                     className="tw-secondary-action-btn"
                     style={{
-                      background: livePreview ? '#4CAF82' : 'rgba(92,58,74,0.08)',
-                      color: livePreview ? '#fff' : C.burgundy,
-                      borderColor: livePreview ? '#4CAF82' : C.border,
+                      background: livePreview ? '#4CAF82' : 'rgba(255,255,255,.08)',
+                      color: livePreview ? '#fff' : 'var(--tw-text)',
+                      borderColor: livePreview ? '#4CAF82' : 'var(--tw-border)',
                     }}>
                     <Radio size={15} /> {livePreview ? 'Live: On' : 'Live: Off'}
                   </button>
@@ -294,8 +296,10 @@ export default function Screening() {
               </p>
             </div>
           ) : (
-            <div style={{ border: `2px dashed ${C.border}`, borderRadius: 14, padding: '48px 20px', textAlign: 'center', background: C.blush }}>
-              <div style={{ fontSize: 40, marginBottom: 12 }}>🦷</div>
+            <div style={{ border: `2px dashed ${T.border}`, borderRadius: 14, padding: '48px 20px', textAlign: 'center', background: T.blush }}>
+              <div style={{ width: 56, height: 56, borderRadius: 16, background: T.bg, display: 'grid', placeItems: 'center', margin: '0 auto 16px', color: C.rose }}>
+                <ScanLine size={28} strokeWidth={1.5} />
+              </div>
               <p style={{ color: C.muted, fontSize: 14, marginBottom: 20 }}>
                 Upload an intraoral dental image for analysis
               </p>
@@ -310,7 +314,7 @@ export default function Screening() {
 
       {step === 'preview' && (
         <div style={{ ...CARD, textAlign: 'center' }}>
-          <img src={capturedImg} alt="preview" style={{ width: '100%', maxWidth: 500, borderRadius: 12, marginBottom: 20, border: `4px solid ${C.blush}` }} />
+          <img src={capturedImg} alt="preview" style={{ width: '100%', maxWidth: 500, borderRadius: 12, marginBottom: 20, border: `2px solid ${T.border}` }} />
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
             <button onClick={() => setStep('capture')} className="tw-secondary-action-btn"><RefreshCw size={15} /> Retake</button>
             <button
@@ -332,7 +336,7 @@ export default function Screening() {
 
       {step === 'results' && (
         <div style={{ ...CARD, textAlign: 'center', padding: '48px 24px' }}>
-          <CheckCircle2 size={52} strokeWidth={1.7} aria-hidden="true" style={{ marginBottom: 12, color: '#2CCB91' }} />
+          <CheckCircle2 size={52} strokeWidth={1.7} aria-hidden="true" style={{ marginBottom: 12, color: T.success }} />
           <h3 style={{ color: C.burgundy, fontWeight: 700 }}>Analysis Complete</h3>
           <button onClick={() => navigate('/dashboard/screenings/' + screening.id)} className="tw-primary-action-btn" style={{ marginTop: 20 }}>
             View Detailed Results →

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { KeyRound, Trash2, CircleCheck, CircleOff, Pencil, X, UserCog, ArrowRight } from 'lucide-react';
 import { dentistsAPI } from '../api';
@@ -7,13 +7,9 @@ import PasswordField from '../components/PasswordField';
 import { validateEmail, validatePassword, validateRequiredText, validateOptionalText, LIMITS } from '../utils/validation';
 import { SkeletonTableRows } from '../components/Skeleton';
 import toast from 'react-hot-toast';
+import T from '../tokens';
 
-const BURGUNDY = '#4B2F35';
-const ROSE = '#BA7976';
-const ROSEGOLD = '#C78C8A';
-const BLUSH = '#FBF7F5';
-const WHITE = '#FFFFFF';
-const MUTED = '#6F5B61';
+const { burgundy: BURGUNDY, rose: ROSE, rosegold: ROSEGOLD, blush: BLUSH, white: WHITE, muted: MUTED } = T;
 
 const EMPTY_FORM = {
   first_name: '', middle_name: '', last_name: '', email: '', password: '', role: 'dentist', license_no: ''
@@ -33,8 +29,20 @@ export default function Dentists() {
   const [search, setSearch] = useState('');
   const [formErrors, setFormErrors] = useState({});
   const [pwErrors, setPwErrors] = useState({});
+  const searchRef = useRef(null);
 
   useEffect(() => { load(); }, []);
+
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === '/' && !e.ctrlKey && !e.metaKey && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+        e.preventDefault();
+        searchRef.current?.focus();
+      }
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, []);
 
   useEffect(() => {
     if (!showModal && !showPwModal) return;
@@ -217,8 +225,9 @@ export default function Dentists() {
       <div style={s.searchWrap}>
         <span style={s.searchIcon}><KeyRound size={16} aria-hidden="true" /></span>
         <input
+          ref={searchRef}
           style={s.searchInput}
-          placeholder="Search by name or email..."
+          placeholder="Search by name or email... (press /)"
           value={search}
           onChange={e => setSearch(e.target.value)}
         />
@@ -283,8 +292,8 @@ export default function Dentists() {
                   <td style={s.td} data-label="Role">
                     <span style={{
                       ...s.roleBadge,
-                      background: d.role === 'admin' ? '#FCE8EA' : '#EEF2FF',
-                      color: d.role === 'admin' ? '#C4505A' : '#4F46E5',
+                      background: d.role === 'admin' ? T.dangerBg : T.indigoBg,
+                      color: d.role === 'admin' ? T.danger : T.indigo,
                     }}>
                       {d.role}
                     </span>
@@ -293,8 +302,8 @@ export default function Dentists() {
                   <td style={s.td} data-label="Status">
                     <span style={{
                       ...s.statusBadge,
-                      background: d.is_active ? '#E8F5EE' : '#F5F5F5',
-                      color: d.is_active ? '#2D7A52' : '#999',
+                      background: d.is_active ? T.successBg : '#F5F5F5',
+                      color: d.is_active ? T.success : '#999',
                     }}>
                       {d.is_active ? 'Active' : 'Inactive'}
                     </span>
@@ -406,9 +415,9 @@ export default function Dentists() {
 const s = {
   searchWrap: {
     display: 'flex', alignItems: 'center', gap: 10,
-    background: WHITE, border: '1px solid #E5DADC',
+    background: WHITE, border: `1px solid ${T.border}`,
     borderRadius: 11, padding: '0 16px',
-    boxShadow: '0 2px 8px rgba(75,47,53,0.05)',
+    boxShadow: '0 2px 8px rgba(0,0,0,.06)',
   },
   searchIcon: { fontSize: 16, color: MUTED },
   searchInput: {
@@ -420,27 +429,27 @@ const s = {
     display: 'flex', flexDirection: 'column', alignItems: 'center',
     justifyContent: 'center', padding: 80, gap: 16,
     background: WHITE, borderRadius: 18,
-    border: '1px solid #E5DADC',
-    boxShadow: '0 10px 30px rgba(75,47,53,0.05)',
+    border: `1px solid ${T.border}`,
+    boxShadow: '0 10px 30px rgba(0,0,0,.06)',
   },
   emptyIcon: { fontSize: 48, color: MUTED },
   emptyTitle: { fontSize: 20, fontWeight: 700, color: BURGUNDY },
   emptyDesc: { fontSize: 13, color: MUTED },
   tableCard: {
     background: WHITE, borderRadius: 18,
-    border: '1px solid #E5DADC',
-    boxShadow: '0 10px 30px rgba(75,47,53,0.05)',
+    border: `1px solid ${T.border}`,
+    boxShadow: '0 10px 30px rgba(0,0,0,.06)',
     overflow: 'hidden',
   },
   table: { width: '100%', borderCollapse: 'collapse' },
   th: {
     padding: '13px 18px', fontSize: 10.5, fontWeight: 700,
     color: MUTED, textTransform: 'uppercase', letterSpacing: '0.07em',
-    borderBottom: '1px solid #E5DADC', textAlign: 'left',
+    borderBottom: `1px solid ${T.border}`, textAlign: 'left',
     background: WHITE,
   },
   tr: { transition: 'background 0.12s ease' },
-  td: { padding: '13px 18px', fontSize: 13, color: '#352126', borderBottom: '1px solid #F0E4E2' },
+  td: { padding: '13px 18px', fontSize: 13, color: BURGUNDY, borderBottom: `1px solid ${T.border}` },
   nameCell: { display: 'flex', alignItems: 'center', gap: 11 },
   avatar: {
     width: 38, height: 38, borderRadius: '50%',
@@ -448,9 +457,9 @@ const s = {
     display: 'flex', alignItems: 'center', justifyContent: 'center',
     color: WHITE, fontWeight: 700, fontSize: 16, flexShrink: 0,
   },
-  name: { fontWeight: 600, fontSize: 14.5, color: '#352126' },
+  name: { fontWeight: 600, fontSize: 14.5, color: BURGUNDY },
   youBadge: {
-    fontSize: 10, background: '#EEF2FF', color: '#4F46E5',
+    fontSize: 10, background: T.indigoBg, color: T.indigo,
     padding: '2px 8px', borderRadius: 10, fontWeight: 600,
   },
   roleBadge: {
@@ -462,11 +471,11 @@ const s = {
   },
   actions: { display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' },
   actionBtn: {
-    background: BLUSH, border: '1px solid #E5DADC', borderRadius: 8,
+    background: BLUSH, border: `1px solid ${T.border}`, borderRadius: 8,
     padding: '6px 9px', cursor: 'pointer', fontSize: 14,
     color: BURGUNDY,
   },
-  deleteBtn: { background: '#FCE8EA', border: '1px solid #F5C0C4', color: '#C4505A' },
+  deleteBtn: { background: T.dangerBg, border: `1px solid ${T.dangerBorder}`, color: T.danger },
   forbidden: {
     display: 'flex', flexDirection: 'column', alignItems: 'center',
     justifyContent: 'center', height: 400, gap: 16,

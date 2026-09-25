@@ -24,7 +24,9 @@ from app.config import get_settings
 from app.ml.labels import (
     LABELS, SEVERITY_WEIGHT, RECOMMENDATIONS, GENERAL_RECOMMENDATIONS,
 )
-from app.ml.train_knn import FEATURE_LABELS, train_and_save
+from app.ml.train_knn import (
+    FEATURE_LABELS, train_and_save, retrain_with_labeled,
+)
 
 settings = get_settings()
 
@@ -34,12 +36,30 @@ _bundle = None  # {"model": KNeighborsClassifier, "feature_labels": [...]}
 TIER_NAMES = {0: "LOW", 1: "MEDIUM", 2: "HIGH"}
 
 
+def _retrain_if_journal_newer(path: Path) -> bool:
+    """If clinician-confirmed cases were written after the artifact was
+    trained, fold them in. The journal is the source of truth, so a boot
+    after any lost retrain converges by comparing mtimes. Cheap (one stat
+    each) and runs only once per process under _lock."""
+    global _bundle
+    journal = Path(settings.KNN_LABELED_CASES_PATH)
+    if not journal.exists():
+        return False
+    if path.exists() and path.stat().st_mtime >= journal.stat().st_mtime:
+        return False
+    retrain_with_labeled(str(path))
+    _bundle = joblib.load(path)
+    return True
+
+
 def _ensure_trained() -> dict:
     global _bundle
     with _lock:
         if _bundle is not None:
             return _bundle
         path = Path(settings.KNN_MODEL_PATH)
+        if _retrain_if_journal_newer(path):
+            return _bundle
         if path.exists():
             try:
                 loaded = joblib.load(path)
@@ -51,6 +71,16 @@ def _ensure_trained() -> dict:
             except Exception:
                 pass
         train_and_save(str(path))
+        _bundle = joblib.load(path)
+        return _bundle
+
+
+def retrain_from_labeled() -> dict:
+    """Fold every clinician-confirmed tier into the model and swap the cache."""
+    global _bundle
+    with _lock:
+        path = Path(settings.KNN_MODEL_PATH)
+        retrain_with_labeled(str(path))
         _bundle = joblib.load(path)
         return _bundle
 

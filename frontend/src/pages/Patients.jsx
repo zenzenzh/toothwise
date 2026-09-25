@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { Search, Trash2, Pencil, X, UsersRound, ArrowRight } from 'lucide-react';
@@ -6,13 +6,9 @@ import { patientsAPI } from '../api';
 import { validatePHMobile, validateRequiredText, validateOptionalText, LIMITS } from '../utils/validation';
 import { SkeletonTableRows } from '../components/Skeleton';
 import toast from 'react-hot-toast';
+import T from '../tokens';
 
-const BURGUNDY = '#4B2F35';
-const ROSE = '#BA7976';
-const ROSEGOLD = '#C78C8A';
-const BLUSH = '#FBF7F5';
-const WHITE = '#FFFFFF';
-const MUTED = '#6F5B61';
+const { burgundy: BURGUNDY, rose: ROSE, rosegold: ROSEGOLD, blush: BLUSH, white: WHITE, muted: MUTED } = T;
 
 const EMPTY_FORM = {
   first_name: '', middle_name: '', last_name: '', birthdate: '', gender: '', contact_number: '', address: ''
@@ -28,12 +24,24 @@ export default function Patients() {
   const [saving, setSaving] = useState(false);
   const [formErrors, setFormErrors] = useState({});
   const navigate = useNavigate();
+  const searchRef = useRef(null);
 
   useEffect(() => { load(); }, []);
   useEffect(() => {
     const t = setTimeout(() => load(search), 300);
     return () => clearTimeout(t);
   }, [search]);
+
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === '/' && !e.ctrlKey && !e.metaKey && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+        e.preventDefault();
+        searchRef.current?.focus();
+      }
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, []);
 
   useEffect(() => {
     if (!showModal) return;
@@ -160,8 +168,9 @@ export default function Patients() {
       <div style={s.searchWrap}>
         <span style={s.searchIcon}><Search size={16} aria-hidden="true" /></span>
         <input
+          ref={searchRef}
           style={s.searchInput}
-          placeholder="Search patients by name..."
+          placeholder="Search patients by name... (press /)"
           value={search}
           onChange={e => setSearch(e.target.value)}
         />
@@ -306,9 +315,9 @@ export default function Patients() {
 const s = {
   searchWrap: {
     display: 'flex', alignItems: 'center', gap: 10,
-    background: WHITE, border: '1px solid #E5DADC',
+    background: WHITE, border: `1px solid ${T.border}`,
     borderRadius: 11, padding: '0 16px',
-    boxShadow: '0 2px 8px rgba(75,47,53,0.05)',
+    boxShadow: '0 2px 8px rgba(0,0,0,.06)',
   },
   searchIcon: { fontSize: 16, color: MUTED },
   searchInput: {
@@ -320,27 +329,27 @@ const s = {
     display: 'flex', flexDirection: 'column', alignItems: 'center',
     justifyContent: 'center', padding: 80, gap: 16,
     background: WHITE, borderRadius: 18,
-    border: '1px solid #E5DADC',
-    boxShadow: '0 10px 30px rgba(75,47,53,0.05)',
+    border: `1px solid ${T.border}`,
+    boxShadow: '0 10px 30px rgba(0,0,0,.06)',
   },
   emptyIcon: { fontSize: 48, color: MUTED },
   emptyTitle: { fontSize: 20, fontWeight: 700, color: BURGUNDY },
   emptyDesc: { fontSize: 13, color: MUTED },
   tableCard: {
     background: WHITE, borderRadius: 18,
-    border: '1px solid #E5DADC',
-    boxShadow: '0 10px 30px rgba(75,47,53,0.05)',
+    border: `1px solid ${T.border}`,
+    boxShadow: '0 10px 30px rgba(0,0,0,.06)',
     overflow: 'hidden',
   },
   table: { width: '100%', borderCollapse: 'collapse' },
   th: {
     padding: '13px 18px', fontSize: 10.5, fontWeight: 700,
     color: MUTED, textTransform: 'uppercase', letterSpacing: '0.07em',
-    borderBottom: '1px solid #E5DADC', textAlign: 'left',
+    borderBottom: `1px solid ${T.border}`, textAlign: 'left',
     background: WHITE,
   },
   tr: { transition: 'background 0.12s ease' },
-  td: { padding: '13px 18px', fontSize: 13, color: '#352126', borderBottom: '1px solid #F0E4E2' },
+  td: { padding: '13px 18px', fontSize: 13, color: BURGUNDY, borderBottom: `1px solid ${T.border}` },
   nameCell: { display: 'flex', alignItems: 'center', gap: 11 },
   avatar: {
     width: 38, height: 38, borderRadius: '50%',
@@ -353,18 +362,18 @@ const s = {
   addressText: { display: 'block', maxWidth: 180, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' },
   actions: { display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' },
   viewBtn: {
-    background: BLUSH, border: '1px solid #E5DADC', borderRadius: 8,
+    background: BLUSH, border: `1px solid ${T.border}`, borderRadius: 8,
     padding: '6px 13px', cursor: 'pointer', fontSize: 12,
     color: BURGUNDY, fontWeight: 600, fontFamily: 'inherit',
   },
   editBtn: {
-    background: BLUSH, border: '1px solid #E5DADC', borderRadius: 8,
+    background: BLUSH, border: `1px solid ${T.border}`, borderRadius: 8,
     padding: '6px 9px', cursor: 'pointer', fontSize: 14,
     color: BURGUNDY,
   },
   deleteBtn: {
-    background: '#FCE8EA', border: '1px solid #F5C0C4', borderRadius: 8,
+    background: T.dangerBg, border: `1px solid ${T.dangerBorder}`, borderRadius: 8,
     padding: '6px 9px', cursor: 'pointer', fontSize: 14,
-    color: '#C4505A',
+    color: T.danger,
   },
 };

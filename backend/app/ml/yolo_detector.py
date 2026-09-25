@@ -189,7 +189,7 @@ class DualYoloDetector:
         v12_weights_exist = Path(settings.YOLOV12_WEIGHTS_PATH).exists()
 
         self.v8_mock = force_mock or not v8_weights_exist
-        self.v12_mock = force_mock or not v12_weights_exist
+        self.v12_mock = force_mock or not v12_weights_exist or not settings.USE_YOLOV12
         # Kept for logging / anything that still checks overall mock status.
         self.mock_mode = self.v8_mock and self.v12_mock
 
@@ -208,6 +208,10 @@ class DualYoloDetector:
                 self.model_v12 = YOLO(settings.YOLOV12_WEIGHTS_PATH)
 
     def _run_real(self, model, source, tag: str) -> tuple[list[RawDetection], float]:
+        # YOLO needs an absolute path for file sources; source may be a
+        # relative path like "screenings/img.jpg" under UPLOAD_DIR.
+        if isinstance(source, (str, Path)):
+            source = Path(settings.UPLOAD_DIR) / source
         start = time.perf_counter()
         results = model.predict(
             source=source,
@@ -263,9 +267,8 @@ class DualYoloDetector:
             dets_v8, ms_v8 = self._run_real(self.model_v8, source, "yolov8")
 
         if self.v12_mock:
-            t1 = time.perf_counter()
-            dets_v12 = self.model_v12.predict(source, settings.DETECTION_CONF_THRESHOLD)
-            ms_v12 = (time.perf_counter() - t1) * 1000
+            dets_v12: list[RawDetection] = []
+            ms_v12 = 0.0
         else:
             dets_v12, ms_v12 = self._run_real(self.model_v12, source, "yolov12")
         fused = _fuse(dets_v8, dets_v12, settings.ENSEMBLE_IOU_THRESHOLD)

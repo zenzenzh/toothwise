@@ -3,8 +3,10 @@ import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import {
   Menu, X, LayoutDashboard, Users, UserCog, ShieldCheck,
   LogOut, ChevronLeft, Activity, Bell, Search, ArrowRight,
+  Moon, Sun,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import useDarkMode from '../hooks/useDarkMode';
 import LogoMark from './LogoMark';
 import SEO from './SEO';
 import { dashboardAPI, patientsAPI } from '../api';
@@ -18,6 +20,7 @@ function initials(name = 'Staff') {
 
 export default function Layout() {
   const { dentist, logout } = useAuth();
+  const { isDark, toggle: toggleTheme } = useDarkMode();
   const navigate = useNavigate();
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(() => localStorage.getItem(COLLAPSE_KEY) === '1');
@@ -242,12 +245,10 @@ export default function Layout() {
               {mobileOpen ? <X size={19} /> : <Menu size={19} />}
             </button>
             <div className="tw-top-heading">
-              <div className="tw-eyebrow" style={styles.eyebrow}>CodiSmile Dental Clinic</div>
               <h1 className="tw-page-title" style={styles.pageTitle}>{pageLabel}</h1>
             </div>
           </div>
           <div className="tw-top-right" style={{ ...styles.topRight, position: 'relative' }}>
-            <div className="tw-system-pill" style={styles.system}><Activity size={15} /><span>Systems operational</span></div>
             <button className="dashboard-icon-button tw-icon-button" style={styles.iconButton} title="Notifications" aria-label="Notifications"
               onClick={openNotifications}>
               <Bell size={17} />
@@ -256,6 +257,15 @@ export default function Layout() {
             <button className="dashboard-icon-button tw-icon-button" style={styles.iconButton} title="Search patients" aria-label="Search patients"
               onClick={openSearch}>
               <Search size={17} />
+            </button>
+            <button
+              className="dashboard-icon-button tw-icon-button"
+              style={styles.iconButton}
+              onClick={toggleTheme}
+              title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+              aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+            >
+              {isDark ? <Sun size={17} /> : <Moon size={17} />}
             </button>
 
             {searchOpen && (
@@ -317,10 +327,10 @@ export default function Layout() {
 }
 
 const styles = {
-  shell: { minHeight: '100vh', background: '#FBF7F5', color: '#352126' },
+  shell: { minHeight: '100vh', background: 'var(--tw-bg)', color: 'var(--tw-text)' },
   sidebar: {
     position: 'fixed', inset: '0 auto 0 0', zIndex: 200, display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
-    background: '#352126', color: '#fff', padding: '20px 12px', overflow: 'hidden', transition: 'width .22s ease, transform .22s ease',
+    background: '#352126', color: '#fff', padding: '20px 12px', overflow: 'hidden',
     boxShadow: '12px 0 35px rgba(58,36,48,.08)', width: 'var(--sidebar-w, 260px)',
   },
   brandRow: { display: 'flex', alignItems: 'center', gap: 12, minHeight: 52, padding: '2px 10px' },
@@ -330,7 +340,7 @@ const styles = {
   clinicPill: { margin: '17px 8px 0', padding: '8px 10px', borderRadius: 10, background: 'rgba(255,255,255,.05)', color: '#C4B0BA', fontSize: 11, display: 'flex', alignItems: 'center', gap: 7 },
   liveDot: { width: 7, height: 7, borderRadius: '50%', background: '#2CCB91', boxShadow: '0 0 0 4px rgba(44,203,145,.12)' },
   nav: { display: 'flex', flexDirection: 'column', gap: 6, padding: '0 4px' },
-  navLink: { display: 'flex', alignItems: 'center', gap: 12, borderLeft: '3px solid transparent', borderRadius: 12, padding: '12px 13px', textDecoration: 'none', fontSize: 13, fontWeight: 700, transition: 'background .16s, color .16s' },
+  navLink: { display: 'flex', alignItems: 'center', gap: 12, borderRadius: 12, padding: '12px 13px', textDecoration: 'none', fontSize: 13, fontWeight: 700, transition: 'background .16s, color .16s' },
   sidebarBottom: { display: 'flex', flexDirection: 'column', gap: 9 },
   collapseButton: { width: '100%', border: 0, background: 'transparent', color: '#C4B0BA', padding: '10px 13px', borderRadius: 10, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 12, fontSize: 11, fontWeight: 700 },
   userCard: { display: 'flex', alignItems: 'center', gap: 10, padding: '12px 8px', borderTop: '1px solid rgba(255,255,255,.08)' },
@@ -338,13 +348,13 @@ const styles = {
   userName: { color: '#FBF6F4', fontWeight: 800, fontSize: 12, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 160 },
   userRole: { color: '#C4B0BA', textTransform: 'capitalize', fontSize: 10, marginTop: 2 },
   logout: { border: '1px solid rgba(255,255,255,.1)', background: 'rgba(255,255,255,.04)', color: '#AFC3C9', borderRadius: 11, padding: '10px 12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 11, fontSize: 12, fontWeight: 700 },
-  main: { minHeight: '100vh', display: 'flex', flexDirection: 'column', transition: 'margin-left .22s ease', marginLeft: 'var(--sidebar-w, 260px)' },
-  topbar: { height: 78, background: 'rgba(255,255,255,.92)', backdropFilter: 'blur(14px)', borderBottom: '1px solid #E5DADC', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 30px', position: 'sticky', top: 0, zIndex: 100 },
+  main: { minHeight: '100vh', display: 'flex', flexDirection: 'column', marginLeft: 'var(--sidebar-w, 260px)' },
+  topbar: { height: 78, background: 'color-mix(in srgb, var(--tw-surface) 92%, transparent)', backdropFilter: 'blur(14px)', borderBottom: '1px solid var(--tw-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 30px', position: 'sticky', top: 0, zIndex: 100 },
   topLeft: { display: 'flex', alignItems: 'center', gap: 14 },
-  eyebrow: { color: '#7A8F97', fontSize: 10, textTransform: 'uppercase', letterSpacing: '.12em', fontWeight: 800 },
-  pageTitle: { margin: '3px 0 0', color: '#4B2F35', fontSize: 21, lineHeight: 1.1, letterSpacing: '-.02em' },
+  eyebrow: { color: 'var(--tw-muted)', fontSize: 10, textTransform: 'uppercase', letterSpacing: '.12em', fontWeight: 800 },
+  pageTitle: { margin: '3px 0 0', color: 'var(--tw-text)', fontSize: 21, lineHeight: 1.1, letterSpacing: '-.02em' },
   topRight: { display: 'flex', alignItems: 'center', gap: 8 },
-  system: { display: 'flex', alignItems: 'center', gap: 7, marginRight: 4, padding: '9px 11px', borderRadius: 11, background: '#F1FBF9', color: '#2B8068', fontSize: 11, fontWeight: 800 },
-  iconButton: { width: 38, height: 38, border: '1px solid #E5DADC', borderRadius: 11, background: '#fff', color: '#6F5B61', display: 'grid', placeItems: 'center', cursor: 'pointer' },
+  system: { display: 'flex', alignItems: 'center', gap: 7, marginRight: 4, padding: '9px 11px', borderRadius: 11, background: '#0D2818', color: '#4ADE80', fontSize: 11, fontWeight: 800 },
+  iconButton: { width: 38, height: 38, border: '1px solid var(--tw-border)', borderRadius: 11, background: 'var(--tw-surface)', color: 'var(--tw-muted)', display: 'grid', placeItems: 'center', cursor: 'pointer' },
   content: { flex: 1, padding: '28px 30px 36px', minWidth: 0 },
 };

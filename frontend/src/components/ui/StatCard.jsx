@@ -12,18 +12,18 @@ const StatCard = ({
   trend,
   color = 'var(--tw-burgundy)',
   className = '',
+  iconClassName = '',
 }) => {
   return (
-    <div className={`tw-card tw-hover-lift stagger-item ${className}`} style={{ borderTop: `4px solid ${color}` }}>
+    <div className={`tw-card tw-hover-lift stagger-item ${className}`}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 'var(--tw-space-3)' }}>
-        <div style={{
+        <div className={`tw-stat-icon ${iconClassName}`} style={{
           width: 40, height: 40, borderRadius: 'var(--tw-radius-md)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          background: 'var(--tw-white)', border: '1.5px solid var(--tw-border)'
+          background: `${color}10`, border: 'none'
         }}>
-          {Icon && <Icon size={20} strokeWidth={1.75} color="var(--tw-ink)" />}
+          {Icon && <Icon size={20} strokeWidth={1.75} color={color} />}
         </div>
-        <span style={{ width: 8, height: 8, borderRadius: '50%', background: color, flexShrink: 0 }} />
       </div>
       <div style={{ fontSize: '32px', fontWeight: '700', lineHeight: 1, color }}>
         {value}
@@ -47,6 +47,7 @@ StatCard.propTypes = {
   trend: PropTypes.string,
   color: PropTypes.string,
   className: PropTypes.string,
+  iconClassName: PropTypes.string,
 };
 
 export default StatCard;

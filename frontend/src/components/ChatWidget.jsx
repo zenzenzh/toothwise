@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Bot, MessageCircle, Phone, Send, Sparkles, X } from 'lucide-react';
+import { MessageCircle, Phone, Send, Sparkles, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { chatbotAPI, patientScreeningsAPI } from '../api';
+import LogoMark from './LogoMark';
 import { answerPatientQuestion } from '../utils/screeningAssistant';
 
 const CLINIC_PHONE = '+63 956 196 5325';
@@ -147,7 +148,7 @@ export default function ChatWidget({ patient } = {}) {
         <div className="chat-panel-body" ref={scrollRef} aria-live="polite" aria-label="Conversation">
           {messages.map((message, index) => (
             <div key={`${message.from}-${index}`} className={`chat-message chat-message-${message.from}`}>
-              {message.from === 'bot' && <div className="chat-message-icon"><Bot size={13} /></div>}
+              {message.from === 'bot' && <div className="chat-message-icon"><LogoMark size={18} /></div>}
               <div className="chat-bubble">{message.text}</div>
             </div>
           ))}
@@ -160,7 +161,7 @@ export default function ChatWidget({ patient } = {}) {
           )}
           {typing && (
             <div className="chat-message chat-message-bot">
-              <div className="chat-message-icon"><Bot size={13} /></div>
+              <div className="chat-message-icon"><LogoMark size={18} /></div>
               <div className="chat-bubble chat-typing" aria-label="Assistant is typing"><span /><span /><span /></div>
             </div>
           )}

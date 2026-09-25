@@ -7,12 +7,14 @@ import { formatDatePH, formatShortDatePH } from '../utils/datetime';
 import { SkeletonBlock, SkeletonCircle, SkeletonCard } from '../components/Skeleton';
 import toast from 'react-hot-toast';
 
-const C = { burgundy: '#4B2F35', rose: '#BA7976', gold: '#C78C8A', blush: '#FBF7F5', white: '#FFFFFF', muted: '#6F5B61' };
+import T from '../tokens';
+
+const C = { burgundy: T.burgundy, rose: T.rose, gold: T.rosegold, blush: T.blush, white: T.white, muted: T.muted };
 
 const RISK_STYLE = {
-  HIGH:   { background: '#FCE8EA', color: '#C4505A', border: '1px solid #F5C0C4' },
-  MEDIUM: { background: '#FEF3E2', color: '#D4850A', border: '1px solid #F9DBA0' },
-  LOW:    { background: '#E8F5EE', color: '#2D7A52', border: '1px solid #A8DBBE' },
+  HIGH:   { background: 'var(--tw-danger-bg)', color: 'var(--tw-danger)', border: '1px solid var(--tw-danger-border)' },
+  MEDIUM: { background: 'var(--tw-warning-bg)', color: 'var(--tw-warning)', border: '1px solid var(--tw-warning-border)' },
+  LOW:    { background: 'var(--tw-success-bg)', color: 'var(--tw-success)', border: '1px solid var(--tw-success-border)' },
 };
 
 // Trend chart shows severity level, never the raw internal score - the
@@ -203,10 +205,10 @@ export default function PatientDetail() {
 }
 
 const CARD = {
-  background: C.white, borderRadius: 18, padding: '22px 24px',
-  border: '1px solid #E5DADC', boxShadow: '0 10px 30px rgba(75,47,53,0.05)',
+  background: T.white, borderRadius: 18, padding: '22px 24px',
+  border: `1px solid ${T.border}`, boxShadow: '0 10px 30px rgba(0,0,0,.06)',
 };
-const BIG_AVATAR = { width: 72, height: 72, borderRadius: '50%', background: 'linear-gradient(135deg, #BA7976, #C78C8A)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: 28, flexShrink: 0 };
+const BIG_AVATAR = { width: 72, height: 72, borderRadius: '50%', background: `linear-gradient(135deg, ${T.rose}, ${T.rosegold})`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: 28, flexShrink: 0 };
 
 const s = {
   card: CARD,
@@ -220,7 +222,7 @@ const s = {
   defsCard: { ...CARD, padding: '8px 24px' },
   defRow: {
     display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 18,
-    padding: '13px 0', borderBottom: '1px solid #F0E4E2',
+    padding: '13px 0', borderBottom: `1px solid ${T.border}`,
   },
   defLabel: { fontSize: 10.5, color: C.muted, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', flexShrink: 0 },
   defValue: { fontSize: 13.5, color: C.burgundy, fontWeight: 500, textAlign: 'right', overflowWrap: 'anywhere' },
@@ -228,14 +230,14 @@ const s = {
   historyCard: { ...CARD, padding: '4px 20px' },
   historyRow: {
     display: 'flex', alignItems: 'center', gap: 15,
-    padding: '14px 2px', borderTop: '1px solid #F0E4E2',
+    padding: '14px 2px', borderTop: `1px solid ${T.border}`,
     cursor: 'pointer', borderRadius: 8,
     transition: 'background 0.15s ease',
   },
   historyIcon: {
     width: 42, height: 42, borderRadius: 12, background: C.blush, color: C.rose,
     display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-    border: '1px solid #E5DADC',
+    border: `1px solid ${T.border}`,
   },
   historyArrow: { color: C.rose, flexShrink: 0, display: 'flex', alignItems: 'center' },
 };

@@ -276,6 +276,13 @@ class ClinicalNoteCreate(BaseModel):
     body: str = Field(min_length=1, max_length=4000)
 
 
+class TierConfirm(BaseModel):
+    """Dentist-reviewed severity tier for a screening. This is the ground
+    truth the KNN recommender learns from - 'the AI said LOW, the dentist
+    looked and said HIGH' is exactly the signal synthetic data fakes."""
+    risk_level: RiskLevel
+
+
 class ClinicalNoteOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: int

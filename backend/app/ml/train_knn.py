@@ -7,8 +7,11 @@ to train on. We bootstrap the KNN with a large synthetic dataset generated
 from the same clinical severity weights used by the deterministic risk
 engine (app/ml/risk_engine.py). This gives the KNN a sensible starting
 decision boundary that already reflects dental domain knowledge, while
-keeping the door open to swap in real labeled cases later without
-changing any downstream code (see retrain_from_real_data() at the bottom).
+keeping the door open to add real labeled cases later: every
+clinician-confirmed tier is appended to a JSONL journal
+(append_labeled_case / load_labeled_cases) and folded into the model by
+retrain_with_labeled(), which always keeps the synthetic base so KNN never
+sees fewer rows than n_neighbors.
 
 Feature vector per sample (order matters, see FEATURE_LABELS):
   [count*meanConfidence for each non-healthy label]  -> 7 features
@@ -18,6 +21,7 @@ Target: severity tier -> 0 = LOW, 1 = MEDIUM, 2 = HIGH
 """
 from __future__ import annotations
 
+import json
 import random
 from pathlib import Path
 
@@ -86,15 +90,46 @@ def train_and_save(path: str | None = None) -> str:
     return str(out_path)
 
 
-def retrain_from_real_data(feature_rows: list[list[float]], tiers: list[int],
-                            path: str | None = None) -> str:
+def append_labeled_case(features: list[float], tier: int,
+                        path: str | None = None) -> str:
+    """Append one clinician-confirmed case to the labeled-data journal."""
+    out_path = Path(path or settings.KNN_LABELED_CASES_PATH)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    with out_path.open("a", encoding="utf-8") as f:
+        f.write(json.dumps({"features": features, "tier": tier}) + "\n")
+    return str(out_path)
+
+
+def load_labeled_cases(path: str | None = None) -> tuple[np.ndarray, np.ndarray]:
+    """Read every clinician-confirmed case written by append_labeled_case."""
+    in_path = Path(path or settings.KNN_LABELED_CASES_PATH)
+    X, y = [], []
+    if in_path.exists():
+        for line in in_path.read_text(encoding="utf-8").splitlines():
+            if not line.strip():
+                continue
+            row = json.loads(line)
+            X.append(row["features"])
+            y.append(row["tier"])
+    if not X:
+        return np.empty((0, len(FEATURE_LABELS))), np.empty((0,), dtype=int)
+    return np.array(X, dtype=float), np.array(y, dtype=int)
+
+
+def retrain_with_labeled(path: str | None = None) -> str:
     """
-    Call this once you have real clinician-confirmed screenings (feature
-    rows built with recommender.build_feature_vector + the tier the
-    dentist actually assigned). Swaps the bootstrap dataset for real data.
+    Retrain on the bootstrap synthetic data PLUS every clinician-confirmed
+    case. Real rows alone crash KNN at predict time once fewer than
+    n_neighbors exist, so synthetic data is always kept as the base.
     """
+    X, y = _synthesize_dataset()
+    X_real, y_real = load_labeled_cases()
+    if len(X_real):
+        X = np.vstack([X, X_real])
+        y = np.concatenate([y, y_real])
+
     model = KNeighborsClassifier(n_neighbors=settings.KNN_NEIGHBORS, weights="distance")
-    model.fit(np.array(feature_rows), np.array(tiers))
+    model.fit(X, y)
 
     out_path = Path(path or settings.KNN_MODEL_PATH)
     out_path.parent.mkdir(parents=True, exist_ok=True)

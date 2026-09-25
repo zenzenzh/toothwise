@@ -14,9 +14,12 @@ const Badge = ({
   const variantClasses = {
     default: 'tw-badge',
     high: 'risk-high',
+    HIGH: 'risk-high',
     moderate: 'risk-moderate',
     medium: 'risk-moderate',
+    MEDIUM: 'risk-moderate',
     low: 'risk-low',
+    LOW: 'risk-low',
     scheduled: 'status-scheduled',
     completed: 'status-completed',
     cancelled: 'status-cancelled',

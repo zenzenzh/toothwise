@@ -9,8 +9,12 @@ from app import models, schemas
 from app.audit import log_action
 from app.config import get_settings
 from app.database import get_db
-from app.ml.recommender import generate_prevention_plan
+from app.ml.recommender import (
+    TIER_NAMES, build_feature_vector, generate_prevention_plan,
+    retrain_from_labeled,
+)
 from app.ml.risk_engine import compute_risk
+from app.ml.train_knn import append_labeled_case
 from app.ml.yolo_detector import get_detector
 from app.rate_limit import limiter
 from app.security import get_current_dentist, get_current_patient
@@ -226,6 +230,53 @@ def get_screening(
     screening = db.query(models.Screening).get(screening_id)
     if not screening:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Screening not found.")
+    return screening
+
+
+@router.patch("/screenings/{screening_id}/tier", response_model=schemas.ScreeningDetailOut)
+def confirm_screening_tier(
+    screening_id: int,
+    payload: schemas.TierConfirm,
+    db: Session = Depends(get_db),
+    current: models.Dentist = Depends(get_current_dentist),
+):
+    """
+    Dentist reviews the AI-predicted severity tier and records the true
+    tier. That label is appended to the KNN's labeled-case journal and the
+    model is retrained from it, so every review iteratively shrinks the
+    gap between the synthetic bootstrap and real clinical judgment. The
+    screening's stored tier/score are NOT rewritten - the AI prediction
+    stays as-is alongside the review, because overwriting it would
+    silently destroy the exact data point this endpoint exists to capture.
+    """
+    screening = db.query(models.Screening).get(screening_id)
+    if not screening:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Screening not found.")
+
+    fused = [d for d in screening.detections if d.detection_set == "fused"]
+    features = build_feature_vector(
+        [{"label": d.label, "confidence": d.confidence} for d in fused],
+        screening.patient.age if screening.patient else None,
+    )
+    tier_id = {v: k for k, v in TIER_NAMES.items()}[payload.risk_level.value]
+    append_labeled_case(features, tier_id)
+
+    log_action(
+        db, current, "screening.tier_confirm", "screening", screening.id,
+        f"ai={screening.risk_level.value} dentist={payload.risk_level.value}",
+    )
+
+    # Refit before committing so a slow fit never holds a DB write open.
+    # The label is journaled to disk first, so on any failure _ensure_trained
+    # picks it up on the next load (it retrains whenever the journal is
+    # newer than the artifact).
+    try:
+        retrain_from_labeled()
+    except Exception:  # pragma: no cover - model unavailability can't be planned
+        pass
+
+    db.commit()
+    db.refresh(screening)
     return screening
 
 

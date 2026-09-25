@@ -64,8 +64,8 @@ export function SkeletonCard({ index = 0, height = 100, style }) {
       className="stagger-item"
       style={{
         '--stagger-index': index,
-        background: '#FFFFFF', borderRadius: 14, padding: 20,
-        border: '1px solid #F0E4E2', display: 'flex', flexDirection: 'column', gap: 10,
+        background: 'var(--tw-surface)', borderRadius: 14, padding: 20,
+        border: '1px solid var(--tw-border)', display: 'flex', flexDirection: 'column', gap: 10,
         minHeight: height, ...style,
       }}
     >

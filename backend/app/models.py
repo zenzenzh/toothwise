@@ -10,6 +10,11 @@ from sqlalchemy.orm import relationship
 from app.database import Base
 
 
+def _utcnow():
+    """Timezone-aware UTC now. Replaces deprecated datetime.utcnow()."""
+    return datetime.now(timezone.utc)
+
+
 class DentistRole(str, enum.Enum):
     admin = "admin"
     dentist = "dentist"
@@ -49,7 +54,7 @@ class Dentist(Base):
     role = Column(SAEnum(DentistRole), default=DentistRole.dentist, nullable=False)
     license_no = Column(String(60), nullable=True)
     is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=_utcnow)
 
     screenings = relationship("Screening", back_populates="dentist")
     notes = relationship("ClinicalNote", back_populates="dentist")
@@ -73,7 +78,7 @@ class Patient(Base):
     email = Column(String(150), unique=True, nullable=True, index=True)
     hashed_password = Column(String(255), nullable=True)
     is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=_utcnow)
 
     screenings = relationship(
         "Screening", back_populates="patient", cascade="all, delete-orphan"
@@ -102,7 +107,7 @@ class Screening(Base):
     risk_score = Column(Integer, default=0)
     yolov8_ms = Column(Float, default=0.0)
     yolov12_ms = Column(Float, default=0.0)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=_utcnow)
 
     patient = relationship("Patient", back_populates="screenings")
     dentist = relationship("Dentist", back_populates="screenings")
@@ -162,7 +167,7 @@ class ClinicalNote(Base):
     screening_id = Column(Integer, ForeignKey("screenings.id"), nullable=False)
     dentist_id = Column(Integer, ForeignKey("dentists.id"), nullable=True)
     body = Column(Text, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=_utcnow)
 
     screening = relationship("Screening", back_populates="notes")
     dentist = relationship("Dentist", back_populates="notes")

@@ -27,7 +27,8 @@ os.environ.setdefault("SEED_ADMIN_EMAIL", "admin@codismile.com")
 os.environ.setdefault("SEED_ADMIN_PASSWORD", "CodiSmile@2025")
 os.environ.setdefault("SEED_ADMIN_NAME", "Test Admin")
 os.environ.setdefault("SEED_ADMIN_LICENSE", "TEST-001")
-os.environ.setdefault("KNN_MODEL_PATH", "app/ml/artifacts/knn_recommender.joblib")
+os.environ.setdefault("KNN_MODEL_PATH", "test_artifacts/knn_recommender.joblib")
+os.environ.setdefault("KNN_LABELED_CASES_PATH", "test_artifacts/labeled_cases.jsonl")
 # ---- end env setup ----
 
 import pytest
@@ -49,10 +50,13 @@ def _setup_and_teardown_db():
     Base.metadata.create_all(bind=engine)
     yield
     Base.metadata.drop_all(bind=engine)
-    # Clean up test uploads
-    uploads = os.path.join(os.getcwd(), "test_uploads")
-    if os.path.isdir(uploads):
-        shutil.rmtree(uploads, ignore_errors=True)
+    # Clean up test uploads and test-trained KNN artifacts
+    for dirname in ("test_uploads", "test_artifacts"):
+        path = os.path.join(os.getcwd(), dirname)
+        if os.path.isdir(path):
+            shutil.rmtree(path, ignore_errors=True)
+    from app.ml import recommender
+    recommender._bundle = None
 
 
 @pytest.fixture()

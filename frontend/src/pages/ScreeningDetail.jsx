@@ -6,21 +6,9 @@ import { formatDatePH, formatDateTimePH } from '../utils/datetime';
 import { LIMITS } from '../utils/validation';
 import { SkeletonBlock, SkeletonCard } from '../components/Skeleton';
 import toast from 'react-hot-toast';
+import T from '../tokens';
 
-const C = {
-  burgundy: '#4B2F35',
-  rose: '#BA7976',
-  gold: '#C78C8A',
-  blush: '#FBF7F5',
-  white: '#FFFFFF',
-  muted: '#6F5B61'
-};
-
-const RISK_STYLE = {
-  HIGH:   { background: '#FCE8EA', color: '#C4505A', border: '1px solid #F5C0C4' },
-  MEDIUM: { background: '#FEF3E2', color: '#D4850A', border: '1px solid #F9DBA0' },
-  LOW:    { background: '#E8F5EE', color: '#2D7A52', border: '1px solid #A8DBBE' },
-};
+const C = T;
 
 // Matches app/ml/labels.py LABELS on the backend.
 const CLASS_COLORS = {
@@ -31,12 +19,7 @@ const CLASS_COLORS = {
   tartar:              '#B45309',
 };
 
-const CARD     = { background: '#FFFFFF', borderRadius: 14, padding: '24px', boxShadow: '0 4px 20px rgba(92,58,74,0.08)', border: '1px solid #FBF7F5' };
-const PRI_BTN  = { background: '#4B2F35', color: '#fff', border: 'none', borderRadius: 10, padding: '14px', fontSize: 14, fontWeight: 600, cursor: 'pointer', transition: '0.2s' };
-const SEC_TITLE = { fontSize: 11, fontWeight: 800, color: '#6F5B61', margin: 0, textTransform: 'uppercase', letterSpacing: '0.1em' };
-const INP      = { background: '#FBF7F5', border: '1.5px solid #E5DADC', borderRadius: 10, padding: '12px', fontSize: 14, color: '#4B2F35', outline: 'none', transition: '0.2s' };
-
-function BoundingBoxCanvas({ imageUrl, detections }) {
+function BoundingBoxCanvas({ imageUrl, detections, showBoxes = true }) {
   const canvasRef = useRef(null);
   const [imgLoaded, setImgLoaded] = useState(false);
 
@@ -53,37 +36,46 @@ function BoundingBoxCanvas({ imageUrl, detections }) {
       canvas.height = img.naturalHeight;
       ctx.drawImage(img, 0, 0);
 
-      detections.forEach(d => {
-        // x1/y1/x2/y2 are normalized (0-1) corner coordinates.
-        const x = d.x1 * img.naturalWidth;
-        const y = d.y1 * img.naturalHeight;
-        const w = (d.x2 - d.x1) * img.naturalWidth;
-        const h = (d.y2 - d.y1) * img.naturalHeight;
+      if (showBoxes) {
+        detections.forEach(d => {
+          // x1/y1/x2/y2 are normalized (0-1) corner coordinates.
+          const x = d.x1 * img.naturalWidth;
+          const y = d.y1 * img.naturalHeight;
+          const w = (d.x2 - d.x1) * img.naturalWidth;
+          const h = (d.y2 - d.y1) * img.naturalHeight;
 
-        const color = CLASS_COLORS[d.label] || '#FF0000';
-        ctx.strokeStyle = color;
-        ctx.lineWidth = Math.max(4, img.naturalWidth / 200);
-        ctx.strokeRect(x, y, w, h);
+          const color = CLASS_COLORS[d.label] || '#FF0000';
+          ctx.strokeStyle = color;
+          ctx.lineWidth = Math.max(4, img.naturalWidth / 200);
+          ctx.strokeRect(x, y, w, h);
 
-        const label = `${d.label.replace(/_/g, ' ')} ${(d.confidence * 100).toFixed(0)}%`;
-        const fontSize = Math.max(14, img.naturalWidth / 40);
-        ctx.font = `bold ${fontSize}px Arial`;
-        const textW = ctx.measureText(label).width;
+          const label = `${d.label.replace(/_/g, ' ')} ${(d.confidence * 100).toFixed(0)}%`;
+          const fontSize = Math.max(14, img.naturalWidth / 40);
+          ctx.font = `bold ${fontSize}px Arial`;
+          const textW = ctx.measureText(label).width;
 
-        ctx.fillStyle = color;
-        ctx.fillRect(x, y - fontSize - 10, textW + 10, fontSize + 10);
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillText(label, x + 5, y - 8);
-      });
+          ctx.fillStyle = color;
+          ctx.fillRect(x, y - fontSize - 10, textW + 10, fontSize + 10);
+          ctx.fillStyle = '#FFFFFF';
+          ctx.fillText(label, x + 5, y - 8);
+        });
+      }
       setImgLoaded(true);
     };
     img.src = imageUrl;
-  }, [imageUrl, detections]);
+  }, [imageUrl, detections, showBoxes]);
 
   return (
-    <div style={{ position: 'relative', borderRadius: 12, overflow: 'hidden', background: '#f0f0f0', width: '100%' }}>
-      <img src={imageUrl} alt="Fallback" style={{ width: '100%', display: imgLoaded ? 'none' : 'block' }} />
+    <div style={{ position: 'relative', borderRadius: 12, overflow: 'hidden', background: 'var(--tw-surface)', width: '100%' }}>
+      <img src={imageUrl} alt="Screening" style={{ width: '100%', display: imgLoaded ? 'none' : 'block' }} />
       <canvas ref={canvasRef} style={{ width: '100%', display: imgLoaded ? 'block' : 'none', height: 'auto' }} />
+      {detections?.length > 0 && (
+        <ul style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0,0,0,0)', whiteSpace: 'nowrap', margin: -1, padding: 0, border: 0 }}>
+          {detections.map((d, i) => (
+            <li key={i}>{d.label.replace(/_/g, ' ')} detected with {(d.confidence * 100).toFixed(0)}% confidence</li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
@@ -101,6 +93,7 @@ export default function ScreeningDetail() {
   const [compareLoading, setCompareLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('fused'); // 'fused' | 'yolov8' | 'yolov12'
   const [imageUrl, setImageUrl] = useState(null);
+  const [showBoxes, setShowBoxes] = useState(true);
 
   const load = useCallback(() => {
     screeningsAPI.get(id)
@@ -220,16 +213,16 @@ export default function ScreeningDetail() {
       </div>
 
       {/* PATIENT HEADER + RISK BADGE */}
-      <div style={CARD}>
+      <div className="sd-card">
         <div className="sd-patient-header">
           <div>
             <h2 style={{ color: C.burgundy, margin: 0, fontSize: 'clamp(16px, 4vw, 22px)' }}>Patient: {patient?.full_name}</h2>
             <p style={{ color: C.rose, margin: '4px 0 0', fontWeight: 500 }}>AI Analysis Result</p>
           </div>
-          <div className="sd-risk-badge" style={{ ...RISK_STYLE[screening.risk_level], padding: '12px 24px', borderRadius: 12, textAlign: 'center' }}>
-            <div style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 1 }}>Risk Level</div>
-            <div style={{ fontSize: 22, fontWeight: 900 }}>{screening.risk_level}</div>
-            <div style={{ fontSize: 11 }}>{fusedDetections.length} finding{fusedDetections.length !== 1 ? 's' : ''}</div>
+          <div className={`sd-risk sd-risk--${screening.risk_level}`}>
+            <div className="sd-risk-label">Risk Level</div>
+            <div className="sd-risk-value">{screening.risk_level}</div>
+            <div className="sd-risk-count">{fusedDetections.length} finding{fusedDetections.length !== 1 ? 's' : ''}</div>
           </div>
         </div>
       </div>
@@ -238,98 +231,92 @@ export default function ScreeningDetail() {
       <div className="sd-main-grid">
 
           {/* LEFT COLUMN: IMAGE */}
-          <div style={CARD}>
+          <div className="sd-card">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
-              <h4 style={SEC_TITLE}>AI Detection View</h4>
-              <div className="sd-tab-bar" style={{ display: 'flex', gap: 6 }}>
+              <h4 className="sd-sec-title">AI Detection View</h4>
+              <div className="sd-tab-bar" style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
                 {[
-                  { key: 'fused', label: 'Fused (Clinical)' },
+                  { key: 'fused', label: 'Fused' },
                   { key: 'yolov8', label: 'YOLOv8' },
                   { key: 'yolov12', label: 'YOLOv12' },
                 ].map(t => (
                   <button
                     key={t.key}
                     onClick={() => selectTab(t.key)}
-                    style={{
-                      border: 'none',
-                      borderRadius: 8,
-                      padding: '6px 12px',
-                      fontSize: 11,
-                      fontWeight: 700,
-                      cursor: 'pointer',
-                      background: activeTab === t.key ? C.burgundy : C.blush,
-                      color: activeTab === t.key ? '#fff' : C.burgundy,
-                    }}
+                    className={`sd-tab-btn ${activeTab === t.key ? 'active' : ''}`}
                   >
                     {t.label}
                   </button>
                 ))}
+                <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 600, color: C.muted, cursor: 'pointer', marginLeft: 'auto' }}>
+                  <input
+                    type="checkbox"
+                    checked={showBoxes}
+                    onChange={e => setShowBoxes(e.target.checked)}
+                    style={{ accentColor: C.burgundy, width: 16, height: 16 }}
+                  />
+                  Show Bounding Boxes
+                </label>
               </div>
             </div>
 
             <div style={{ marginTop: 15 }}>
               {!imageUrl ? (
-                <div style={{ height: 300, background: C.blush, borderRadius: 10, display: 'grid', placeItems: 'center', color: C.muted }}>
+                <div className="sd-image-placeholder">
                   No image data available
                 </div>
               ) : activeTab !== 'fused' && compareLoading ? (
-                <div style={{ height: 300, background: C.blush, borderRadius: 10, display: 'grid', placeItems: 'center', color: C.muted }}>
+                <div className="sd-image-placeholder">
                   Loading {activeTab === 'yolov8' ? 'YOLOv8' : 'YOLOv12'} detections...
                 </div>
               ) : (
-                <BoundingBoxCanvas imageUrl={imageUrl} detections={tabDetections} />
+                <BoundingBoxCanvas imageUrl={imageUrl} detections={tabDetections} showBoxes={showBoxes} />
               )}
             </div>
 
-            <p style={{ color: C.muted, fontSize: 11, marginTop: 10 }}>
+            <p className="sd-perf">
               YOLOv8: {screening.yolov8_ms?.toFixed?.(1) ?? screening.yolov8_ms} ms · YOLOv12: {screening.yolov12_ms?.toFixed?.(1) ?? screening.yolov12_ms} ms
             </p>
 
             {activeTab !== 'fused' && comparison && (
-              <div style={{ marginTop: 14, background: C.blush, borderRadius: 10, padding: 14 }}>
+              <div className="sd-comparison">
                 {(() => {
                   const stats = activeTab === 'yolov8' ? comparison.yolov8 : comparison.yolov12;
                   return (
-                    <div style={{ fontSize: 12, color: '#555', lineHeight: 1.8 }}>
+                    <div className="sd-comparison-stats">
                       <div>Detections found: <strong>{stats.detection_count}</strong></div>
                       <div>Average confidence: <strong>{stats.avg_confidence != null ? (stats.avg_confidence * 100).toFixed(1) + '%' : '—'}</strong></div>
                       <div>Inference time: <strong>{stats.inference_ms?.toFixed?.(1) ?? stats.inference_ms} ms</strong></div>
                     </div>
                   );
                 })()}
-                <div style={{ marginTop: 8, fontSize: 12, color: C.muted }}>
-                  Fused (clinical) result: <strong>{comparison.fused_count}</strong> finding{comparison.fused_count !== 1 ? 's' : ''}
-                  {' · '}Models agreed on <strong>{comparison.agreement_count}</strong> independent detection{comparison.agreement_count !== 1 ? 's' : ''}
+                <div className="sd-comparison-summary">
+                  Fused result: <strong>{comparison.fused_count}</strong> finding{comparison.fused_count !== 1 ? 's' : ''}
+                  {' · '}Models agreed on <strong>{comparison.agreement_count}</strong>
                 </div>
-                <p style={{ fontSize: 11, color: C.muted, marginTop: 8, fontStyle: 'italic' }}>
-                  This is per-image runtime data, not accuracy/precision/recall - those
-                  require a labeled test set and are reported separately from model
-                  training (see evaluate_models.py).
-                </p>
               </div>
             )}
           </div>
 
           {/* RIGHT COLUMN: PLAN & NOTES */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
-            <div style={CARD}>
-              <h4 style={SEC_TITLE}>Prevention Plan</h4>
+            <div className="sd-card">
+              <h4 className="sd-sec-title">Prevention Plan</h4>
               <div style={{ marginTop: 15, display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {recommendations.length > 0 ? (
                   recommendations.map((r, i) => (
                     <div key={r.id} className="stagger-item" style={{
                       '--stagger-index': i,
                       padding: '14px',
-                      background: r.priority > 0 ? '#FFF5F5' : C.blush,
+                      background: r.priority > 0 ? 'var(--tw-danger-bg)' : T.blush,
                       borderRadius: 10,
-                      borderLeft: `4px solid ${r.priority > 0 ? '#C4505A' : C.gold}`,
                     }}>
                       {r.priority > 0 && (
-                        <div style={{ fontSize: 10, fontWeight: 700, color: '#C4505A', textTransform: 'uppercase', marginBottom: 4 }}>
+                        <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--tw-danger)', textTransform: 'uppercase', marginBottom: 4 }}>
                           Urgent
                         </div>
                       )}
-                      <div style={{ fontSize: 13, color: '#333', lineHeight: 1.5 }}>{r.text}</div>
+                      <div style={{ fontSize: 13, color: 'var(--tw-text)', lineHeight: 1.5 }}>{r.text}</div>
                     </div>
                   ))
                 ) : (
@@ -338,12 +325,12 @@ export default function ScreeningDetail() {
               </div>
             </div>
 
-            <div style={CARD}>
-              <h4 style={SEC_TITLE}>Clinical Notes</h4>
+            <div className="sd-card">
+              <h4 className="sd-sec-title">Clinical Notes</h4>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 12, maxHeight: 220, overflowY: 'auto' }}>
                 {notes.length > 0 ? notes.map(n => (
-                  <div key={n.id} style={{ padding: '10px 12px', background: C.blush, borderRadius: 8 }}>
-                    <div style={{ fontSize: 13, color: '#333' }}>{n.body}</div>
+                  <div key={n.id} style={{ padding: '10px 12px', background: T.blush, borderRadius: 8 }}>
+                    <div style={{ fontSize: 13, color: 'var(--tw-text)' }}>{n.body}</div>
                     <div style={{ fontSize: 10, color: C.muted, marginTop: 4 }}>
                       {formatDateTimePH(n.created_at)}
                     </div>
@@ -353,13 +340,14 @@ export default function ScreeningDetail() {
                 )}
               </div>
               <textarea
-                style={{ ...INP, minHeight: 90, width: '100%', marginTop: 12, boxSizing: 'border-box' }}
+                className="sd-inp"
+                style={{ minHeight: 90, width: '100%', marginTop: 12, boxSizing: 'border-box', resize: 'vertical' }}
                 value={noteBody}
                 onChange={e => setNoteBody(e.target.value)}
                 placeholder="Add a dentist observation..."
                 maxLength={LIMITS.NOTES_MAX}
               />
-              <button style={{ ...PRI_BTN, width: '100%', marginTop: 12 }} onClick={saveNote} disabled={saving || !noteBody.trim()}>
+              <button className="sd-pri-btn" style={{ width: '100%', marginTop: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }} onClick={saveNote} disabled={saving || !noteBody.trim()}>
                 {saving ? 'Saving...' : <><Save size={16} /> Add Clinical Note</>}
               </button>
             </div>

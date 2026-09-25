@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Activity, MessageCircleQuestion, Microscope, TriangleAlert, CalendarDays } from 'lucide-react';
+import { MessageCircleQuestion, Microscope, TriangleAlert, ArrowLeft, ChevronRight, LogOut, Star, Clock, CheckCircle, AlertCircle } from 'lucide-react';
 import { usePatientAuth } from '../context/PatientAuthContext';
 import { patientScreeningsAPI } from '../api';
 import { formatDatePH } from '../utils/datetime';
@@ -11,27 +11,14 @@ import { validateEmail, validatePHMobile, validatePassword, validateRequiredText
 import toast from 'react-hot-toast';
 import SEO from '../components/SEO';
 import ChatWidget from '../components/ChatWidget';
+import LogoMark from '../components/LogoMark';
 
-const BURGUNDY = '#4B2F35';
-const ROSE = '#BA7976';
-const ROSEGOLD = '#C78C8A';
-const BLUSH = '#FBF7F5';
-const WHITE = '#FFFFFF';
-const MUTED = '#6F5B61';
-
-// Matches app/ml/labels.py LABELS on the backend / ScreeningDetail.jsx on the staff side.
 const CLASS_COLORS = {
-  healthy_tooth:       '#22C55E',
-  cavity:              '#EF4444',
-  gum_inflammation:    '#F97316',
-  plaque:              '#EAB308',
-  tartar:              '#B45309',
-};
-
-const RISK_STYLE = {
-  HIGH:   { background: '#FCE8EA', color: '#C4505A', border: '1px solid #F5C0C4' },
-  MEDIUM: { background: '#FEF3E2', color: '#D4850A', border: '1px solid #F9DBA0' },
-  LOW:    { background: '#E8F5EE', color: '#2D7A52', border: '1px solid #A8DBBE' },
+  healthy_tooth:       '#166534',
+  cavity:              '#B91C1C',
+  gum_inflammation:    '#C2410C',
+  plaque:              '#A16207',
+  tartar:              '#92400E',
 };
 
 function BoundingBoxCanvas({ imageUrl, detections }) {
@@ -58,7 +45,7 @@ function BoundingBoxCanvas({ imageUrl, detections }) {
         const w = (d.x2 - d.x1) * img.naturalWidth;
         const h = (d.y2 - d.y1) * img.naturalHeight;
 
-        const color = CLASS_COLORS[d.label] || '#FF0000';
+        const color = CLASS_COLORS[d.label] || '#B91C1C';
         ctx.strokeStyle = color;
         ctx.lineWidth = Math.max(4, img.naturalWidth / 200);
         ctx.strokeRect(x, y, w, h);
@@ -79,18 +66,21 @@ function BoundingBoxCanvas({ imageUrl, detections }) {
   }, [imageUrl, detections]);
 
   return (
-    <div style={{ position: 'relative', borderRadius: 12, overflow: 'hidden', background: '#f0f0f0', width: '100%' }}>
-      <img src={imageUrl} alt="Screening" style={{ width: '100%', display: imgLoaded ? 'none' : 'block' }} />
-      <canvas ref={canvasRef} style={{ width: '100%', display: imgLoaded ? 'block' : 'none', height: 'auto' }} />
+    <div className="pp-canvas-wrap">
+      <img src={imageUrl} alt="Screening with detection annotations" style={{ width: '100%', display: imgLoaded ? 'none' : 'block' }} />
+      <canvas ref={canvasRef} style={{ width: '100%', display: imgLoaded ? 'block' : 'none', height: 'auto' }} aria-label={`Screening results with ${detections?.length || 0} findings annotated`} role="img" />
+      {detections?.length > 0 && (
+        <ul style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0,0,0,0)', whiteSpace: 'nowrap', margin: -1, padding: 0, border: 0 }}>
+          {detections.map((d, i) => (
+            <li key={i}>{d.label.replace(/_/g, ' ')} detected with {(d.confidence * 100).toFixed(0)}% confidence</li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
 
-// Each thumbnail fetches its own authenticated image (there's no
-// unauthenticated static path for these anymore) and cleans up its
-// object URL when it unmounts or the screening it's showing changes -
-// important here since a whole grid of these can be on screen together.
-function ScreeningThumbnail({ screeningId, style }) {
+function ScreeningThumbnail({ screeningId }) {
   const [url, setUrl] = useState(null);
 
   useEffect(() => {
@@ -107,8 +97,8 @@ function ScreeningThumbnail({ screeningId, style }) {
     };
   }, [screeningId]);
 
-  if (!url) return <div style={{ ...style, background: BLUSH }} />;
-  return <img src={url} alt="Screening" style={style} />;
+  if (!url) return <div className="pp-thumb pp-thumb--skeleton" />;
+  return <img src={url} alt="Screening" className="pp-thumb" />;
 }
 
 function calculateAge(birthdate) {
@@ -139,9 +129,7 @@ export default function PatientPortal() {
     <>
       <SEO title="Patient Portal | ToothWise" description="Secure CodiSmile patient portal for account access, AI-assisted dental screening results, and dental records." noIndex />
       {patient ? (
-        <div style={s.page}>
-          <div style={s.circle1} />
-          <div style={s.circle2} />
+        <div className="pp2-root">
           <PortalHome patient={patient} onLogout={handleLogout} />
         </div>
       ) : (
@@ -152,21 +140,10 @@ export default function PatientPortal() {
   );
 }
 
-// Shared with the staff login screen (pages/Login.jsx + components/AuthLayout.jsx)
-// so both auth surfaces use the identical split-screen layout and field styling.
-const authField = 'auth6-field';
-const authLabel = 'auth6-label';
-// Some labels in the name row wrap to two lines ("Middle Name / Initial")
-// while their siblings ("First Name", "Last Name") stay on one line. Without
-// a shared minimum height the inputs below them end up at different vertical
-// positions. This variant reserves two lines of height for every label in
-// that row so all three inputs line up.
-const authLabelRow = 'auth6-label auth6-label-row';
-const authFieldError = { color: '#C23F4A', fontSize: 11, margin: 0 };
-const authHint = { fontSize: 11, color: '#6F5B61', margin: '4px 0 0 0' };
+/* ─── Auth ─────────────────────────────────────────────────────────── */
 
 function AuthCard() {
-  const [mode, setMode] = useState('login'); // 'login' | 'register'
+  const [mode, setMode] = useState('login');
 
   return (
     <AuthLayout>
@@ -233,8 +210,8 @@ function LoginForm() {
 
   return (
     <form onSubmit={handleSubmit} className="auth6-form" noValidate>
-      <div className={authField}>
-        <label htmlFor="portal-login-email" className={authLabel}>Email Address</label>
+      <div className="auth6-field">
+        <label htmlFor="portal-login-email" className="auth6-label">Email Address</label>
         <input
           id="portal-login-email"
           className="auth6-input"
@@ -245,8 +222,9 @@ function LoginForm() {
           autoComplete="username"
           required
           aria-invalid={!!errors.email}
+          aria-describedby={errors.email ? 'login-email-error' : undefined}
         />
-        {errors.email && <p style={authFieldError} role="alert">{errors.email}</p>}
+        {errors.email && <p id="login-email-error" className="auth6-error" role="alert">{errors.email}</p>}
       </div>
       <PasswordField
         value={password}
@@ -254,8 +232,8 @@ function LoginForm() {
         autoComplete="current-password"
         error={errors.password}
         inputClassName="auth6-input auth6-input-password"
-        labelClassName={authLabel}
-        fieldClassName={authField}
+        labelClassName="auth6-label"
+        fieldClassName="auth6-field"
       />
       <button className="auth6-submit" disabled={busy}>{busy ? 'Signing in...' : 'Sign In'}</button>
     </form>
@@ -278,9 +256,6 @@ function RegisterForm() {
     e.preventDefault();
     if (busy) return;
 
-    // Real validation, not just "is it non-empty" - a made-up email or a
-    // random string of digits for a phone number is rejected here before
-    // it ever reaches the backend, with a specific reason shown per field.
     const firstCheck = validateRequiredText(form.first_name, 'First name');
     const lastCheck = validateRequiredText(form.last_name, 'Last name');
     const middleCheck = validateOptionalText(form.middle_name, 'Middle name', LIMITS.NAME_MAX);
@@ -333,8 +308,8 @@ function RegisterForm() {
   return (
     <form onSubmit={handleSubmit} className="auth6-form" noValidate>
       <div className="auth6-grid auth6-grid-2">
-        <div className={authField}>
-          <label htmlFor="reg-first-name" className={authLabelRow}>First Name</label>
+        <div className="auth6-field">
+          <label htmlFor="reg-first-name" className="auth6-label auth6-label-row">First Name</label>
           <input
             id="reg-first-name"
             className="auth6-input"
@@ -344,11 +319,12 @@ function RegisterForm() {
             autoComplete="given-name"
             required
             aria-invalid={!!errors.first_name}
+            aria-describedby={errors.first_name ? 'reg-first-error' : undefined}
           />
-          {errors.first_name && <p style={authFieldError} role="alert">{errors.first_name}</p>}
+          {errors.first_name && <p id="reg-first-error" className="auth6-error" role="alert">{errors.first_name}</p>}
         </div>
-        <div className={authField}>
-          <label htmlFor="reg-middle-name" className={authLabelRow}>Middle Name / Initial</label>
+        <div className="auth6-field">
+          <label htmlFor="reg-middle-name" className="auth6-label auth6-label-row">Middle Name / Initial</label>
           <input
             id="reg-middle-name"
             className="auth6-input"
@@ -357,11 +333,12 @@ function RegisterForm() {
             maxLength={LIMITS.NAME_MAX}
             autoComplete="additional-name"
             aria-invalid={!!errors.middle_name}
+            aria-describedby={errors.middle_name ? 'reg-middle-error' : undefined}
           />
-          {errors.middle_name && <p style={authFieldError} role="alert">{errors.middle_name}</p>}
+          {errors.middle_name && <p id="reg-middle-error" className="auth6-error" role="alert">{errors.middle_name}</p>}
         </div>
-        <div className={`${authField} auth6-span-2`}>
-          <label htmlFor="reg-last-name" className={authLabel}>Last Name</label>
+        <div className="auth6-field auth6-span-2">
+          <label htmlFor="reg-last-name" className="auth6-label">Last Name</label>
           <input
             id="reg-last-name"
             className="auth6-input"
@@ -371,12 +348,13 @@ function RegisterForm() {
             autoComplete="family-name"
             required
             aria-invalid={!!errors.last_name}
+            aria-describedby={errors.last_name ? 'reg-last-error' : undefined}
           />
-          {errors.last_name && <p style={authFieldError} role="alert">{errors.last_name}</p>}
+          {errors.last_name && <p id="reg-last-error" className="auth6-error" role="alert">{errors.last_name}</p>}
         </div>
       </div>
-      <div className={authField}>
-        <label htmlFor="reg-email" className={authLabel}>Email Address</label>
+      <div className="auth6-field">
+        <label htmlFor="reg-email" className="auth6-label">Email Address</label>
         <input
           id="reg-email"
           className="auth6-input"
@@ -387,11 +365,12 @@ function RegisterForm() {
           autoComplete="email"
           required
           aria-invalid={!!errors.email}
+          aria-describedby={errors.email ? 'reg-email-error' : undefined}
         />
-        {errors.email && <p style={authFieldError} role="alert">{errors.email}</p>}
+        {errors.email && <p id="reg-email-error" className="auth6-error" role="alert">{errors.email}</p>}
       </div>
-      <div className={authField}>
-        <label htmlFor="reg-phone" className={authLabel}>Mobile Number</label>
+      <div className="auth6-field">
+        <label htmlFor="reg-phone" className="auth6-label">Mobile Number</label>
         <input
           id="reg-phone"
           className="auth6-input"
@@ -402,13 +381,14 @@ function RegisterForm() {
           autoComplete="tel"
           required
           aria-invalid={!!errors.contact_number}
+          aria-describedby={errors.contact_number ? 'reg-phone-error' : undefined}
         />
-        {errors.contact_number && <p style={authFieldError} role="alert">{errors.contact_number}</p>}
-        <p style={authHint}>Used by the clinic to reach you about your records.</p>
+        {errors.contact_number && <p id="reg-phone-error" className="auth6-error" role="alert">{errors.contact_number}</p>}
+        <p className="auth6-hint">Used by the clinic to reach you about your records.</p>
       </div>
       <div className="auth6-grid auth6-grid-2">
-        <div className={authField}>
-          <label htmlFor="reg-gender" className={authLabel}>Gender</label>
+        <div className="auth6-field">
+          <label htmlFor="reg-gender" className="auth6-label">Gender</label>
           <select
             id="reg-gender"
             className="auth6-input"
@@ -422,8 +402,8 @@ function RegisterForm() {
             <option value="Other">Other</option>
           </select>
         </div>
-        <div className={authField}>
-          <label htmlFor="reg-birthdate" className={authLabel}>Birthdate</label>
+        <div className="auth6-field">
+          <label htmlFor="reg-birthdate" className="auth6-label">Birthdate</label>
           <input
             id="reg-birthdate"
             className="auth6-input"
@@ -434,12 +414,13 @@ function RegisterForm() {
             autoComplete="bday"
             required
             aria-invalid={!!errors.birthdate}
+            aria-describedby={errors.birthdate ? 'reg-birth-error' : undefined}
           />
-          {errors.birthdate && <p style={authFieldError} role="alert">{errors.birthdate}</p>}
+          {errors.birthdate && <p id="reg-birth-error" className="auth6-error" role="alert">{errors.birthdate}</p>}
         </div>
       </div>
-      <div className={authField}>
-        <label htmlFor="reg-address" className={authLabel}>Address</label>
+      <div className="auth6-field">
+        <label htmlFor="reg-address" className="auth6-label">Address</label>
         <input
           id="reg-address"
           className="auth6-input"
@@ -448,8 +429,9 @@ function RegisterForm() {
           maxLength={LIMITS.ADDRESS_MAX}
           autoComplete="street-address"
           aria-invalid={!!errors.address}
+          aria-describedby={errors.address ? 'reg-address-error' : undefined}
         />
-        {errors.address && <p style={authFieldError} role="alert">{errors.address}</p>}
+        {errors.address && <p id="reg-address-error" className="auth6-error" role="alert">{errors.address}</p>}
       </div>
       <PasswordField
         value={form.password}
@@ -457,8 +439,8 @@ function RegisterForm() {
         showRequirements
         error={errors.password}
         inputClassName="auth6-input auth6-input-password"
-        labelClassName={authLabel}
-        fieldClassName={authField}
+        labelClassName="auth6-label"
+        fieldClassName="auth6-field"
       />
       <PasswordField
         value={form.confirm_password}
@@ -466,13 +448,15 @@ function RegisterForm() {
         label="Confirm Password"
         error={errors.confirm_password}
         inputClassName="auth6-input auth6-input-password"
-        labelClassName={authLabel}
-        fieldClassName={authField}
+        labelClassName="auth6-label"
+        fieldClassName="auth6-field"
       />
       <button className="auth6-submit" disabled={busy}>{busy ? 'Creating account...' : 'Create Account'}</button>
     </form>
   );
 }
+
+/* ─── Portal Home ──────────────────────────────────────────────────── */
 
 function PortalHome({ patient, onLogout }) {
   const [screenings, setScreenings] = useState([]);
@@ -504,81 +488,141 @@ function PortalHome({ patient, onLogout }) {
     window.dispatchEvent(new CustomEvent('tw-open-chat'));
   }
 
+  const firstName = patient.full_name.split(' ')[0];
+
+  const hasScreenings = screenings.length > 0;
+  const riskLevel = latestScreening?.risk_level;
+  const riskClass = riskLevel === 'HIGH' ? 'alert' : riskLevel === 'MEDIUM' ? 'warn' : 'good';
+  const riskMsg = riskLevel === 'HIGH'
+    ? 'Your latest screening found something that needs attention. Your dentist will follow up.'
+    : riskLevel === 'MEDIUM'
+    ? 'Your latest screening shows areas to keep an eye on. Nothing urgent, but worth a conversation.'
+    : 'Your latest screening looks great. Keep up the good habits!';
+
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+
   return (
-    <div style={s.homeCard}>
-      <div style={s.homeHeader}>
-        <div style={{ minWidth: 0 }}>
-          <div style={s.homeBrandRow}>
-            <span style={s.homeMark}><Activity size={15} /></span>
-            <span style={s.homeBrand}>ToothWise</span>
+    <div className="pp2-shell">
+      <header className="pp2-masthead">
+        <div className="pp2-masthead-brand">
+          <div className="pp2-masthead-logo">
+            <LogoMark size={20} alt="CodiSmile Dental Clinic" />
           </div>
-          <h1 style={s.homeGreeting}>Hi, {patient.full_name.split(' ')[0]}</h1>
-          <p style={s.homeSub}>Here's where your dental care stands.</p>
+          <span className="pp2-masthead-name">ToothWise</span>
         </div>
-        <button style={s.logoutBtn} onClick={onLogout}>Log out</button>
-      </div>
+        <button type="button" className="pp2-signout" onClick={onLogout}>
+          <LogOut size={14} />
+          Sign out
+        </button>
+      </header>
 
-      {/* Stats cards grid */}
-      <div style={s.statsGrid} className="tw6-portal-stats">
-        <div style={s.statCard}>
-          <div style={s.statIcon}><Microscope size={18} /></div>
-          <div style={s.statValue}>{screeningsLoading ? '—' : screenings.length}</div>
-          <div style={s.statLabel}>Screenings on file</div>
-        </div>
-        <div style={s.statCard}>
-          <div style={{ ...s.statIcon, ...(latestScreening?.risk_level === 'HIGH' ? s.statIconDanger : {}) }}>
-            <TriangleAlert size={18} />
-          </div>
-          <div style={s.statValue}>
-            {screeningsLoading ? '—' : latestScreening ? (
-              <span style={{ ...s.riskBadge, ...RISK_STYLE[latestScreening.risk_level] }}>{latestScreening.risk_level}</span>
-            ) : 'No data yet'}
-          </div>
-          <div style={s.statLabel}>Latest risk level</div>
-        </div>
-        <div style={s.statCard}>
-          <div style={s.statIcon}><CalendarDays size={18} /></div>
-          <div style={s.statValue}>{screeningsLoading ? '—' : latestScreening ? formatDatePH(latestScreening.created_at) : 'None yet'}</div>
-          <div style={s.statLabel}>Last screening</div>
-        </div>
-      </div>
+      {/* ── Greeting ── */}
+        <section className="pp2-greet">
+          <p className="pp2-greet-kicker">{greeting}</p>
+          <h1 className="pp2-greet-name">{firstName}</h1>
+          <p className="pp2-greet-sub">
+            {hasScreenings
+              ? `You have ${screenings.length} screening${screenings.length !== 1 ? 's' : ''} on record at ToothWise.`
+              : 'Welcome to your dental health record. Your first screening will appear here after a visit.'}
+          </p>
+        </section>
 
-      <div style={s.assistantCta} className="tw-portal-cta">
-        <div style={s.assistantCtaText}><MessageCircleQuestion size={17} /> Have a question about your results?</div>
-        <button style={s.assistantCtaBtn} onClick={openAssistant}>Ask the assistant</button>
-      </div>
+        {/* ── Status card ── */}
+        <section className={`pp2-status pp2-status--${hasScreenings ? riskClass : 'neutral'}`}>
+          <div className="pp2-status-icon">
+            {!hasScreenings ? <Microscope size={20} /> : riskClass === 'alert' ? <TriangleAlert size={20} /> : riskClass === 'warn' ? <AlertCircle size={20} /> : <CheckCircle size={20} />}
+          </div>
+          <div className="pp2-status-body">
+            <span className="pp2-status-label">Dental health</span>
+            <span className="pp2-status-value">{hasScreenings ? `${riskLevel} risk` : 'No data yet'}</span>
+            <p className="pp2-status-msg">
+              {hasScreenings ? riskMsg : 'Nothing to report yet. Once your dentist runs a screening, your summary will live here.'}
+            </p>
+          </div>
+          <button type="button" className="pp2-status-cta" onClick={openAssistant}>
+            Ask assistant <ChevronRight size={12} />
+          </button>
+        </section>
 
-      <div style={s.listSection}>
-        <h3 style={s.sectionTitle}>Your screening history</h3>
-        {screeningsLoading ? (
-          <div style={s.screeningGrid}>
-            {Array.from({ length: 3 }).map((_, i) => <SkeletonCard key={i} index={i} height={160} />)}
+        {/* ── Quick facts ── */}
+        <dl className="pp2-facts">
+          <div className="pp2-fact">
+            <dt className="pp2-fact-label">Last screening</dt>
+            <dd className="pp2-fact-value">{hasScreenings ? formatDatePH(latestScreening.created_at) : 'Not yet'}</dd>
           </div>
-        ) : screenings.length === 0 ? (
-          <div style={s.emptyState}>
-            <div style={s.emptyIcon}><CalendarDays size={32} /></div>
-            <p style={s.emptyTitle}>No screenings yet</p>
-            <p style={s.hint}>Your dentist will add one after a visit.</p>
+          <div className="pp2-fact">
+            <dt className="pp2-fact-label">Screenings on record</dt>
+            <dd className="pp2-fact-value">{screenings.length}</dd>
           </div>
-        ) : (
-          <div style={s.screeningGrid}>
-            {screenings.map((sc, i) => (
-              <div key={sc.id} className="stagger-item tw6-portal-card" style={{ ...s.screeningCard, '--stagger-index': i }} onClick={() => setSelectedScreening(sc.id)}>
-                <ScreeningThumbnail screeningId={sc.id} style={s.screeningThumb} />
-                <div style={s.screeningCardBody}>
-                  <div style={s.screeningDate}>
-                    {formatDatePH(sc.created_at)}
-                  </div>
-                  <span style={{ ...s.riskBadge, ...RISK_STYLE[sc.risk_level] }}>{sc.risk_level} RISK</span>
-                </div>
+          <div className="pp2-fact">
+            <dt className="pp2-fact-label">Assistant</dt>
+            <dd className="pp2-fact-value">Ready when you are</dd>
+          </div>
+        </dl>
+
+        {/* ── Screening history ── */}
+        <section className="pp2-history" aria-labelledby="pp2-history-title">
+          <div className="pp2-history-head">
+            <h2 id="pp2-history-title" className="pp2-history-title">Screening history</h2>
+            {hasScreenings && <span className="pp2-history-count">{screenings.length}</span>}
+          </div>
+
+          {screeningsLoading ? (
+            <div className="pp2-screening-grid">
+              {Array.from({ length: 3 }).map((_, i) => <SkeletonCard key={i} index={i} height={160} />)}
+            </div>
+          ) : screenings.length === 0 ? (
+            <div className="pp2-empty">
+              <div className="pp2-empty-icon">
+                <Microscope size={28} />
               </div>
-            ))}
-          </div>
-        )}
-      </div>
+              <h3 className="pp2-empty-title">No screenings yet</h3>
+              <p className="pp2-empty-text">Your dentist will add your first screening after a dental visit. Once added, you'll see your results and recommendations here.</p>
+              <button type="button" className="pp2-empty-cta" onClick={openAssistant}>
+                <MessageCircleQuestion size={14} />
+                Ask the assistant
+              </button>
+            </div>
+          ) : (
+            <div className="pp2-screening-grid">
+              {screenings.map((sc, i) => (
+                <div
+                  key={sc.id}
+                  className="pp2-screening-card"
+                  data-risk={sc.risk_level}
+                  style={{ '--stagger-index': i }}
+                  onClick={() => setSelectedScreening(sc.id)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedScreening(sc.id); } }}
+                  aria-label={`Screening from ${formatDatePH(sc.created_at)}, ${sc.risk_level} risk`}
+                >
+                  <div className="pp2-screening-thumb-wrap">
+                    <ScreeningThumbnail screeningId={sc.id} />
+                    <span className={`pp2-risk-pill pp2-risk-pill--${sc.risk_level === 'HIGH' ? 'high' : sc.risk_level === 'MEDIUM' ? 'moderate' : 'low'}`}>
+                      {sc.risk_level}
+                    </span>
+                  </div>
+                  <div className="pp2-screening-card-body">
+                    <div className="pp2-screening-card-meta">
+                      <Clock size={11} />
+                      <span>{formatDatePH(sc.created_at)}</span>
+                    </div>
+                    <span className="pp2-screening-card-cta">
+                      View details <ChevronRight size={12} />
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
     </div>
   );
 }
+
+/* ─── Screening Detail ─────────────────────────────────────────────── */
 
 function ScreeningDetailView({ screeningId, onBack }) {
   const [screening, setScreening] = useState(null);
@@ -607,128 +651,82 @@ function ScreeningDetailView({ screeningId, onBack }) {
   }, [screeningId]);
 
   return (
-    <div style={s.homeCard}>
-      <button style={s.logoutBtn} onClick={onBack}>← Back</button>
+    <div className="pp2-detail-page">
+      <button type="button" className="pp2-back-btn" onClick={onBack}>
+        <ArrowLeft size={14} />
+        Back to screenings
+      </button>
+
       {loading ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginTop: 16 }}>
-          <SkeletonBlock height={200} radius={12} />
-          <SkeletonBlock width="60%" height={16} />
-          <SkeletonBlock width="40%" height={16} />
+        <div className="pp2-detail-skeleton">
+          <SkeletonBlock height={300} radius={16} />
+          <SkeletonBlock width="50%" height={22} />
+          <SkeletonBlock width="35%" height={16} />
         </div>
       ) : !screening ? (
-        <p style={{ ...s.hint, marginTop: 16 }}>Screening not found.</p>
+        <div className="tw-state">
+          <p className="tw-state__text">Screening not found.</p>
+        </div>
       ) : (
-        <div style={{ marginTop: 16 }}>
-          <div style={s.screeningDetailHeader}>
-            <h3 style={s.sectionTitle}>
-              {formatDatePH(screening.created_at)}
-            </h3>
-            <span style={{ ...s.riskBadge, ...RISK_STYLE[screening.risk_level] }}>{screening.risk_level} RISK</span>
+        <div className="pp2-detail">
+          <div className="pp2-detail-header">
+            <div className="pp2-detail-title-row">
+              <h2 className="pp2-detail-title">{formatDatePH(screening.created_at)}</h2>
+              <span className={`pp2-risk-pill pp2-risk-pill--${screening.risk_level === 'HIGH' ? 'high' : screening.risk_level === 'MEDIUM' ? 'moderate' : 'low'}`}>
+                {screening.risk_level} RISK
+              </span>
+            </div>
           </div>
 
-          <BoundingBoxCanvas
-            imageUrl={imageUrl}
-            detections={screening.detections}
-          />
-
-          {screening.recommendations?.length > 0 && (
-            <div style={{ marginTop: 20 }}>
-              <h4 style={s.sectionTitle}>Recommendations</h4>
-              <ul style={s.recList}>
-                {screening.recommendations
-                  .sort((a, b) => a.order_index - b.order_index)
-                  .map(r => <li key={r.id} style={s.recItem}>{r.text}</li>)}
-              </ul>
+          <div className="pp2-detail-grid">
+            {/* Image */}
+            <div className="pp2-detail-image">
+              <BoundingBoxCanvas imageUrl={imageUrl} detections={screening.detections} />
             </div>
-          )}
+
+            {/* Info panel */}
+            <div className="pp2-detail-info">
+              {screening.detections?.length > 0 && (
+                <div className="pp2-detail-block">
+                  <h4 className="pp2-detail-block-title">
+                    <Microscope size={14} />
+                    Findings
+                  </h4>
+                  <div className="pp2-detection-chips">
+                    {screening.detections.map((d, i) => (
+                      <span key={i} className="pp2-detection-chip" style={{ '--chip-color': CLASS_COLORS[d.label] || '#6F5B61' }}>
+                        <span className="pp2-detection-dot" />
+                        {d.label.replace(/_/g, ' ')} {(d.confidence * 100).toFixed(0)}%
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {screening.recommendations?.length > 0 && (
+                <div className="pp2-detail-block">
+                  <h4 className="pp2-detail-block-title">
+                    <Star size={14} />
+                    Recommendations
+                  </h4>
+                  <ol className="pp2-rec-list">
+                    {screening.recommendations
+                      .sort((a, b) => a.order_index - b.order_index)
+                      .map((r, i) => (
+                        <li key={r.id} className="pp2-rec-item">
+                          <span className="pp2-rec-num">{i + 1}</span>
+                          <span className="pp2-rec-text">{r.text}</span>
+                        </li>
+                      ))}
+                  </ol>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       )}
     </div>
   );
 }
 
-const s = {
-  page: {
-    minHeight: '100vh',
-    background: `linear-gradient(135deg, #FBF7F5 0%, #EDE0E8 40%, #E5DADC 100%)`,
-    display: 'flex', alignItems: 'center', justifyContent: 'center',
-    position: 'relative', overflow: 'auto', padding: '40px 16px',
-    fontFamily: "Inter, 'Segoe UI', Arial, sans-serif",
-  },
-  circle1: { position: 'absolute', top: -120, right: -120, width: 400, height: 400, borderRadius: '50%', background: 'rgba(196,132,126,0.12)', pointerEvents: 'none' },
-  circle2: { position: 'absolute', bottom: -80, left: -80, width: 300, height: 300, borderRadius: '50%', background: 'rgba(92,58,74,0.08)', pointerEvents: 'none' },
-  card: {
-    background: WHITE, borderRadius: 24, padding: '48px 44px', width: 420,
-    textAlign: 'center', boxShadow: '0 20px 60px rgba(92,58,74,0.15), 0 4px 20px rgba(92,58,74,0.08)',
-    position: 'relative', zIndex: 1,
-  },
-  homeCard: {
-    background: WHITE, borderRadius: 24, padding: 'clamp(20px, 4vw, 32px)', width: '100%', maxWidth: 760,
-    border: '1px solid #E5DADC',
-    boxShadow: '0 24px 70px rgba(75,47,53,0.12)',
-    position: 'relative', zIndex: 1, boxSizing: 'border-box',
-  },
-  homeHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12, marginBottom: 22 },
-  homeBrandRow: { display: 'flex', alignItems: 'center', gap: 7, marginBottom: 14 },
-  homeMark: {
-    width: 24, height: 24, borderRadius: 8, background: BURGUNDY, color: WHITE,
-    display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-  },
-  homeBrand: { fontSize: 12.5, fontWeight: 700, color: BURGUNDY, letterSpacing: '0.02em' },
-  homeGreeting: { fontSize: 26, fontWeight: 700, color: BURGUNDY, letterSpacing: '-0.02em', margin: 0 },
-  homeSub: { fontSize: 13, color: MUTED, margin: '4px 0 0 0' },
-  logoutBtn: {
-    background: 'transparent', border: `1.5px solid ${ROSEGOLD}`, borderRadius: 9,
-    color: BURGUNDY, padding: '9px 16px', fontSize: 12, cursor: 'pointer', fontFamily: 'inherit',
-    minHeight: 40,
-  },
-  statsRow: {
-    display: 'grid', gap: 0,
-    borderTop: '1px solid #F0E4E2', borderBottom: '1px solid #F0E4E2',
-    marginBottom: 22,
-  },
-  statCell: { padding: '15px 18px', borderLeft: '1px solid #F0E4E2', minWidth: 0 },
-  statLabel: { fontSize: 10, color: MUTED, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em' },
-  statValue: { fontSize: 14.5, color: BURGUNDY, fontWeight: 700, marginTop: 5 },
-  assistantCta: {
-    display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap',
-    background: BURGUNDY, borderRadius: 14, padding: '15px 18px',
-    marginBottom: 22, color: WHITE,
-  },
-  assistantCtaText: { display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, fontWeight: 600 },
-  assistantCtaBtn: {
-    background: 'rgba(255,255,255,0.14)', border: '1px solid rgba(255,255,255,0.35)', borderRadius: 9,
-    color: WHITE, padding: '9px 16px', fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', flexShrink: 0,
-    minHeight: 40,
-  },
-  screeningGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: 12 },
-  screeningCard: {
-    background: BLUSH, borderRadius: 14, overflow: 'hidden', cursor: 'pointer',
-    border: `1px solid #E5DADC`, transition: 'transform 180ms ease, box-shadow 180ms ease',
-  },
-  screeningThumb: { width: '100%', height: 120, objectFit: 'cover', display: 'block' },
-  screeningCardBody: { padding: '10px 12px' },
-  screeningDate: { fontSize: 12, color: BURGUNDY, fontWeight: 600, marginBottom: 6 },
-  riskBadge: { fontSize: 10, fontWeight: 800, padding: '4px 10px', borderRadius: 20, letterSpacing: '0.03em' },
-  screeningDetailHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8, marginBottom: 14 },
-  recList: { margin: 0, paddingLeft: 20, display: 'flex', flexDirection: 'column', gap: 8 },
-  recItem: { fontSize: 13, color: BURGUNDY, lineHeight: 1.5 },
-  sectionTitle: { fontSize: 15, color: BURGUNDY, fontWeight: 700, margin: '0 0 14px 0', letterSpacing: '0.03em' },
-  listSection: {},
-  logoWrap: { display: 'flex', justifyContent: 'center', marginBottom: 16 },
-  logoRing: {
-    width: 80, height: 80, borderRadius: '50%',
-    background: `linear-gradient(135deg, ${BURGUNDY}, ${ROSE})`,
-    display: 'flex', alignItems: 'center', justifyContent: 'center',
-    boxShadow: `0 8px 24px rgba(92,58,74,0.3)`,
-  },
-  logoIcon: { fontSize: 36 },
-  brand: { fontFamily: "Inter, 'Segoe UI', Arial, sans-serif", fontSize: 26, fontWeight: 700, color: BURGUNDY, letterSpacing: '0.15em', margin: '0 0 4px 0' },
-  clinic: { fontSize: 15, color: ROSE, fontWeight: 600, margin: '0 0 4px 0', letterSpacing: '0.05em' },
-  tagline: { fontSize: 12, color: MUTED, margin: '0 0 20px 0' },
-  divider: { height: 1, background: `linear-gradient(90deg, transparent, ${ROSEGOLD}, transparent)`, margin: '0 0 24px 0' },
-  form: { display: 'flex', flexDirection: 'column', gap: 16, textAlign: 'left' },
-  hint: { fontSize: 11, color: MUTED, margin: '2px 0 0 0' },
-  switchText: { fontSize: 12, color: MUTED, marginTop: 20 },
-  switchLink: { color: BURGUNDY, fontWeight: 700, cursor: 'pointer', textDecoration: 'underline' },
-};
+
