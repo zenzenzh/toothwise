@@ -194,8 +194,6 @@ export default function Layout() {
             </div>}
           </div>
 
-          {!collapsed && <div style={styles.clinicPill}><span style={styles.liveDot} /> Clinic workspace</div>}
-
           <nav style={{ ...styles.nav, marginTop: collapsed ? 22 : 18 }}>
             {navItems.map(item => (
               <NavLink

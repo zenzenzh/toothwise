@@ -67,6 +67,7 @@ body.dark-mode .tw-topbar .tw-page-title { color: #fff !important; }
 body.dark-mode .tw-topbar .tw-eyebrow { color: rgba(255,255,255,.5) !important; }
 body.dark-mode .tw-topbar .tw-icon-button { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.12); color: rgba(255,255,255,.7); }
 body.dark-mode .tw-topbar .tw-icon-button:hover { color: #fff; background: rgba(255,255,255,.14); }
+body.dark-mode .tw-topbar .tw-icon-button:focus { outline: 2px solid rgba(255,255,255,.4); outline-offset: 2px; }
 
 /* ── Page dark overrides ─────────────────────────────────────────────── */
 body.dark-mode .patients-table, body.dark-mode .dash-table { background: var(--tw-surface) !important; border-color: var(--tw-border) !important; }
@@ -74,6 +75,7 @@ body.dark-mode .patients-table th, body.dark-mode .dash-table th { background: v
 body.dark-mode .patients-table td, body.dark-mode .dash-table td { color: var(--tw-text) !important; border-bottom-color: rgba(255,255,255,.05) !important; }
 body.dark-mode .screening-card { background: var(--tw-surface) !important; border-color: var(--tw-border) !important; }
 body.dark-mode .screening-card h3 { color: var(--tw-text) !important; }
+body.dark-mode .patients-table tr:hover td, body.dark-mode .dash-table tr:hover td { background: rgba(255,255,255,.06) !important; color: var(--tw-text) !important; }
 body.dark-mode .tw-topbar .tw-hamburger { color: rgba(255,255,255,.7); }
 body.dark-mode .tw-topbar .tw-hamburger:hover { color: #fff; }
 
