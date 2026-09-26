@@ -244,10 +244,6 @@ export default function Layout() {
             <button className="tw-hamburger" onClick={toggleSidebar} aria-label="Toggle navigation" aria-expanded={mobileOpen}>
               {mobileOpen ? <X size={19} /> : <Menu size={19} />}
             </button>
-            <div style={{ background: 'var(--tw-surface)', border: '1px solid var(--tw-border)', borderRadius: 14, padding: '14px 18px', marginBottom: 8 }}>
-              <div style={{ fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--tw-teal-dark)', fontWeight: 600 }}>Toothwise</div>
-              <div style={{ fontSize: 13, color: 'var(--tw-muted)', marginTop: 2 }}>Clinical Screening</div>
-            </div>
             <div className="tw-top-heading">
               <h1 className="tw-page-title" style={styles.pageTitle}>{pageLabel}</h1>
             </div>
