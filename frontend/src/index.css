@@ -52,9 +52,17 @@ body.dark-mode {
   --tw-indigo-bg: rgba(165, 180, 252, .12);
 }
 
+/* ── Typography / Measure ─────────────────────────────────────────── */
+body { font-family: 'Fira Sans', ui-sans-serif, system-ui, -apple-system, sans-serif; font-size: 16px; line-height: 1.55; color: var(--tw-text); }
+.tw-content { max-width: 72ch; line-height: 1.5; }
+h1,h2,h3 { font-family: 'Fira Code', ui-monospace, SFMono-Regular, monospace; letter-spacing: -0.03em; }
+
+/* ── Transitions (Batch A) ─────────────────────────────────────────── */
+button, a, .nav-link, .tw-icon-button { transition: color .2s ease, background-color .2s ease, border-color .2s ease; }
+
 /* ── Dark mode: Layout shell ─────────────────────────────────────── */
 body.dark-mode .tw-main { background: var(--tw-bg); color: var(--tw-text); }
-body.dark-mode .tw-topbar { background: #000000 !important; border-color: var(--tw-border); color: #fff; }
+body.dark-mode .tw-topbar { background: rgba(15,17,23,.92) !important; backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,.06); color: #fff; }
 body.dark-mode .tw-topbar .tw-page-title { color: #fff !important; }
 body.dark-mode .tw-topbar .tw-eyebrow { color: rgba(255,255,255,.5) !important; }
 body.dark-mode .tw-topbar .tw-icon-button { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.12); color: rgba(255,255,255,.7); }
@@ -4186,6 +4194,11 @@ textarea.tw6-modal-input { min-height: 90px; resize: vertical; }
 }
 
 /* ── Dark mode: Page headers ─────────────────────────────────────── */
+/* ── Stagger (AuditLog) with reduced-motion guard ─────────────────── */
+.audit6-row { opacity: 0; animation: auditFadeIn .35s ease-out forwards; animation-delay: calc(var(--stagger-index, 0) * 40ms); }
+@media (prefers-reduced-motion: reduce) { .audit6-row { animation: none; opacity: 1; } }
+@keyframes auditFadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
 body.dark-mode .tw-page-title-wrap h2 { color: var(--tw-text) !important; }
 body.dark-mode .tw-page-title-wrap p { color: var(--tw-muted) !important; }
 body.dark-mode .tw-page-header { color: var(--tw-text); }

@@ -244,6 +244,10 @@ export default function Layout() {
             <button className="tw-hamburger" onClick={toggleSidebar} aria-label="Toggle navigation" aria-expanded={mobileOpen}>
               {mobileOpen ? <X size={19} /> : <Menu size={19} />}
             </button>
+            <div style={{ background: 'var(--tw-surface)', border: '1px solid var(--tw-border)', borderRadius: 14, padding: '14px 18px', marginBottom: 8 }}>
+              <div style={{ fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--tw-teal-dark)', fontWeight: 600 }}>Toothwise</div>
+              <div style={{ fontSize: 13, color: 'var(--tw-muted)', marginTop: 2 }}>Clinical Screening</div>
+            </div>
             <div className="tw-top-heading">
               <h1 className="tw-page-title" style={styles.pageTitle}>{pageLabel}</h1>
             </div>
@@ -330,7 +334,7 @@ const styles = {
   shell: { minHeight: '100vh', background: 'var(--tw-bg)', color: 'var(--tw-text)' },
   sidebar: {
     position: 'fixed', inset: '0 auto 0 0', zIndex: 200, display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
-    background: '#352126', color: '#fff', padding: '20px 12px', overflow: 'hidden',
+    background: 'var(--tw-bg)', color: '#fff', padding: '20px 12px', overflow: 'hidden',
     boxShadow: '12px 0 35px rgba(58,36,48,.08)', width: 'var(--sidebar-w, 260px)',
   },
   brandRow: { display: 'flex', alignItems: 'center', gap: 12, minHeight: 52, padding: '2px 10px' },
