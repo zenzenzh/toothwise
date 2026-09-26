@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import {
   Menu, X, LayoutDashboard, Users, UserCog, ShieldCheck,
-  LogOut, ChevronLeft, Activity, Bell, Search, ArrowRight,
+  LogOut, ChevronLeft, Bell, Search, ArrowRight,
   Moon, Sun,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
