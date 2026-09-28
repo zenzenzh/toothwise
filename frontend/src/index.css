@@ -80,7 +80,9 @@ body.dark-mode .patients-table td, body.dark-mode .dash-table td { color: var(--
 body.dark-mode .screening-card { background: var(--tw-surface) !important; border-color: var(--tw-border) !important; }
 body.dark-mode .screening-card h3 { color: var(--tw-text) !important; }
 body.dark-mode .quick-action-card, body.dark-mode .action-card { background: var(--tw-surface) !important; border-color: var(--tw-border) !important; color: var(--tw-text) !important; }
+body.dark-mode .bg-white, body.dark-mode .bg-card, body.dark-mode .bg-neutral-100, body.dark-mode .bg-gray-50 { background: var(--tw-surface) !important; color: var(--tw-text) !important; }
 body.dark-mode .patients-table tr:hover td, body.dark-mode .dash-table tr:hover td, body.dark-mode .audit6-row:hover, body.dark-mode .stagger-item:hover { background: rgba(255,255,255,.06) !important; color: var(--tw-text) !important; }
+body.dark-mode .patients-table td.bg-rose-50, body.dark-mode .patients-table td.bg-red-50, body.dark-mode .dash-table td.bg-rose-50 { background: rgba(255,255,255,.06) !important; color: var(--tw-text) !important; }
 body.dark-mode .patients-table tr.selected td, body.dark-mode .dash-table tr.selected td { background: rgba(255,255,255,.08) !important; color: var(--tw-text) !important; }
 body.dark-mode .tw-topbar .tw-hamburger { color: rgba(255,255,255,.7); }
 body.dark-mode .tw-topbar .tw-hamburger:hover { color: #fff; }
