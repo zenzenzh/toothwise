@@ -40,6 +40,17 @@ export default function Layout() {
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
   }, []);
+  // The open mobile drawer is a full-screen overlay, so it must never render in the
+  // collapsed rail state (mobileOpen can only be true while below MOBILE_BREAKPOINT).
+  const railCollapsed = collapsed && !mobileOpen;
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const onKey = e => { if (e.key === 'Escape') setMobileOpen(false); };
+    document.addEventListener('keydown', onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.removeEventListener('keydown', onKey); document.body.style.overflow = prev; };
+  }, [mobileOpen]);
 
   const navItems = useMemo(() => [
     { to: '/dashboard', label: 'Overview', icon: LayoutDashboard, exact: true },
@@ -176,67 +187,67 @@ export default function Layout() {
   }
 
   return (
-    <div style={{ ...styles.shell, '--sidebar-w': collapsed ? '84px' : '260px' }}>
+    <div style={{ ...styles.shell, '--sidebar-w': railCollapsed ? '84px' : '260px' }}>
       <SEO title={pageMeta[0]} description={pageMeta[1]} noIndex />
       {mobileOpen && <div className="tw-backdrop" onClick={() => setMobileOpen(false)} aria-hidden="true" />}
 
       <aside
-        className={`tw-sidebar${mobileOpen ? ' mobile-open' : ''}${collapsed ? ' collapsed' : ''}`}
+        className={`tw-sidebar${mobileOpen ? ' mobile-open' : ''}${railCollapsed ? ' collapsed' : ''}`}
         style={styles.sidebar}
         aria-label="Primary navigation"
       >
         <div>
-          <div style={{ ...styles.brandRow, justifyContent: collapsed ? 'center' : 'flex-start' }}>
+          <div style={{ ...styles.brandRow, justifyContent: railCollapsed ? 'center' : 'flex-start' }}>
             <div style={styles.logo}><LogoMark size={38} alt="CodiSmile Dental Clinic" /></div>
-            {!collapsed && <div>
+            {!railCollapsed && <div>
               <div style={styles.brandName}>TOOTHWISE</div>
               <div style={styles.brandSub}>CODISMILE CLINIC</div>
             </div>}
           </div>
 
-          <nav style={{ ...styles.nav, marginTop: collapsed ? 22 : 18 }}>
+          <nav style={{ ...styles.nav, marginTop: railCollapsed ? 22 : 18 }}>
             {navItems.map(item => (
               <NavLink
                 key={item.to}
                 to={item.to}
                 end={item.exact}
-                title={collapsed ? item.label : undefined}
+                title={railCollapsed ? item.label : undefined}
                 className="nav-link"
                 style={({ isActive }) => ({
                   ...styles.navLink,
-                  justifyContent: collapsed ? 'center' : 'flex-start',
+                  justifyContent: railCollapsed ? 'center' : 'flex-start',
                   color: isActive ? '#FFFFFF' : '#C4B0BA',
                   background: isActive ? 'rgba(196,132,126,.18)' : 'transparent',
                   borderColor: isActive ? '#BA7976' : 'transparent',
                 })}
               >
                 <item.icon size={19} strokeWidth={2} />
-                {!collapsed && <span>{item.label}</span>}
+                {!railCollapsed && <span>{item.label}</span>}
               </NavLink>
             ))}
           </nav>
         </div>
 
         <div style={styles.sidebarBottom}>
-          <button className="nav-link" onClick={toggleSidebar} style={{ ...styles.collapseButton, justifyContent: collapsed ? 'center' : 'flex-start' }}>
-            <ChevronLeft size={18} style={{ transform: collapsed ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }} />
-            {!collapsed && <span>Collapse menu</span>}
+          <button className="nav-link" onClick={toggleSidebar} style={{ ...styles.collapseButton, justifyContent: railCollapsed ? 'center' : 'flex-start' }}>
+            <ChevronLeft size={18} style={{ transform: railCollapsed ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }} />
+            {mobileOpen ? <span>Close menu</span> : !railCollapsed && <span>Collapse menu</span>}
           </button>
           <div style={styles.userCard}>
             <div style={styles.avatar}>{initials(dentist?.full_name)}</div>
-            {!collapsed && <div style={{ minWidth: 0 }}>
+            {!railCollapsed && <div style={{ minWidth: 0 }}>
               <div style={styles.userName}>{dentist?.full_name || 'Clinic staff'}</div>
               <div style={styles.userRole}>{dentist?.role || 'staff'}</div>
             </div>}
           </div>
-          <button onClick={handleLogout} style={{ ...styles.logout, justifyContent: collapsed ? 'center' : 'flex-start' }}>
+          <button onClick={handleLogout} style={{ ...styles.logout, justifyContent: railCollapsed ? 'center' : 'flex-start' }}>
             <LogOut size={17} />
-            {!collapsed && <span>Sign out</span>}
+            {!railCollapsed && <span>Sign out</span>}
           </button>
         </div>
       </aside>
 
-      <main className={`tw-main${collapsed ? ' collapsed' : ''}`} style={styles.main}>
+      <main className={`tw-main${railCollapsed ? ' collapsed' : ''}`} style={styles.main}>
         <header className="tw-topbar" style={styles.topbar}>
           <div className="tw-top-left" style={styles.topLeft}>
             <button className="tw-hamburger" onClick={toggleSidebar} aria-label="Toggle navigation" aria-expanded={mobileOpen}>
@@ -328,8 +339,9 @@ const styles = {
   shell: { minHeight: '100vh', background: 'var(--tw-bg)', color: 'var(--tw-text)' },
   sidebar: {
     position: 'fixed', inset: '0 auto 0 0', zIndex: 200, display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
-    background: 'var(--tw-bg)', color: '#fff', padding: '20px 12px', overflow: 'hidden',
+    background: 'var(--tw-bg)', color: 'var(--tw-text)', padding: '20px 12px', overflowY: 'auto',
     boxShadow: '12px 0 35px rgba(58,36,48,.08)', width: 'var(--sidebar-w, 260px)',
+    transition: 'width .2s ease, background .2s ease',
   },
   brandRow: { display: 'flex', alignItems: 'center', gap: 12, minHeight: 52, padding: '2px 10px' },
   logo: { width: 44, height: 44, borderRadius: 14, display: 'grid', placeItems: 'center', background: '#FFFFFF', boxShadow: 'none', flexShrink: 0 },
@@ -346,7 +358,7 @@ const styles = {
   userName: { color: '#FBF6F4', fontWeight: 800, fontSize: 12, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 160 },
   userRole: { color: '#C4B0BA', textTransform: 'capitalize', fontSize: 10, marginTop: 2 },
   logout: { border: '1px solid rgba(255,255,255,.1)', background: 'rgba(255,255,255,.04)', color: '#AFC3C9', borderRadius: 11, padding: '10px 12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 11, fontSize: 12, fontWeight: 700 },
-  main: { minHeight: '100vh', display: 'flex', flexDirection: 'column', marginLeft: 'var(--sidebar-w, 260px)' },
+  main: { minHeight: '100vh', display: 'flex', flexDirection: 'column', marginLeft: 'var(--sidebar-w, 260px)', transition: 'margin-left .2s ease' },
   topbar: { height: 78, background: 'color-mix(in srgb, var(--tw-surface) 92%, transparent)', backdropFilter: 'blur(14px)', borderBottom: '1px solid var(--tw-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 30px', position: 'sticky', top: 0, zIndex: 100 },
   topLeft: { display: 'flex', alignItems: 'center', gap: 14 },
   eyebrow: { color: 'var(--tw-muted)', fontSize: 10, textTransform: 'uppercase', letterSpacing: '.12em', fontWeight: 800 },
