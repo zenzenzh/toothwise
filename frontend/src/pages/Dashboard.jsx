@@ -59,7 +59,7 @@ export default function Dashboard() {
       </div>
 
       {/* Stats grid: 4 equal cards in a row */}
-      <div style={s.statsGrid} className="stagger-item">
+      <div className="dash6-stats-grid stagger-item">
         {[
           { label: 'Total Screenings', value: stats.total_screenings, Icon: Microscope, accent: false },
           ...secondary,

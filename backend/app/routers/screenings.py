@@ -1,7 +1,6 @@
 from pathlib import Path
-from time import perf_counter
 
-from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile, status
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
@@ -16,9 +15,8 @@ from app.ml.recommender import (
 from app.ml.risk_engine import compute_risk
 from app.ml.train_knn import append_labeled_case
 from app.ml.yolo_detector import get_detector
-from app.rate_limit import limiter
 from app.security import get_current_dentist, get_current_patient
-from app.utils.image_utils import decode_preview_frame, save_upload
+from app.utils.image_utils import save_upload
 from app.utils.pdf_report import generate_screening_report_pdf
 
 router = APIRouter(tags=["screenings"])
@@ -108,44 +106,6 @@ def get_my_screening_image(
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Screening not found.")
     return FileResponse(_resolve_image_path(screening.image_path))
 
-
-@router.post(
-    "/patients/{patient_id}/screening/preview",
-    response_model=schemas.LivePreviewOut,
-)
-@limiter.limit("40/minute")
-def preview_screening_frame(
-    request: Request,
-    patient_id: int,
-    file: UploadFile = File(...),
-    current: models.Dentist = Depends(get_current_dentist),
-):
-    """
-    Live-preview inference for the intraoral camera capture loop. Runs the
-    same YOLOv8/YOLOv12 ensemble used for a real screening, on one webcam
-    frame at a time, so staff see a live bounding-box overlay while aiming
-    the camera. Nothing here is written to disk or the database, and no
-    Screening row is created - that only happens when staff click
-    "Capture" and go through create_screening below, same as before.
-    Rate-limited (40/min ~ one frame every 1.5s) since this runs full
-    model inference per call, unlike most read endpoints.
-    """
-    if not settings.DETECTION_ENABLED:
-        raise HTTPException(
-            status.HTTP_503_SERVICE_UNAVAILABLE,
-            "AI screening is temporarily unavailable.",
-        )
-    image = decode_preview_frame(file)
-    detector = get_detector()
-    start = perf_counter()
-    result = detector.detect(image)
-    elapsed_ms = (perf_counter() - start) * 1000
-    return schemas.LivePreviewOut(
-        detections=result["detections"],
-        width=image.width,
-        height=image.height,
-        inference_ms=round(elapsed_ms, 1),
-    )
 
 
 @router.post(

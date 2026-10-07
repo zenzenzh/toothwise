@@ -53,3 +53,7 @@ Thumbs.db
 # Tooling dirs / temp office lock files
 .impeccable/
 ~$*
+
+# Patient-data backups written by backend/reset_test_data.py. These are rows
+# of real screenings/detections - never commit them.
+backend/backups/

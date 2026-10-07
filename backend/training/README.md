@@ -70,3 +70,34 @@ Cross-check the printed names against `LABELS` / `LABEL_ALIASES` in
 `backend/app/ml/labels.py`. Anything not covered gets passed through
 as-is (lowercased) rather than silently dropped, so it'll be obvious in
 the detection results if something isn't mapping correctly.
+
+## Before training: audit the dataset
+
+Correct class *names* are not enough. A class can be declared in the yaml
+and still have no usable data, and the resulting checkpoint will report
+~0.00 confidence for it forever - no threshold, architecture, or longer
+schedule fixes that. `audit_dataset.py` counts instances per class, flags
+starved/dead classes, and reports the majority/minority ratio:
+
+```bash
+python audit_dataset.py --data /content/merged_dataset/data_5class.yaml
+```
+
+`--data` is optional - with no arguments it searches `/content`,
+`/content/drive/MyDrive`, the script's own directory and the cwd for a
+yaml containing both `names:` and `train:`, and refuses to guess if it
+finds more than one. So in Colab you can also just paste the file into a
+cell and hit Run.
+
+Standard library only apart from the yaml: PyYAML is used when importable,
+with a hand-rolled reader as the fallback so the script still runs before the
+training environment is installed. `test_audit_dataset.py` pins the yaml
+shapes that have broken this script.
+Note that labelling a `healthy_tooth` *box* on every healthy tooth is
+self-contradictory (`healthy_tooth` + `cavity` on the same tooth) and that
+class tends to collapse during training. Background-only images - no label
+file at all - are what actually teach "no pathology here", and the audit
+reports how many of those you have.
+
+`evaluate_models.py` measures a *trained model*; this measures the
+*dataset*. Run this first, then evaluate.

@@ -20,11 +20,6 @@ _FORMAT_EXTENSIONS = {"JPEG": ".jpg", "PNG": ".png", "WEBP": ".webp"}
 # memory/CPU) before any resizing or model inference touches it.
 MAX_DIMENSION_PX = 6000
 
-# Live-preview frames (the intraoral camera capture loop) come in every
-# ~1.5-2s from a webcam screenshot, not a hand-picked upload, so they get
-# a tighter size cap than a one-off screening upload.
-MAX_PREVIEW_FRAME_MB = 4
-
 
 def _validate_and_decode(contents: bytes) -> tuple[Image.Image, str]:
     """
@@ -87,20 +82,6 @@ def _read_and_check_content_type(file: UploadFile, max_mb: int) -> bytes:
     return contents
 
 
-def decode_preview_frame(file: UploadFile) -> Image.Image:
-    """
-    Lightweight path for the live-preview capture loop: same real
-    validation as save_upload() (content-type check, then actual PIL
-    decode/verify, dimension cap, animated-image rejection) but returns
-    the decoded image in memory instead of writing anything to disk.
-    Preview frames are ephemeral - shown for a second on the live overlay
-    and discarded - so they never become files or database rows.
-    """
-    contents = _read_and_check_content_type(file, MAX_PREVIEW_FRAME_MB)
-    img, _ = _validate_and_decode(contents)
-    if img.mode not in ("RGB", "L"):
-        img = img.convert("RGB")
-    return img
 
 
 def save_upload(file: UploadFile, patient_id: int) -> tuple[str, int, int]:

@@ -51,8 +51,8 @@ class Settings(BaseSettings):
     USE_MOCK_MODEL: bool = False
     # Set to false to use only YOLOv8 for detection (skips YOLOv12 entirely).
     USE_YOLOV12: bool = True
-    # Master switch for ALL AI inference (YOLOv8/YOLOv12 ensemble + live
-    # preview). When false, screening endpoints answer 503 with a clear
+    # Master switch for ALL AI inference (YOLOv8/YOLOv12 ensemble).
+    # When false, screening endpoints answer 503 with a clear
     # message - the rest of the app (patients, records, portal) keeps
     # working. Use this to present the system without the models.
     DETECTION_ENABLED: bool = True

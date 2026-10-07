@@ -243,25 +243,6 @@ class ModelComparisonOut(BaseModel):
     agreement_count: int
 
 
-class LiveDetectionOut(BaseModel):
-    """Same shape as DetectionOut but without the DB-only fields (id,
-    detection_set) - a live-preview frame is never persisted as a row."""
-    label: str
-    confidence: float
-    x1: float
-    y1: float
-    x2: float
-    y2: float
-    source_model: str
-
-
-class LivePreviewOut(BaseModel):
-    """Response for one live-preview frame from the intraoral camera loop.
-    Nothing behind this response is written to disk or the database."""
-    detections: list[LiveDetectionOut] = []
-    width: int
-    height: int
-    inference_ms: float
 
 
 class RecommendationOut(BaseModel):

@@ -97,19 +97,6 @@ export const screeningsAPI = {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
   },
-  // Live-preview inference for the intraoral camera loop: same YOLO
-  // ensemble, but nothing on the backend writes this frame to disk or
-  // the database (see decode_preview_frame / preview_screening_frame).
-  // `signal` lets the caller abort an in-flight preview request (e.g. the
-  // loop tears down or fires the next tick before this one resolved).
-  preview: (patientId, frameBlob, signal) => {
-    const fm = new FormData();
-    fm.append('file', frameBlob, 'frame.jpg');
-    return api.post('/patients/' + patientId + '/screening/preview', fm, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-      signal,
-    });
-  },
   get: (id) => api.get('/screenings/' + id),
   compare: (id) => api.get('/screenings/' + id + '/compare'),
   addNote: (id, body) => api.post('/screenings/' + id + '/notes', { body }),
