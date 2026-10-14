@@ -14,9 +14,7 @@ build/
 backend/.env
 .env
 
-# ML model weights (large binary files)
-backend/models_weights/*.pt
-backend/models_weights/*.pth
+# ML model weights are tracked (see backend/models_weights/)
 
 # Uploads — patient images (privacy + large size)
 backend/uploads/
