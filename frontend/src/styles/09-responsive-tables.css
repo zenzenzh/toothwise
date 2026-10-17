@@ -1,0 +1,83 @@
+/* Responsive data tables -> mobile cards.
+   Part of the ordered stylesheet split - see src/index.css. */
+/* ==========================================================================
+   Responsive tables (Patients / Staff) — no horizontal swipe on mobile.
+   Below 720px each row becomes its own card; the column header is replayed
+   from the td's data-label attribute.
+   ========================================================================== */
+@media (max-width: 768px) {
+  /* Selectors carry .tw-data-table so they outrank the desktop table
+     rules defined later, without !important. */
+  .tw-table-card.tw-responsive-table {
+    overflow: visible;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+  .tw-responsive-table .tw-data-table {
+    min-width: 0;
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 10px;
+  }
+  .tw-responsive-table .tw-data-table thead { display: none; }
+  .tw-responsive-table .tw-data-table tbody,
+  .tw-responsive-table .tw-data-table tr,
+  .tw-responsive-table .tw-data-table td {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .tw-responsive-table .tw-data-table tr {
+    padding: 8px 16px;
+    border: 1px solid var(--tw-border);
+    border-radius: var(--r-lg);
+    background: var(--tw-surface);
+    box-shadow: var(--shadow-md);
+  }
+  .tw-responsive-table .tw-data-table tr:hover td { background: transparent; }
+  .tw-responsive-table .tw-data-table td {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--tw-border);
+    font-size: .85rem;
+    line-height: 1.45;
+    white-space: normal;
+    text-align: right;
+    overflow-wrap: anywhere;
+  }
+  .tw-responsive-table .tw-data-table td:last-child { border-bottom: 0; }
+  .tw-responsive-table .tw-data-table td::before {
+    content: attr(data-label);
+    flex: none;
+    color: var(--tw-muted);
+    font-size: .64rem;
+    font-weight: 900;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    text-align: left;
+  }
+  .tw-responsive-table .tw-data-table td > div,
+  .tw-responsive-table .tw-data-table td > span { max-width: 70%; }
+
+  /* Identity row becomes the card header: avatar + name left-aligned,
+     no replayed column label. */
+  .tw-responsive-table .tw-data-table td[data-label="Patient"],
+  .tw-responsive-table .tw-data-table td[data-label="Name"] {
+    justify-content: flex-start;
+    text-align: left;
+    gap: 12px;
+    padding: 2px 0 12px;
+    margin-bottom: 4px;
+  }
+  .tw-responsive-table .tw-data-table td[data-label="Patient"]::before,
+  .tw-responsive-table .tw-data-table td[data-label="Name"]::before { content: none; }
+  .tw-responsive-table .tw-data-table td[data-label="Patient"] > div,
+  .tw-responsive-table .tw-data-table td[data-label="Name"] > div { max-width: none; }
+  .tw-responsive-table .stagger-item { animation: none; }
+}
+

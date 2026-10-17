@@ -6,6 +6,7 @@ const T = {
   text: 'var(--tw-text)',
   muted: 'var(--tw-muted)',
   accent: 'var(--tw-teal)',
+  accentText: 'var(--tw-accent-text)',
   accentStrong: 'var(--tw-teal-dark)',
   bg: 'var(--tw-bg)',
   surface: 'var(--tw-surface)',

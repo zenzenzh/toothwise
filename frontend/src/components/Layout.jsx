@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import {
   Menu, X, LayoutDashboard, Users, UserCog, ShieldCheck,
@@ -18,6 +18,21 @@ const COLLAPSE_KEY = 'tw_sidebar_collapsed';
 function initials(name = 'Staff') {
   return name.split(/\s+/).filter(Boolean).slice(0, 2).map(x => x[0]).join('').toUpperCase();
 }
+
+// One entry per staff route: document title, meta description and the
+// breadcrumb trail shown in the top bar (the page itself owns the <h1>).
+const WORKSPACE = { label: 'CodiSmile Clinic', to: '/dashboard' };
+const PATIENTS = { label: 'Patients', to: '/dashboard/patients' };
+const ROUTES = [
+  { match: /^\/dashboard\/?$/, title: 'Dashboard | ToothWise', description: 'CodiSmile staff dashboard for patients, screenings, and clinic activity.', crumbs: [{ label: 'Overview' }] },
+  { match: /^\/dashboard\/patients\/?$/, title: 'Patients | ToothWise', description: 'Manage authorized patient records and dental screening workflows.', crumbs: [{ label: 'Patients' }] },
+  { match: /^\/dashboard\/patients\/[^/]+\/screening$/, title: 'Dental Screening | ToothWise', description: 'Run an AI-assisted dental screening for an authorized patient.', crumbs: [PATIENTS, { label: 'New screening' }] },
+  { match: /^\/dashboard\/patients\/[^/]+$/, title: 'Patient Record | ToothWise', description: 'View an authorized patient record and clinical history.', crumbs: [PATIENTS, { label: 'Patient record' }] },
+  { match: /^\/dashboard\/screenings\/[^/]+$/, title: 'Screening Result | ToothWise', description: 'Review an authorized ToothWise dental screening result.', crumbs: [PATIENTS, { label: 'Screening result' }] },
+  { match: /^\/dashboard\/dentists\/?$/, title: 'Staff | ToothWise', description: 'Manage authorized CodiSmile clinic staff.', crumbs: [{ label: 'Staff' }] },
+  { match: /^\/dashboard\/audit-log\/?$/, title: 'Audit Trail | ToothWise', description: 'Review authorized ToothWise audit activity.', crumbs: [{ label: 'Audit trail' }] },
+];
+const FALLBACK_ROUTE = { title: 'ToothWise Clinic Workspace', description: 'Secure CodiSmile clinic workspace.', crumbs: [{ label: 'ToothWise' }] };
 
 export default function Layout() {
   const { dentist, logout } = useAuth();
@@ -44,13 +59,32 @@ export default function Layout() {
   // The open mobile drawer is a full-screen overlay, so it must never render in the
   // collapsed rail state (mobileOpen can only be true while below MOBILE_BREAKPOINT).
   const railCollapsed = collapsed && !mobileOpen;
+  const sidebarRef = useRef(null);
+  const hamburgerRef = useRef(null);
   useEffect(() => {
-    if (!mobileOpen) return;
-    const onKey = e => { if (e.key === 'Escape') setMobileOpen(false); };
+    if (!mobileOpen) return undefined;
+    // Drawer open: move focus into it, keep Tab inside, Esc closes and
+    // returns focus to the menu button.
+    const sidebar = sidebarRef.current;
+    sidebar?.querySelector('a, button')?.focus();
+    const onKey = e => {
+      if (e.key === 'Escape') { setMobileOpen(false); return; }
+      if (e.key !== 'Tab' || !sidebar) return;
+      const items = [...sidebar.querySelectorAll('a, button')];
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    };
     document.addEventListener('keydown', onKey);
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
-    return () => { document.removeEventListener('keydown', onKey); document.body.style.overflow = prev; };
+    const hamburger = hamburgerRef.current;
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.body.style.overflow = prev;
+      if (hamburger && hamburger.offsetParent !== null) hamburger.focus();
+    };
   }, [mobileOpen]);
 
   const navItems = useMemo(() => [
@@ -62,23 +96,8 @@ export default function Layout() {
     ] : []),
   ], [dentist?.role]);
 
-  const pageLabel = navItems.find(i => location.pathname === i.to || (i.to !== '/dashboard' && location.pathname.startsWith(i.to)))?.label || 'ToothWise';
-  const routeMeta = location.pathname === '/dashboard'
-    ? ['Dashboard | ToothWise', 'CodiSmile staff dashboard for patients, screenings, and clinic activity.', 'Dashboard']
-    : location.pathname === '/dashboard/patients'
-      ? ['Patients | ToothWise', 'Manage authorized patient records and dental screening workflows.', 'Patients']
-      : /^\/dashboard\/patients\/[^/]+\/screening$/.test(location.pathname)
-        ? ['Dental Screening | ToothWise', 'Review and run an authorized patient dental screening workflow.', 'Patients / Screening']
-        : /^\/dashboard\/patients\/[^/]+$/.test(location.pathname)
-          ? ['Patient Record | ToothWise', 'View an authorized patient record and clinical history.', 'Patients / Patient Record']
-          : /^\/dashboard\/screenings\/[^/]+$/.test(location.pathname)
-            ? ['Screening Result | ToothWise', 'Review an authorized ToothWise dental screening result.', 'Screening Result']
-            : location.pathname === '/dashboard/dentists'
-              ? ['Staff | ToothWise', 'Manage authorized CodiSmile clinic staff.', 'Staff']
-              : location.pathname === '/dashboard/audit-log'
-                ? ['Audit Trail | ToothWise', 'Review authorized ToothWise audit activity.', 'Audit Trail']
-                : ['ToothWise Clinic Workspace', 'Secure CodiSmile clinic workspace.', pageLabel];
-  const pageMeta = routeMeta;
+  const route = ROUTES.find(r => r.match.test(location.pathname)) || FALLBACK_ROUTE;
+  const trail = [WORKSPACE, ...route.crumbs.slice(0, -1)];
 
 
   useEffect(() => {
@@ -189,10 +208,11 @@ export default function Layout() {
 
   return (
     <div style={{ ...styles.shell, '--sidebar-w': railCollapsed ? '84px' : '260px' }}>
-      <SEO title={pageMeta[0]} description={pageMeta[1]} noIndex />
+      <SEO title={route.title} description={route.description} noIndex />
       {mobileOpen && <div className="tw-backdrop" onClick={() => setMobileOpen(false)} aria-hidden="true" />}
 
       <aside
+        ref={sidebarRef}
         className={`tw-sidebar${mobileOpen ? ' mobile-open' : ''}${railCollapsed ? ' collapsed' : ''}`}
         style={styles.sidebar}
         aria-label="Primary navigation"
@@ -201,8 +221,8 @@ export default function Layout() {
           <div style={{ ...styles.brandRow, justifyContent: railCollapsed ? 'center' : 'flex-start' }}>
             <div style={styles.logo}><LogoMark size={38} alt="CodiSmile Dental Clinic" /></div>
             {!railCollapsed && <div>
-              <div style={styles.brandName}>TOOTHWISE</div>
-              <div style={styles.brandSub}>CODISMILE CLINIC</div>
+              <div className="tw-sb-brand-name" style={styles.brandName}>TOOTHWISE</div>
+              <div className="tw-sb-brand-sub" style={styles.brandSub}>CODISMILE CLINIC</div>
             </div>}
           </div>
 
@@ -213,14 +233,8 @@ export default function Layout() {
                 to={item.to}
                 end={item.exact}
                 title={railCollapsed ? item.label : undefined}
-                className="nav-link"
-                style={({ isActive }) => ({
-                  ...styles.navLink,
-                  justifyContent: railCollapsed ? 'center' : 'flex-start',
-                  color: isActive ? '#FFFFFF' : '#C4B0BA',
-                  background: isActive ? 'rgba(196,132,126,.18)' : 'transparent',
-                  borderColor: isActive ? '#BA7976' : 'transparent',
-                })}
+                className="nav-link tw-sb-link"
+                style={{ ...styles.navLink, justifyContent: railCollapsed ? 'center' : 'flex-start' }}
               >
                 <item.icon size={19} strokeWidth={2} />
                 {!railCollapsed && <span>{item.label}</span>}
@@ -230,18 +244,18 @@ export default function Layout() {
         </div>
 
         <div style={styles.sidebarBottom}>
-          <button className="nav-link" onClick={toggleSidebar} style={{ ...styles.collapseButton, justifyContent: railCollapsed ? 'center' : 'flex-start' }}>
+          <button className="nav-link tw-sb-collapse" onClick={toggleSidebar} style={{ ...styles.collapseButton, justifyContent: railCollapsed ? 'center' : 'flex-start' }}>
             <ChevronLeft size={18} style={{ transform: railCollapsed ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }} />
             {mobileOpen ? <span>Close menu</span> : !railCollapsed && <span>Collapse menu</span>}
           </button>
-          <div style={styles.userCard}>
-            <div style={styles.avatar}>{initials(dentist?.full_name)}</div>
+          <div className="tw-sb-user" style={styles.userCard}>
+            <div className="tw-sb-avatar" style={styles.avatar}>{initials(dentist?.full_name)}</div>
             {!railCollapsed && <div style={{ minWidth: 0 }}>
-              <div style={styles.userName}>{dentist?.full_name || 'Clinic staff'}</div>
-              <div style={styles.userRole}>{ROLE_LABELS[dentist?.role] || dentist?.role || 'Staff'}</div>
+              <div className="tw-sb-user-name" style={styles.userName}>{dentist?.full_name || 'Clinic staff'}</div>
+              <div className="tw-sb-user-role" style={styles.userRole}>{ROLE_LABELS[dentist?.role] || dentist?.role || 'Staff'}</div>
             </div>}
           </div>
-          <button onClick={handleLogout} style={{ ...styles.logout, justifyContent: railCollapsed ? 'center' : 'flex-start' }}>
+          <button className="tw-sb-logout" onClick={handleLogout} style={{ ...styles.logout, justifyContent: railCollapsed ? 'center' : 'flex-start' }}>
             <LogOut size={17} />
             {!railCollapsed && <span>Sign out</span>}
           </button>
@@ -251,12 +265,21 @@ export default function Layout() {
       <main className={`tw-main${railCollapsed ? ' collapsed' : ''}`} style={styles.main}>
         <header className="tw-topbar" style={styles.topbar}>
           <div className="tw-top-left" style={styles.topLeft}>
-            <button className="tw-hamburger" onClick={toggleSidebar} aria-label="Toggle navigation" aria-expanded={mobileOpen}>
+            <button ref={hamburgerRef} className="tw-hamburger" onClick={toggleSidebar} aria-label="Toggle navigation" aria-expanded={mobileOpen}>
               {mobileOpen ? <X size={19} /> : <Menu size={19} />}
             </button>
-            <div className="tw-top-heading">
-              <h1 className="tw-page-title" style={styles.pageTitle}>{pageLabel}</h1>
-            </div>
+            {/* The trail *to* this page; the page's own <h1> names it. */}
+            <nav className="tw-top-heading tw-crumbs" aria-label="Breadcrumb">
+              <ol>
+                {trail.map((c, i) => (
+                  <li key={c.label} className={i === trail.length - 1 ? 'is-end' : undefined}>
+                    {c.to && location.pathname !== c.to
+                      ? <NavLink to={c.to} end>{i === trail.length - 1 && trail.length > 1 && <ChevronLeft size={15} className="tw-crumbs-back" aria-hidden="true" />}{c.label}</NavLink>
+                      : <span>{c.label}</span>}
+                  </li>
+                ))}
+              </ol>
+            </nav>
           </div>
           <div className="tw-top-right" style={{ ...styles.topRight, position: 'relative' }}>
             <button className="dashboard-icon-button tw-icon-button" style={styles.iconButton} title="Notifications" aria-label="Notifications"
@@ -324,9 +347,6 @@ export default function Layout() {
         </header>
 
         <div className="tw-content" style={styles.content}>
-          <nav className="app-breadcrumbs" aria-label="Breadcrumb">
-            <span>ToothWise</span><span>/</span><strong>{routeMeta[2]}</strong>
-          </nav>
           <div key={location.pathname} className="page-enter">
             <Outlet />
           </div>
@@ -340,32 +360,26 @@ const styles = {
   shell: { minHeight: '100vh', background: 'var(--tw-bg)', color: 'var(--tw-text)' },
   sidebar: {
     position: 'fixed', inset: '0 auto 0 0', zIndex: 200, display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
-    background: 'var(--tw-bg)', color: 'var(--tw-text)', padding: '20px 12px', overflowY: 'auto',
-    boxShadow: '12px 0 35px rgba(58,36,48,.08)', width: 'var(--sidebar-w, 260px)',
+    padding: '20px 12px', overflowY: 'auto', width: 'var(--sidebar-w, 260px)',
     transition: 'width .2s ease, background .2s ease',
   },
   brandRow: { display: 'flex', alignItems: 'center', gap: 12, minHeight: 52, padding: '2px 10px' },
   logo: { width: 44, height: 44, borderRadius: 14, display: 'grid', placeItems: 'center', background: '#FFFFFF', boxShadow: 'none', flexShrink: 0 },
-  brandName: { color: '#fff', fontWeight: 900, letterSpacing: '.12em', fontSize: 14 },
-  brandSub: { color: '#C78C8A', fontSize: 9, marginTop: 3, letterSpacing: '.1em', fontWeight: 800 },
-  clinicPill: { margin: '17px 8px 0', padding: '8px 10px', borderRadius: 10, background: 'rgba(255,255,255,.05)', color: '#C4B0BA', fontSize: 11, display: 'flex', alignItems: 'center', gap: 7 },
-  liveDot: { width: 7, height: 7, borderRadius: '50%', background: '#2CCB91', boxShadow: '0 0 0 4px rgba(44,203,145,.12)' },
+  brandName: { fontWeight: 900, letterSpacing: '.12em', fontSize: 14 },
+  brandSub: { fontSize: 9, marginTop: 3, letterSpacing: '.1em', fontWeight: 800 },
   nav: { display: 'flex', flexDirection: 'column', gap: 6, padding: '0 4px' },
-  navLink: { display: 'flex', alignItems: 'center', gap: 12, borderRadius: 12, padding: '12px 13px', textDecoration: 'none', fontSize: 13, fontWeight: 700, transition: 'background .16s, color .16s' },
+  navLink: { display: 'flex', alignItems: 'center', gap: 12, borderRadius: 12, padding: '12px 13px', textDecoration: 'none', fontSize: 13, fontWeight: 700 },
   sidebarBottom: { display: 'flex', flexDirection: 'column', gap: 9 },
-  collapseButton: { width: '100%', border: 0, background: 'transparent', color: '#C4B0BA', padding: '10px 13px', borderRadius: 10, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 12, fontSize: 11, fontWeight: 700 },
-  userCard: { display: 'flex', alignItems: 'center', gap: 10, padding: '12px 8px', borderTop: '1px solid rgba(255,255,255,.08)' },
-  avatar: { width: 38, height: 38, borderRadius: 12, background: 'rgba(196,132,126,.18)', color: '#C4B0BA', display: 'grid', placeItems: 'center', fontSize: 13, fontWeight: 900, flexShrink: 0 },
-  userName: { color: '#FBF6F4', fontWeight: 800, fontSize: 12, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 160 },
-  userRole: { color: '#C4B0BA', textTransform: 'capitalize', fontSize: 10, marginTop: 2 },
-  logout: { border: '1px solid rgba(255,255,255,.1)', background: 'rgba(255,255,255,.04)', color: '#AFC3C9', borderRadius: 11, padding: '10px 12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 11, fontSize: 12, fontWeight: 700 },
+  collapseButton: { width: '100%', border: 0, padding: '10px 13px', borderRadius: 10, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 12, fontSize: 11, fontWeight: 700 },
+  userCard: { display: 'flex', alignItems: 'center', gap: 10, padding: '12px 8px' },
+  avatar: { width: 38, height: 38, borderRadius: 12, display: 'grid', placeItems: 'center', fontSize: 13, fontWeight: 900, flexShrink: 0 },
+  userName: { fontWeight: 800, fontSize: 12, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 160 },
+  userRole: { textTransform: 'capitalize', fontSize: 10, marginTop: 2 },
+  logout: { borderRadius: 11, padding: '10px 12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 11, fontSize: 12, fontWeight: 700 },
   main: { minHeight: '100vh', display: 'flex', flexDirection: 'column', marginLeft: 'var(--sidebar-w, 260px)', transition: 'margin-left .2s ease' },
   topbar: { height: 78, background: 'color-mix(in srgb, var(--tw-surface) 92%, transparent)', backdropFilter: 'blur(14px)', borderBottom: '1px solid var(--tw-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 30px', position: 'sticky', top: 0, zIndex: 100 },
   topLeft: { display: 'flex', alignItems: 'center', gap: 14 },
-  eyebrow: { color: 'var(--tw-muted)', fontSize: 10, textTransform: 'uppercase', letterSpacing: '.12em', fontWeight: 800 },
-  pageTitle: { margin: '3px 0 0', color: 'var(--tw-text)', fontSize: 21, lineHeight: 1.1, letterSpacing: '-.02em' },
   topRight: { display: 'flex', alignItems: 'center', gap: 8 },
-  system: { display: 'flex', alignItems: 'center', gap: 7, marginRight: 4, padding: '9px 11px', borderRadius: 11, background: '#0D2818', color: '#4ADE80', fontSize: 11, fontWeight: 800 },
   iconButton: { width: 38, height: 38, border: '1px solid var(--tw-border)', borderRadius: 11, background: 'var(--tw-surface)', color: 'var(--tw-muted)', display: 'grid', placeItems: 'center', cursor: 'pointer' },
   content: { flex: 1, padding: '28px 30px 36px', minWidth: 0 },
 };

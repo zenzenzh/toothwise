@@ -14,7 +14,7 @@ const PageHeader = ({
 }) => (
   <div className={`tw-page-header ${className}`.trim()}>
     <div className="tw-page-title-wrap">
-      <h2>{title}</h2>
+      <h1>{title}</h1>
       {subtitle && <p>{subtitle}</p>}
     </div>
     {actions && <div className="tw-page-header__actions">{actions}</div>}

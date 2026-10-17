@@ -154,7 +154,7 @@ export default function PatientDetail() {
         <div className="pd6-identity">
           <div className="tw-avatar tw-avatar--lg" aria-hidden="true">{patient.full_name.charAt(0)}</div>
           <div className="pd6-identity-text">
-            <h2 className="pd6-name">{patient.full_name}</h2>
+            <h1 className="pd6-name">{patient.full_name}</h1>
             <p className="pd6-id">Patient ID #{patient.id}</p>
           </div>
         </div>

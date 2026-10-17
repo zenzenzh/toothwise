@@ -1,0 +1,121 @@
+/* Workspace polish passes (v9 / v14).
+   Part of the ordered stylesheet split - see src/index.css. */
+/* ========================================================================
+   v9 visual correction pass â€” CodiSmile editorial clinic direction
+   Grounded in the supplied clinic logo/photos and uploaded UI/UX skill set.
+   ======================================================================== */
+:root {
+  --tw-brand-plum: #5C3A4A;
+  --tw-brand-plum-deep: #3B2831;
+  --tw-brand-rose: #C4847E;
+  --tw-brand-rose-light: #E7B8B4;
+  --tw-brand-cream: #FBF6F4;
+  --tw-brand-ink: #2F2026;
+  --tw-brand-muted: #735F67;
+  --tw-brand-line: #E7D9DC;
+  --tw-brand-white: #FFFFFF;
+  --tw-brand-green: #4B8B6B;
+  --tw-shadow-soft: 0 18px 50px rgba(92,58,74,.10);
+  --tw-shadow-float: 0 28px 70px rgba(92,58,74,.18);
+}
+
+html { scroll-behavior: smooth; scroll-padding-top: 92px; }
+button, a, input, select, textarea, summary { -webkit-tap-highlight-color: transparent; }
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, summary:focus-visible {
+  outline: 3px solid rgba(196,132,126,.38);
+  outline-offset: 3px;
+}
+
+/* Landing */
+
+
+
+
+
+
+
+
+
+/* Admin forms and modals */
+
+/* Upgrade table controls to match the modern modal family */
+.tw-content button { min-height:44px; }
+
+
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior:auto; }
+  }
+
+/* Dashboard action popovers: predictable layering and explicit click targets. */
+.dashboard-popover button { pointer-events:auto; }
+.dashboard-popover .popover-heading > button { flex:0 0 28px; }
+
+/* ==========================================================================\n   ToothWise v10 public + modal redesign\n   Brand icon intentionally unchanged. These styles only reshape the public\n   experience and admin form surfaces.\n   ========================================================================== */
+
+
+
+
+
+@media (max-width: 768px) {
+                            /* Stack carousel: the active card sits centered and raised, with the
+     next/previous cards peeking in at the edges - not a single edge-to-edge
+     slide. Swipe (or tap a dot) to bring the next card to center. */
+                                            }
+
+
+
+/* ==========================================================================
+   ToothWise v14 workspace polish
+   Focus: remove redundant microcopy, improve modal fit, and make forms read
+   as direct clinic tasks rather than stacked information panels.
+   ========================================================================== */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@media (max-width: 480px) {
+  
+  
+  
+  
+  
+  
+  
+  
+  .screening-page {
+    padding: 12px !important;
+  }
+
+  .screening-page h2 {
+    margin: 14px 0 16px !important;
+    font-size: 1.55rem !important;
+    line-height: 1.16 !important;
+    letter-spacing: 0;
+    text-wrap: balance;
+  }
+
+  
+  
+  }
+

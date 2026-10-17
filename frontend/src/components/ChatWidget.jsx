@@ -130,7 +130,7 @@ export default function ChatWidget({ patient } = {}) {
       >
         <div className="chat-panel-header">
           <div className="chat-brand-row">
-            <div className="chat-avatar"><img src="/codismile/codismile-logo-transparent.png" alt="" /></div>
+            <div className="chat-avatar"><img src="/codismile/codismile-logo-96.png" srcSet="/codismile/codismile-logo-96.png 1x, /codismile/codismile-logo-192.png 2x" alt="" width="40" height="40" /></div>
             <div>
               <strong>ToothWise AI Assistant</strong>
               <span><span className="chat-status-dot" /> Online · {patient ? 'your screenings + general info' : 'general information'}</span>

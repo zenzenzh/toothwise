@@ -1,0 +1,178 @@
+/* Utilities, typography, staff shell (breadcrumbs, sidebar), dark-mode component overrides, element defaults.
+   Part of the ordered stylesheet split - see src/index.css. */
+/* ── Utilities ─────────────────────────────────────────────────────── */
+.u-stack { display: flex; flex-direction: column; gap: var(--s-3); }
+.u-row { display: flex; align-items: center; gap: var(--s-2); flex-wrap: wrap; }
+.u-muted { color: var(--tw-muted); }
+.u-truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+
+/* ── Typography / Measure ─────────────────────────────────────────── */
+body { font-size: 16px; line-height: 1.55; color: var(--tw-text); }
+.tw-content { max-width: 72ch; line-height: 1.5; }
+/* Headings use the same clean sans as the rest of the UI (see docs/brand-guidelines.md).
+   Previously these were set to 'Fira Code' monospace, which rendered page titles like
+   typewriter text. */
+h1,h2,h3 { font-family: 'Manrope', system-ui, -apple-system, 'Segoe UI', sans-serif; font-weight: 700; letter-spacing: -0.03em; }
+
+/* ── Transitions (Batch A) ─────────────────────────────────────────── */
+button, a, .nav-link, .tw-icon-button { transition: color var(--dur) ease, background-color var(--dur) ease, border-color var(--dur) ease; }
+
+.auth6-alert {
+  padding: 10px 14px; border-radius: var(--r-md);
+  border: 1px solid var(--tw-danger-border); background: var(--tw-danger-bg); color: var(--tw-danger);
+  font-size: var(--fs-sm); line-height: 1.5;
+}
+
+/* ── Top-bar breadcrumbs (Layout) ────────────────────────────────── */
+.tw-crumbs ol { list-style: none; margin: 0; padding: 0; display: flex; align-items: center; gap: 8px; min-width: 0; }
+.tw-crumbs li { display: flex; align-items: center; gap: 8px; min-width: 0; font-size: 14px; font-weight: 600; color: var(--tw-muted); white-space: nowrap; }
+.tw-crumbs li + li::before { content: '/'; color: var(--tw-border); font-weight: 400; }
+.tw-crumbs a { display: inline-flex; align-items: center; gap: 2px; color: var(--tw-muted); text-decoration: none; border-radius: 6px; }
+.tw-crumbs a:hover { color: var(--tw-text); }
+.tw-crumbs a:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.tw-crumbs .is-end { color: var(--tw-text); }
+.tw-crumbs .is-end a { color: var(--tw-text); }
+.tw-crumbs-back { display: none; }
+@media (max-width: 640px) {
+  .tw-crumbs li:not(.is-end) { display: none; }
+  .tw-crumbs li + li::before { content: none; }
+  .tw-crumbs-back { display: inline; }
+}
+
+/* ── Staff sidebar (Layout) ───────────────────────────────────────
+   The sidebar is plum in both themes; its colours are tokens so dark
+   mode is a variable swap, not a stack of !important overrides. */
+:root {
+  --sb-bg: #352126;
+  --sb-text: #C4B0BA;
+  --sb-text-strong: #FFFFFF;
+  --sb-sub: #C78C8A;
+  --sb-hover: rgba(196, 132, 126, .12);
+  --sb-active-bg: rgba(196, 132, 126, .18);
+  --sb-active-border: #BA7976;
+  --sb-line: rgba(255, 255, 255, .08);
+  --sb-shadow: 10px 0 34px rgba(53, 33, 38, .10);
+}
+body.dark-mode {
+  --sb-bg: #3D1F28;
+  --sb-hover: rgba(255, 255, 255, .08);
+  --sb-active-bg: rgba(255, 255, 255, .12);
+  --sb-shadow: 10px 0 34px rgba(0, 0, 0, .35);
+}
+.tw-sidebar { background: var(--sb-bg); color: var(--sb-text); box-shadow: var(--sb-shadow); transition: width var(--dur) ease; }
+.tw-sb-link { color: var(--sb-text); background: transparent; border: 1px solid transparent; transition: background var(--dur-fast) ease, color var(--dur-fast) ease; }
+.tw-sb-link:hover { background: var(--sb-hover); color: var(--sb-text-strong); }
+.tw-sb-link.active { color: var(--sb-text-strong); background: var(--sb-active-bg); border-color: var(--sb-active-border); }
+.tw-sb-brand-name { color: var(--sb-text-strong); }
+.tw-sb-brand-sub { color: var(--sb-sub); }
+.tw-sb-collapse { background: transparent; color: var(--sb-text); }
+.tw-sb-collapse:hover { background: var(--sb-hover); color: var(--sb-text-strong); }
+.tw-sb-user { border-top: 1px solid var(--sb-line); }
+.tw-sb-avatar { background: var(--sb-active-bg); color: var(--sb-text); }
+.tw-sb-user-name { color: var(--sb-text-strong); }
+.tw-sb-user-role { color: var(--sb-text); }
+.tw-sb-logout { border: 1px solid rgba(255, 255, 255, .1); background: rgba(255, 255, 255, .04); color: var(--sb-text); }
+.tw-sb-logout:hover { background: var(--sb-hover); color: var(--sb-text-strong); }
+.tw-sb-link:focus-visible, .tw-sb-collapse:focus-visible, .tw-sb-logout:focus-visible { outline: 2px solid var(--sb-active-border); outline-offset: -2px; }
+
+/* ── Dark mode: remaining component overrides ─────────────────────
+   Everything else follows the token swap in body.dark-mode above. */
+body.dark-mode .dashboard-popover { background: var(--tw-surface); border-color: var(--tw-border); color: var(--tw-text); }
+body.dark-mode .popover-heading { border-color: var(--tw-border); }
+body.dark-mode .popover-result:hover { background: rgba(186, 121, 118, .12); }
+body.dark-mode .popover-empty { color: var(--tw-muted); }
+body.dark-mode .popover-footer-action { border-color: var(--tw-border); color: var(--tw-accent-text); }
+body.dark-mode .global-search-box { border-color: var(--tw-border); background: var(--tw-bg); color: var(--tw-text); }
+body.dark-mode input, body.dark-mode select, body.dark-mode textarea { background: var(--tw-surface); border-color: var(--tw-border); color: var(--tw-text); }
+body.dark-mode input::placeholder, body.dark-mode textarea::placeholder { color: var(--tw-muted); }
+
+* { box-sizing: border-box; }
+html { min-height: 100%; }
+body {
+  margin: 0;
+  min-height: 100%;
+  font-family: 'Manrope', 'Atkinson Hyperlegible', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+  background: var(--tw-bg);
+  color: var(--tw-text);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+button, input, select, textarea { font: inherit; }
+button { transition: transform var(--tw-duration-normal) var(--tw-ease-out), opacity var(--tw-duration-fast) ease-out, background-color var(--tw-duration-normal) ease-out, border-color var(--tw-duration-normal) ease-out, box-shadow var(--tw-duration-normal) ease-out; }
+button:not(:disabled):hover { opacity: 1; }
+button:not(:disabled):active { transform: translateY(0); }
+button:disabled { cursor: not-allowed; opacity: .6; }
+a { color: var(--tw-teal-dark); text-decoration: none; }
+a:hover { color: var(--tw-navy); }
+input, select, textarea { color: var(--tw-text); }
+input::placeholder, textarea::placeholder { color: var(--tw-muted); }
+input:focus, textarea:focus, select:focus {
+  border-color: var(--tw-teal) !important;
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(196,132,126,.12) !important;
+}
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--tw-bg); }
+::-webkit-scrollbar-thumb { background: #C4B0BA; border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: #8EAEB5; }
+
+table { width: 100%; border-collapse: collapse; }
+th { text-align:left; color:#8C7078; font-size:11px; text-transform:uppercase; letter-spacing:.07em; font-weight:800; background:#FBF6F4; }
+td { color:var(--tw-text); border-bottom:1px solid var(--tw-border); }
+tr:hover td { background:var(--tw-surface-alt); }
+
+
+.risk-high { background:#FFF0F1; color:#C23F4A; border:1px solid #F4C7CB; }
+.risk-moderate { background:#FFF6E8; color:#A96605; border:1px solid #F0D19A; }
+.risk-low { background:#E8F5EE; color:#27734E; border:1px solid #A8DBBE; }
+
+@keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+.page-enter { animation: fadeIn .24s ease both; }
+@keyframes staggerIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
+.stagger-item { animation: staggerIn .32s cubic-bezier(.22,1,.36,1) backwards; animation-delay: calc(var(--stagger-index,0) * 35ms); }
+@keyframes shimmer { 0% { background-position:-450px 0 } 100% { background-position:450px 0 } }
+.skeleton { background:linear-gradient(90deg,var(--tw-aqua) 25%,var(--tw-surface-alt) 37%,var(--tw-aqua) 63%); background-size:900px 100%; animation:shimmer 1.35s linear infinite; }
+body.dark-mode .skeleton, body.dark-mode .pp-thumb--skeleton { background:linear-gradient(90deg,#1C2029 25%,#262B36 37%,#1C2029 63%); background-size:900px 100%; }
+@media (prefers-reduced-motion: reduce) { .skeleton, .pp-thumb--skeleton { animation: none; } }
+
+.nav-link:focus-visible { outline:2px solid var(--tw-teal); outline-offset:-2px; }
+.tw-hamburger {
+  width:42px; height:42px; border-radius:12px; border:1px solid var(--tw-border); background:var(--tw-surface); color:var(--tw-navy);
+  display:flex; align-items:center; justify-content:center; cursor:pointer;
+}
+.tw-hamburger:hover { background:var(--tw-surface-alt); box-shadow:0 6px 18px rgba(92,58,74,.08); }
+.tw-backdrop { position:fixed; inset:0; z-index:150; background:rgba(58,36,48,.42); animation:fadeIn .18s ease; }
+
+.auth-panel { padding:54px; }
+.tw-input { width:100%; height:48px; border:1px solid var(--tw-border); background:#FFFFFF; border-radius:12px; padding:0 15px; color:var(--tw-text); }
+.tw-field { display:flex; flex-direction:column; gap:7px; }
+.tw-label { font-size:12px; font-weight:800; color:var(--tw-navy); letter-spacing:.02em; }
+
+@media (max-width: 900px) {
+  .tw-sidebar { width:270px !important; transform:translateX(-100%); }
+  .tw-sidebar.mobile-open { transform:translateX(0); box-shadow:16px 0 40px rgba(0,0,0,.22); }
+  .tw-main { margin-left:0 !important; }
+  .tw-content { padding:20px !important; }
+  .tw-topbar { padding:0 16px !important; height:66px !important; }
+  .tw-top-left { gap:10px !important; }
+          .auth-panel { padding:34px; }
+}
+@media (max-width: 640px) {
+    .auth-panel { padding:26px 20px; }
+      .tw-topbar { padding:0 12px !important; }
+  .tw-top-right { gap:6px !important; }
+  .tw-icon-button { width:34px !important; height:34px !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto !important; }
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0s !important;
+    transition-duration: var(--dur-fast) !important;
+    transition-delay: 0s !important;
+  }
+}
+
+

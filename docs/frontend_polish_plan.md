@@ -80,27 +80,43 @@ Based on a survey of `frontend/src` (React 18 + CRA, plain CSS, no Tailwind).
 3. ~~Replace both `window.confirm` calls~~ (done) with `ConfirmDialog` (danger variant, with the patient or staff name shown).
 4. Use `EmptyState` and `LoadingState` / `Skeleton` everywhere. Add an error state with a **Retry** button.
 
-### Phase 3: Clean up dark mode (≈1 day; needs Phase 2 first)
-> Also remove `body.dark-mode .stagger-item:hover { background … !important }` (index.css, around line 169). It highlights any staggered card on hover in dark mode, not just table rows.
-1. Once the inline colors are gone, delete the `[style*=…]` override block (around lines 192–260) and most of the `body.dark-mode … !important` rules.
-2. Dark mode should come only from swapping variables under `body.dark-mode`.
-3. Check contrast (WCAG AA 4.5:1) for muted text, badges and risk pills in both themes.
+### Phase 3: Clean up dark mode (done)
+- Deleted the `[style*=…]` block (61 selectors). Most of them could never match, because React writes inline styles through the DOM and browsers serialize colours as `rgb(…)`.
+- Cut the `body.dark-mode` rules from 163 to 24. Most targeted classes nothing renders any more, or public and portal pages that are light-only now that the leak is fixed.
+- Sidebar: moved its colours from Layout inline styles into `--sb-*` tokens and `.tw-sb-*` classes, so dark mode is just a variable swap. This replaced a three-layer `!important` chain (inline → `--tw-navy-dark !important` → `#3D1F28 !important`).
+- Mobile card tables: they no longer need `!important`, because the selectors are specific enough to outrank the desktop table rules.
+- `!important` went from 189 to 104. What's left is mostly the landing-page CSS and the Layout mobile rules that still fight inline layout styles, both covered by the Phase 5 CSS split.
+- Checked the dashboard, Patients (desktop and mobile cards), Staff and the drawer in both themes. Public pages stay light after leaving the staff area.
 
-### Phase 4: Page-level polish (≈2–3 days)
-- **Layout and sidebar:** the top-bar title reads "ToothWise" on the screening-result route, because Layout's title map is missing that route. Also, the page title appears twice (in the top bar and again in the page header). Keep one. Also the active-route indicator, collapsed state on tablets, and keyboard focus inside the mobile drawer.
-- **Dashboard:** line up the stat cards, give charts the same colors as the risk badges, and replace the "No detection data yet" placeholder.
-- **Patients:** sticky table header, row hover and focus styles, a clear search button, and pagination or row count. Turn the table into cards on mobile.
-- **Screening (upload):** stronger drag-and-drop highlight, image preview with a remove option, upload progress, and validation messages for file type and size.
-- **ScreeningDetail:** a consistent toggle style for the canvas overlay, a legend for detection colors, a print/export-friendly layout, a proper not-found state, and descriptive `alt` text.
-- **PatientPortal (732 lines):** split into sub-components, and fix the silent image-load failures with a fallback.
-- **Landing:** compress the hero and education images (`public/codismile/*.jpg`) and add `loading="lazy"`, `width` and `height` to prevent layout shift.
-- **Forms (Login, staff and patient modals):** inline field errors through `Field`, a disabled or loading submit button, and autofocus on the first field.
+### Phase 4: Page-level polish (done)
+Most of the per-page items were handled during the Phase 2 rewrites: Patients, Screening, ScreeningDetail and PatientPortal. This phase covered the rest.
+- **Layout.**
+  - One route table now drives the document title, the description and the breadcrumbs, so the screening routes are fixed.
+  - The top bar shows the trail *to* the page ("CodiSmile Clinic / Patients"); on mobile this becomes a "‹ Patients" back link.
+  - Each page's title is now its single `<h1>`, so the name no longer appears twice.
+  - Mobile drawer: focus moves into it, Tab stays inside, and Esc returns focus to the menu button.
+- **Logo.** Added 96 px and 192 px PNG and WebP variants, used by `LogoMark` and the chat avatar. The 351 KB source logo is now 9 KB (WebP) or 16 KB (PNG) where these components use it.
+- **Print.** `@media print` hides the sidebar, top bar, buttons and the note form, and keeps cards together, so a screening result prints cleanly.
+- **Staff login.** Email field focused on load, an inline error banner instead of toast-only messages, focus on the field that failed, and `aria-describedby` on errors.
+- **Not done here:** `Landing.jsx` has uncommitted edits from outside this work, so it was left alone. It still loads the full 351 KB logo in two `<img>` tags, and the hero `<img>` has no `width`/`height`. Swap in `/codismile/codismile-logo-96.png` and add dimensions once those edits are committed.
 
-### Phase 5: Motion, accessibility and quality checks (≈1 day)
-- Use one set of motion tokens (`--ease`, `--dur-fast 120ms`, `--dur 200ms`) and respect `prefers-reduced-motion` everywhere.
-- Visible `:focus-visible` rings on every interactive element. Modals trap focus and close with Esc.
-- Lighthouse pass (target ≥90 for Accessibility and Best Practices) at 390, 768 and 1440px in both themes. Save screenshots to `frontend/audit-shots/`.
-- Split `index.css` into `styles/tokens.css`, `base.css`, `components.css`, `layout.css` and `pages/*.css`, and remove dead selectors.
+### Phase 5: Motion, accessibility and CSS split (done)
+- **Motion.**
+  - Every `transition` duration now uses `--dur-fast`, `--dur` or `--dur-slow` (62 declarations normalized).
+  - The global reduced-motion rule now also zeroes animation and transition delays (staggered rows used to wait up to about 800 ms) and turns off smooth scrolling.
+- **Focus.** Every rule that removes an outline has a replacement border or ring. Modals and the mobile drawer trap focus and close with Esc.
+- **Contrast (WCAG AA).**
+  - Found a second `:root` block in `03-design-overrides.css` that silently redefined the light palette. Folded it into `00-tokens.css`, so there is now one source of truth with no visual change.
+  - Using the real palette:
+    - Muted text is 5.9:1.
+    - Danger is now `#B33A45` (4.95:1 on its tint, was 3.85:1).
+    - A new `--tw-accent-text` (`#9E5A55`, 4.9:1) is used wherever the 3.45:1 brand teal was used for text.
+    - Placeholders now use the muted colour (were 2.05:1).
+  - Dark mode already passed everywhere.
+- **Dead CSS.** Removed 887 rules that can never match: superseded designs such as `pp-*`, `tw-modal-v5`, `hero-v2`, `landing-v5`, `clinic-*` and the old `auth-*`. That's 5,163 → 3,466 lines, and the gzipped CSS went from 36 KB to 21 KB.
+- **Split.** `index.css` is now an ordered `@import` list of 13 files in `src/styles/` (`00-tokens` … `12-print`). Each file is a contiguous chunk, so the cascade order is unchanged.
+- **Verification.** Compared computed styles (20 properties, every element) against the pre-prune stylesheet on landing, login, portal, privacy, 404, all 7 staff routes in light and dark, an open dialog, and 4 routes at 375 px. The only difference is the sidebar background going back to its original `#352126`. A control run with an empty stylesheet flagged every element, so the comparison is sensitive.
+- **Not done.** No Lighthouse run (it isn't installed here). About 100 `!important`s remain, mostly in the landing CSS (`07-landing.css`) and in the Layout mobile rules that fight its inline layout styles.
 
 ## Suggested order and checkpoints
 1. Phase 1 → visual check, should be no change.

@@ -1,0 +1,29 @@
+/* Print styles.
+   Part of the ordered stylesheet split - see src/index.css. */
+/* ── Print (staff pages; mainly the screening result) ──────────────── */
+@media print {
+  @page { margin: 14mm; }
+  body, body.dark-mode { background: #fff !important; color: #000; }
+  body.dark-mode { --tw-bg: #fff; --tw-surface: #fff; --tw-surface-alt: #f6f6f6; --tw-text: #111; --tw-muted: #555; --tw-border: #ccc; }
+  .tw-sidebar,
+.tw-topbar,
+.tw-backdrop,
+.chat-widget-root,
+.sd-topbar .tw-btn,
+.sd-note-form,
+.sd-note-lock,
+.sd-tab-bar,
+.sd-toggle,
+.tw-page-header__actions,
+.scr-actions,
+.tw-row-actions,
+[role="status"]{ display: none !important; }
+  .tw-main { margin-left: 0 !important; }
+  .tw-content { padding: 0 !important; }
+  .page-enter, .stagger-item { animation: none !important; opacity: 1 !important; transform: none !important; }
+  .sd-card, .pd6-card, .tw-stat-card, .dash6-chart-card, .tw-table-card { box-shadow: none !important; break-inside: avoid; }
+  .sd-main-grid { grid-template-columns: 1fr 1fr; }
+  .sd-notes { max-height: none; overflow: visible; }
+  .sd-topbar { justify-content: flex-end; }
+}
+

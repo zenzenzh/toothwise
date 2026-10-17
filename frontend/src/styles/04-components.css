@@ -1,0 +1,142 @@
+/* UI primitives: card, button, badge, field, empty state.
+   Part of the ordered stylesheet split - see src/index.css. */
+/* =====================================================================
+   UI PRIMITIVES — Card, Button, Badge, Field, EmptyState
+   Used by patient portal and other surfaces.
+   ===================================================================== */
+
+/* Card */
+.tw-card {
+  background: var(--tw-surface);
+  border: 1px solid var(--tw-border);
+  border-radius: var(--tw-radius-xl, 20px);
+  box-shadow: var(--tw-shadow-md);
+  padding: var(--tw-space-6, 24px);
+}
+.tw-card--flat {
+  box-shadow: none;
+}
+@media (hover:hover) and (pointer:fine) {
+  .tw-hover-lift { transition: transform var(--tw-duration-normal) var(--tw-ease-out), box-shadow var(--tw-duration-normal) var(--tw-ease-out); }
+  .tw-hover-lift:hover { transform: translateY(-3px); box-shadow: var(--tw-shadow-lg); }
+}
+
+/* Button */
+.tw-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 20px;
+  border: 1px solid transparent;
+  border-radius: var(--tw-radius-md, 12px);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: background var(--tw-duration-normal) ease-out, border-color var(--tw-duration-normal) ease-out, transform var(--tw-duration-fast) ease-out, box-shadow var(--tw-duration-normal) ease-out;
+  font-family: inherit;
+}
+.tw-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.tw-btn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+body.dark-mode .tw-btn--primary { color: var(--tw-bg); box-shadow: none; }
+body.dark-mode .tw-btn--primary:hover:not(:disabled) { background: var(--tw-navy-dark); }
+.tw-btn--primary { background: var(--tw-navy); color: #fff; box-shadow: 0 8px 22px rgba(53,33,38,.12); }
+.tw-btn--primary:hover:not(:disabled) { background: var(--tw-navy-dark); transform: translateY(-1px); box-shadow: 0 12px 28px rgba(53,33,38,.16); }
+.tw-btn--primary:active:not(:disabled) { transform: scale(0.97); }
+.tw-btn--rose { background: var(--tw-teal); color: #fff; }
+.tw-btn--rose:hover:not(:disabled) { background: var(--tw-teal-dark); }
+.tw-btn--rose:active:not(:disabled) { transform: scale(0.97); }
+.tw-btn--secondary { background: var(--tw-surface); color: var(--tw-text); border-color: var(--tw-border); }
+.tw-btn--secondary:hover:not(:disabled) { background: var(--tw-surface-alt); border-color: var(--tw-teal); }
+.tw-btn--secondary:active:not(:disabled) { transform: scale(0.97); }
+.tw-btn--ghost { background: transparent; color: var(--tw-navy); border-color: transparent; }
+.tw-btn--ghost:hover:not(:disabled) { background: rgba(186,121,118,.08); }
+.tw-btn--ghost:active:not(:disabled) { transform: scale(0.97); }
+.tw-btn--danger { background: #B33A45; color: #fff; }
+.tw-btn--danger:hover:not(:disabled) { background: #9A2F39; }
+.tw-btn--danger:active:not(:disabled) { transform: scale(0.97); }
+.tw-btn--sm { min-height: 36px; padding: 0 14px; font-size: 12px; border-radius: var(--tw-radius-sm, 8px); }
+.tw-btn--lg { min-height: 52px; padding: 0 28px; font-size: 15px; }
+
+/* Badge */
+.tw-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 12px;
+  border-radius: var(--tw-radius-full, 999px);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1.4;
+}
+.risk-high { background: #FCE9EB; color: #B33A45; border: 1px solid #F4C7CB; }
+.risk-moderate { background: #FFF4E1; color: #A96605; border: 1px solid #F0D19A; }
+.risk-low { background: #E9F5EE; color: #27734E; border: 1px solid #A8DBBE; }
+
+/* Field / Label / Input */
+.tw-field { display: flex; flex-direction: column; gap: 7px; min-width: 0; }
+.tw-label { font-size: 12px; font-weight: 800; color: var(--tw-navy); letter-spacing: 0.02em; }
+.tw-input {
+  width: 100%;
+  height: 48px;
+  border: 1px solid var(--tw-border);
+  background: #fff;
+  border-radius: var(--tw-radius-md, 12px);
+  padding: 0 15px;
+  color: var(--tw-text);
+  font-size: 14px;
+  transition: border-color var(--tw-duration-fast) ease-out, box-shadow var(--tw-duration-fast) ease-out;
+}
+.tw-input:hover { border-color: rgba(186,121,118,.4); }
+.tw-input:focus { border-color: var(--tw-teal); box-shadow: 0 0 0 4px rgba(186,121,118,.12); outline: none; }
+.tw-input::placeholder { color: var(--tw-muted); }
+select.tw-input { appearance: auto; }
+.tw-field-error { color: #B33A45; font-size: 11.5px; margin: 0; }
+.tw-meta { font-size: 11px; color: var(--tw-muted); margin: 0; }
+
+/* Empty / error state (components/ui/EmptyState) */
+.tw-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 40px var(--s-6);
+  gap: var(--s-2);
+}
+.tw-state__icon {
+  width: 56px;
+  height: 56px;
+  margin-bottom: var(--s-1);
+  border-radius: var(--r-lg);
+  background: var(--tw-aqua);
+  color: var(--tw-accent-text);
+  display: grid;
+  place-items: center;
+}
+.tw-state__title {
+  font-size: var(--fs-md);
+  font-weight: 700;
+  color: var(--tw-text);
+  margin: 0;
+}
+.tw-state__text {
+  font-size: var(--fs-sm);
+  color: var(--tw-muted);
+  margin: 0;
+  max-width: 36ch;
+  line-height: 1.6;
+}
+.tw-state__action { margin-top: var(--s-2); }
+.tw-state--compact { padding: var(--s-7) var(--s-4); }
+.tw-state--compact .tw-state__icon { width: 44px; height: 44px; border-radius: var(--r-md); }
+.tw-state--compact .tw-state__title { font-size: var(--fs-sm); }
+.tw-state--compact .tw-state__text { font-size: var(--fs-xs); }
+
+/* Submit (shared with auth) */
+.public-button{ min-height:44px; border-radius:12px; padding:0 20px; background:var(--tw-navy); color:#fff; box-shadow:0 8px 22px rgba(53,33,38,.12); }
+.public-button:hover{ background:var(--tw-navy-dark); color:#fff; transform:translateY(-1px); }
+

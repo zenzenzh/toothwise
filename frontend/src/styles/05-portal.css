@@ -1,0 +1,645 @@
+/* Patient portal (pp2): masthead, status, history, detail.
+   Part of the ordered stylesheet split - see src/index.css. */
+/* =====================================================================
+   PATIENT PORTAL
+   ===================================================================== */
+
+
+
+
+/* Two-panel layout */
+
+/* Stats (sidebar, stacked) */
+
+/* CTA (sidebar) */
+
+/* Section (main) */
+
+/* Screening grid */
+
+.pp-thumb {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  display: block;
+  background: #EDE0E8;
+}
+.pp-thumb--skeleton {
+  background: linear-gradient(90deg, #EDE0E8 25%, #F8F6F4 37%, #EDE0E8 63%);
+  background-size: 900px 100%;
+  animation: shimmer 1.35s linear infinite;
+}
+
+
+
+/* Detail view */
+
+
+
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+                  
+
+
+/* Detail view */
+
+
+
+
+/* Mobile responsive */
+
+
+
+
+          }
+
+
+/* =====================================================================
+   PATIENT PORTAL — centered patient health page
+   Single column page: masthead, greeting, status, facts, history.
+   No sidebar, no dashboard chrome.
+   ===================================================================== */
+
+/* Root & shell */
+.pp2-root {
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse at 8% 6%, rgba(186,121,118,0.18) 0%, transparent 38%),
+    radial-gradient(ellipse at 92% 94%, rgba(196,140,138,0.14) 0%, transparent 35%),
+    #F5EFEC;
+  font-family: 'Manrope', 'Segoe UI', Arial, sans-serif;
+}
+.pp2-shell {
+  width: 100%;
+  max-width: 840px;
+  margin: 0 auto;
+  padding: 0 clamp(20px, 4vw, 36px) 64px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(24px, 4vw, 36px);
+}
+
+/* ── Masthead ── */
+.pp2-masthead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: clamp(16px, 3vw, 28px) 0 clamp(14px, 2vw, 20px);
+  border-bottom: 1px solid #E8DCE0;
+}
+.pp2-masthead-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.pp2-masthead-logo {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--tw-teal), #8B4A6B);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.pp2-masthead-name {
+  font-size: 16px;
+  font-weight: 800;
+  color: #2E1A22;
+  letter-spacing: -0.02em;
+}
+.pp2-signout {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 14px;
+  border: 1px solid var(--tw-border);
+  border-radius: 12px;
+  background: rgba(255,255,255,0.8);
+  color: var(--tw-muted);
+  font-size: 13px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background var(--dur-fast), color var(--dur-fast), border-color var(--dur-fast);
+}
+.pp2-signout:hover {
+  background: var(--tw-border);
+  color: var(--tw-text);
+  border-color: var(--tw-teal);
+}
+
+/* ── Greeting ── */
+.pp2-greet {
+  display: flex;
+  flex-direction: column;
+}
+.pp2-greet-kicker {
+  font-size: 12px;
+  font-weight: 700;
+  color: #8C5B60;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin: 0 0 6px;
+}
+.pp2-greet-name {
+  font-size: clamp(30px, 5vw, 42px);
+  font-weight: 800;
+  color: #2E1A22;
+  letter-spacing: -0.03em;
+  line-height: 1.08;
+  margin: 0 0 10px;
+}
+.pp2-greet-sub {
+  font-size: 15px;
+  color: var(--tw-muted);
+  line-height: 1.65;
+  margin: 0;
+  max-width: 52ch;
+}
+
+/* ── Status card (page hero object) ── */
+.pp2-status {
+  display: flex;
+  align-items: center;
+  gap: clamp(16px, 2.5vw, 22px);
+  padding: clamp(22px, 3vw, 30px);
+  border-radius: 28px;
+  border: 1px solid;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 14px 44px rgba(59,40,49,0.09);
+}
+.pp2-status--neutral { border-color: var(--tw-border); }
+.pp2-status--good   { border-color: #C3E8D2; background: #EFF8F3; }
+.pp2-status--warn   { border-color: #F2DFB8; background: #Fdf6ea; }
+.pp2-status--alert  { border-color: #F5C6C6; background: #fdeeee; }
+.pp2-status-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.pp2-status--neutral .pp2-status-icon {
+  background: rgba(75,47,53,0.1);
+  color: var(--tw-text);
+}
+.pp2-status--good .pp2-status-icon {
+  background: rgba(22,101,52,0.12);
+  color: #166534;
+}
+.pp2-status--warn .pp2-status-icon {
+  background: rgba(180,83,9,0.12);
+  color: #B45309;
+}
+.pp2-status--alert .pp2-status-icon {
+  background: rgba(185,28,28,0.12);
+  color: #B91C1C;
+}
+.pp2-status-body {
+  flex: 1;
+  min-width: 0;
+}
+.pp2-status-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--tw-muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 3px;
+}
+.pp2-status-value {
+  display: block;
+  font-size: clamp(22px, 3vw, 26px);
+  font-weight: 800;
+  color: #2E1A22;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+.pp2-status-msg {
+  font-size: 14px;
+  color: var(--tw-muted);
+  line-height: 1.6;
+  margin: 8px 0 0;
+  max-width: 52ch;
+}
+.pp2-status-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 11px 18px;
+  border: none;
+  border-radius: 12px;
+  background: #4B2F35;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background var(--dur-fast), transform var(--dur-fast);
+}
+.pp2-status-cta:hover { background: #3A2430; }
+.pp2-status-cta:active { transform: scale(0.97); }
+
+/* ── Quick facts ── */
+.pp2-facts {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  background: rgba(255,255,255,0.8);
+  border: 1px solid var(--tw-border);
+  border-radius: 16px;
+  overflow: hidden;
+  margin: 0;
+}
+.pp2-fact {
+  padding: 16px 20px;
+  text-align: center;
+  min-width: 0;
+}
+.pp2-fact + .pp2-fact { border-left: 1px solid var(--tw-border); }
+.pp2-fact-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--tw-muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.pp2-fact-value {
+  font-size: 14px;
+  font-weight: 800;
+  color: #2E1A22;
+  margin: 0;
+  line-height: 1.45;
+}
+
+/* ── History ── */
+.pp2-history-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.pp2-history-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: #2E1A22;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+.pp2-history-count {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--tw-text);
+  background: rgba(186,121,118,0.16);
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+/* ── Screening grid + cards ── */
+.pp2-screening-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+}
+.pp2-screening-card {
+  background: var(--tw-surface);
+  border: 1px solid var(--tw-border);
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: box-shadow var(--dur), transform var(--dur), border-color var(--dur);
+  animation: pp2-rise 420ms ease both;
+  animation-delay: calc(var(--stagger-index, 0) * 60ms);
+}
+@keyframes pp2-rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.pp2-screening-card:hover {
+  border-color: var(--tw-teal);
+  box-shadow: 0 8px 24px rgba(75,47,53,0.1);
+}
+@media (hover: hover) and (pointer: fine) {
+  .pp2-screening-card:hover { transform: translateY(-2px); }
+}
+.pp2-screening-card:focus-visible {
+  outline: 2px solid var(--tw-teal);
+  outline-offset: 2px;
+}
+.pp2-screening-card:active { transform: scale(0.98); }
+.pp2-screening-thumb-wrap {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  background: var(--tw-bg);
+}
+.pp2-screening-thumb-wrap .pp-thumb,
+.pp2-screening-thumb-wrap .pp-thumb--skeleton {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 0;
+}
+.pp2-risk-pill {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+}
+.pp2-risk-pill--high     { background: #B91C1C; }
+.pp2-risk-pill--moderate { background: #B45309; }
+.pp2-risk-pill--low      { background: #166534; }
+.pp2-screening-card-body {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 12px 14px;
+}
+.pp2-screening-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--tw-muted);
+  min-width: 0;
+}
+.pp2-screening-card-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--tw-text);
+  white-space: nowrap;
+}
+
+/* ── Empty state ── */
+.pp2-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+  padding: 44px 24px;
+  background: rgba(255,255,255,0.8);
+  border: 1px dashed #D8C9CB;
+  border-radius: 20px;
+}
+.pp2-empty-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: rgba(186,121,118,0.14);
+  color: var(--tw-accent-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+.pp2-empty-title {
+  font-size: 17px;
+  font-weight: 800;
+  color: #2E1A22;
+  margin: 0;
+}
+.pp2-empty-text {
+  font-size: 13px;
+  color: var(--tw-muted);
+  line-height: 1.6;
+  margin: 0;
+  max-width: 44ch;
+}
+.pp2-empty-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 12px;
+  background: #4B2F35;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+}
+.pp2-empty-cta:hover { background: #3A2430; }
+
+/* ── Detail view ── */
+.pp2-detail-page {
+  width: 100%;
+  max-width: 840px;
+  margin: 0 auto;
+  padding: 24px clamp(20px, 4vw, 36px) 64px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.pp2-back-btn {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 14px;
+  border: 1px solid var(--tw-border);
+  border-radius: 12px;
+  background: rgba(255,255,255,0.8);
+  color: var(--tw-text);
+  font-size: 13px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background var(--dur-fast), border-color var(--dur-fast), box-shadow var(--dur-fast), transform var(--dur-fast);
+}
+.pp2-back-btn:hover {
+  color: var(--tw-text); border-color: var(--tw-teal); box-shadow: 0 2px 8px rgba(186,121,118,0.15);
+}
+.pp2-back-btn:active { transform: scale(0.97); }
+.pp2-detail-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.pp2-detail-header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.pp2-detail-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.pp2-detail-title {
+  font-size: clamp(22px, 4vw, 30px);
+  font-weight: 800;
+  color: #2E1A22;
+  letter-spacing: -0.03em;
+  margin: 0;
+}
+.pp2-detail-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+.pp2-detail-image { min-width: 0; }
+.pp2-detail-info {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+.pp2-detail-block {
+  background: rgba(255,255,255,0.92);
+  border: 1px solid var(--tw-border);
+  border-radius: 14px;
+  padding: 16px;
+}
+.pp2-detail-block-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--tw-text);
+  margin: 0 0 12px;
+}
+.pp2-detection-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.pp2-detection-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: var(--chip-color, #eee);
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+}
+.pp2-detection-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.85);
+}
+.pp2-rec-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.pp2-rec-item {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 10px 12px;
+  background: #F8F6F4;
+  border: 1px solid var(--tw-border);
+  border-radius: 10px;
+}
+.pp2-rec-num {
+  width: 22px;
+  height: 22px;
+  border-radius: 7px;
+  background: #4B2F35;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.pp2-rec-text {
+  font-size: 13px;
+  color: #2E1A22;
+  line-height: 1.55;
+}
+
+/* ── Mobile ── */
+@media (max-width: 640px) {
+  .pp2-status {
+    flex-wrap: wrap;
+  }
+  .pp2-status-cta {
+    width: 100%;
+    justify-content: center;
+  }
+  .pp2-facts {
+    grid-template-columns: 1fr 1fr;
+  }
+  .pp2-fact + .pp2-fact {
+    border-left: none;
+    border-top: 1px solid var(--tw-border);
+  }
+  .pp2-fact:last-child {
+    grid-column: 1 / -1;
+  }
+  .pp2-fact {
+    padding: 14px 10px;
+  }
+  .pp2-detail-grid { grid-template-columns: 1fr; }
+  .pp2-screening-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 480px) {
+  .pp2-facts { grid-template-columns: 1fr; }
+  .pp2-fact:last-child { grid-column: auto; }
+  .pp2-screening-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 768px) {
+  body { overflow-x:hidden; }
+      .auth-panel { padding:28px 22px; }
+                    .chat-widget-root { right:14px; bottom:14px; }
+  .chat-panel { width:min(380px,calc(100vw - 28px)); height:min(620px,calc(100dvh - 92px)); }
+
+  /* Patient record (dashboard) â€” the Age/Gender/Contact/Address grid was
+     staying at 4 fixed columns even on narrow phones, squeezing each card
+     down to a sliver and forcing values like "21 years old" to wrap across
+     several lines. Two columns gives each stat room to breathe. */
+      }
+@media (max-width: 480px) {
+  /* On the narrowest phones even two columns is tight for "Address" with a
+     long street line, so stack everything into a single column. */
+  }
+@media (max-width: 480px) {
+  /* Patient portal dashboard - stack the stat cards to one per row and
+     let the "Ask the assistant" banner wrap under its label instead of
+     squeezing the button onto the same line. */
+      
+  /* UI primitives — mobile */
+  .tw-card { padding: var(--tw-space-4, 16px); border-radius: var(--tw-radius-lg, 16px); }
+  .tw-btn { min-height: 48px; font-size: 14px; }
+  .tw-btn--sm { min-height: 42px; }
+  .tw-input { height: 52px; font-size: 16px; }
+}
+

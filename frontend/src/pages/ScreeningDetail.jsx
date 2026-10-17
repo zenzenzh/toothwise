@@ -268,7 +268,7 @@ export default function ScreeningDetail() {
       <section className="sd-card sd-patient-header" aria-label="Screening summary">
         <div className="sd-patient-text">
           <p className="sd-eyebrow">AI analysis result · Screening #{screening.id}</p>
-          <h2 className="sd-patient-name">{patient?.full_name || `Patient #${screening.patient_id}`}</h2>
+          <h1 className="sd-patient-name">{patient?.full_name || `Patient #${screening.patient_id}`}</h1>
         </div>
         <div className={`sd-risk sd-risk--${screening.risk_level}`}>
           <div className="sd-risk-label">Risk level</div>

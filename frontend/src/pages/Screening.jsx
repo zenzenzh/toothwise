@@ -152,7 +152,7 @@ export default function Screening() {
       </div>
 
       <div className="tw-page-title-wrap">
-        <h2>New AI Screening</h2>
+        <h1>New AI Screening</h1>
         <p>{patientName ? `${patientName} · Patient #${patientId}` : `Patient #${patientId}`}</p>
       </div>
 
