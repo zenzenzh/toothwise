@@ -1,5 +1,6 @@
 import torch
 import logging
+from contextlib import asynccontextmanager
 from pathlib import Path
 from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
@@ -24,11 +25,20 @@ logging.basicConfig(
 )
 logger = logging.getLogger("toothwise")
 
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    # Replaces the deprecated @app.on_event("startup"); on_startup() is
+    # defined further down and runs before the app starts serving.
+    on_startup()
+    yield
+
+
 app = FastAPI(
     title=settings.APP_NAME,
     version="1.0.0",
     description="AI-powered dental screening and recommendation API for "
                  "CodiSmile Dental Clinic.",
+    lifespan=lifespan,
 )
 
 app.state.limiter = limiter
@@ -175,7 +185,6 @@ def _migrate_roles_v2():
             logger.info("Migrated %s legacy 'admin' staff account(s) to 'dentist'.", result.rowcount)
 
 
-@app.on_event("startup")
 def on_startup():
     Path(settings.UPLOAD_DIR).mkdir(parents=True, exist_ok=True)
 
