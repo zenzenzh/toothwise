@@ -143,7 +143,7 @@ export const chatbotAPI = {
 
 // ---------- Patient portal (self-service) ----------
 // Separate axios instance + token key from the staff `api` above, so a
-// patient session and a staff (dentist/admin) session can't collide or
+// patient session and a staff (clinic) session can't collide or
 // overwrite each other, e.g. in the same browser.
 const patientApi = axios.create({ baseURL: apiBase + '/api' });
 

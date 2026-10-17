@@ -149,8 +149,8 @@ Address:
 NW Phase LRT Central Terminal Arroceros St., Brgy. 659-A, Ermita, Manila City
 
 Hours:
-Monday-Saturday 9:00 AM-6:00 PM
-Sunday 10:00 AM-4:00 PM
+Monday-Saturday 9:00 AM-5:00 PM
+Sunday 9:00 AM-2:00 PM
 
 Services represented in ToothWise:
 - Oral prophylaxis / cleaning
