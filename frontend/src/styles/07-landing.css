@@ -46,7 +46,7 @@
 .tw6-brand { display: flex; align-items: center; gap: 11px; color: var(--t6-plum); min-width: max-content; }
 .tw6-brand img { width: 42px; height: 42px; object-fit: contain; border-radius: 12px; }
 .tw6-brand strong { display: block; font-size: 15px; letter-spacing: -.02em; }
-.tw6-brand small { display: block; margin-top: 2px; font: 700 8px/1 'Manrope', sans-serif; letter-spacing: .17em; color: var(--t6-rose); }
+.tw6-brand small { display: block; margin-top: 2px; font: 700 8px/1 'Manrope', sans-serif; letter-spacing: .17em; color: var(--tw-accent-text); }
 .tw6-nav nav { display: flex; align-items: center; gap: 2px; }
 .tw6-nav nav > button {
   position: relative; min-height: 44px; display: inline-flex; align-items: center; gap: 7px;
@@ -248,6 +248,8 @@
 .tw6-carousel-card.is-active { transform: translateY(-4px); box-shadow: 0 24px 52px oklch(24% .035 350 / .14); }
 .tw6-carousel-card-image { position: relative; width: 100%; aspect-ratio: 1 / 1; height: auto; background: var(--t6-cream); }
 .tw6-carousel-card-image img { width: 100%; height: 100%; object-fit: cover; display: block; }
+/* <picture> wrappers (WebP + JPEG fallback) must not affect layout. */
+.tw6 picture { display: contents; }
 .tw6-carousel-card-body { padding: 18px 20px 22px; display: flex; flex-direction: column; gap: 8px; }
 .tw6-carousel-card-body strong { color: var(--t6-plum); font-size: 16.5px; letter-spacing: -.02em; }
 .tw6-carousel-card-body p { margin: 0; color: var(--t6-muted); font-size: 13.5px; line-height: 1.6; }
@@ -397,7 +399,7 @@
   display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;
   padding-top: 16px; border-top: 1px solid oklch(100% 0 0 / .12);
 }
-.tw6-footer-bottom > span { color: oklch(93% .01 38 / .5); font-size: 11.5px; }
+.tw6-footer-bottom > span { color: oklch(93% .01 38 / .6); font-size: 11.5px; }
 .tw6-footer-links { display: flex; align-items: center; gap: 20px; }
 .tw6-footer-links a, .tw6-footer-links button {
   border: 0; background: none; padding: 0; cursor: pointer;

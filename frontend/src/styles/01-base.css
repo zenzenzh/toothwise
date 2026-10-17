@@ -224,3 +224,12 @@ body.dark-mode .skeleton, body.dark-mode .pp-thumb--skeleton { background:linear
 }
 
 
+
+/* ── Route loading fallback (lazy route chunks) ───────────────────── */
+.tw-route-fallback { min-height: 60vh; display: grid; place-items: center; }
+.tw-route-fallback__spinner {
+  width: 28px; height: 28px; border-radius: 50%;
+  border: 3px solid var(--tw-border); border-top-color: var(--tw-teal);
+  animation: tw-route-spin .8s linear infinite;
+}
+@keyframes tw-route-spin { to { transform: rotate(360deg); } }

@@ -123,13 +123,20 @@ function ServiceCarousel({ services, onAskAbout }) {
         {services.map((service, index) => (
           <div key={service.name} className={`tw6-carousel-card${index === activeIndex ? ' is-active' : ''}`}>
             <div className="tw6-carousel-card-image">
-              <img
-                src={service.image}
-                srcSet={`${service.image.replace('.jpg', '-480.jpg')} 480w, ${service.image} 720w`}
-                sizes="(max-width: 760px) 82vw, 360px"
-                loading="lazy"
-                alt={`${service.name} - CodiSmile Dental Clinic`}
-              />
+              <picture>
+                <source
+                  type="image/webp"
+                  srcSet={`${service.image.replace('.jpg', '-480.webp')} 480w, ${service.image.replace('.jpg', '.webp')} 720w`}
+                  sizes="(max-width: 760px) 82vw, 360px"
+                />
+                <img
+                  src={service.image}
+                  srcSet={`${service.image.replace('.jpg', '-480.jpg')} 480w, ${service.image} 720w`}
+                  sizes="(max-width: 760px) 82vw, 360px"
+                  loading="lazy"
+                  alt={`${service.name} - CodiSmile Dental Clinic`}
+                />
+              </picture>
             </div>
             <div className="tw6-carousel-card-body">
               <strong>{service.name}</strong>
@@ -246,9 +253,9 @@ export default function Landing() {
 
       <header ref={navRef} className={`tw6-nav${mobileNavOpen ? ' is-open' : ''}`}>
         <div className="tw6-nav-inner">
-          <a href="#top" className="tw6-brand" aria-label="CodiSmile Dental Clinic home" onClick={(event) => scrollToSection(event, 'top')}>
-            <img src="/codismile/codismile-logo-96.png" srcSet="/codismile/codismile-logo-96.png 1x, /codismile/codismile-logo-192.png 2x" width="42" height="42" alt="" />
-            <span><strong>CodiSmile</strong><small>DENTAL CLINIC</small></span>
+          <a href="#top" className="tw6-brand" aria-label="CodiSmile Dental Clinic" onClick={(event) => scrollToSection(event, 'top')}>
+            <picture><source type="image/webp" srcSet="/codismile/codismile-logo-96.webp 1x, /codismile/codismile-logo-192.webp 2x" /><img src="/codismile/codismile-logo-96.png" srcSet="/codismile/codismile-logo-96.png 1x, /codismile/codismile-logo-192.png 2x" width="42" height="42" alt="" /></picture>
+            <span><strong>CodiSmile</strong>{' '}<small>DENTAL CLINIC</small></span>
           </a>
           <button
             type="button"
@@ -282,15 +289,23 @@ export default function Landing() {
             <div className="tw6-proof"><CheckCircle2 size={15} /> Secure role-based access <span /> <HeartPulse size={15} /> AI stays assistive</div>
           </div>
           <figure className="tw6-hero-media">
-            <img
-              src="/codismile/hero.jpg"
-              srcSet="/codismile/hero-720.jpg 720w, /codismile/hero.jpg 1080w"
-              sizes="(max-width: 900px) 100vw, 50vw"
-              width="1080"
-              height="1080"
-              decoding="async"
-              alt="CodiSmile Dental Clinic treatment room"
-            />
+            <picture>
+              <source
+                type="image/webp"
+                srcSet="/codismile/hero-720.webp 720w, /codismile/hero.webp 1080w"
+                sizes="(max-width: 1024px) 100vw, 50vw"
+              />
+              {/* The hero photo is the LCP element: fetch it first. */}
+              <img
+                src="/codismile/hero.jpg"
+                srcSet="/codismile/hero-720.jpg 720w, /codismile/hero.jpg 1080w"
+                sizes="(max-width: 1024px) 100vw, 50vw"
+                width="1080"
+                height="1080"
+                fetchpriority="high"
+                alt="CodiSmile Dental Clinic treatment room"
+              />
+            </picture>
             <figcaption className="tw6-hero-chip">
               <span className="tw6-chip-icon"><Activity size={16} /></span>
               <span><strong>From screening to recommendation</strong><small>Organized around the clinic workflow.</small></span>
@@ -312,16 +327,23 @@ export default function Landing() {
 
         <Reveal as="section" className="tw6-story" id="toothwise">
           <div className="tw6-story-media">
-            <img
-              src="/codismile/location.jpg"
-              srcSet="/codismile/location-720.jpg 720w, /codismile/location.jpg 1080w"
-              sizes="(max-width: 900px) 100vw, 50vw"
-              width="1080"
-              height="1080"
-              loading="lazy"
-              decoding="async"
-              alt="CodiSmile Dental Clinic storefront"
-            />
+            <picture>
+              <source
+                type="image/webp"
+                srcSet="/codismile/location-720.webp 720w, /codismile/location.webp 1080w"
+                sizes="(max-width: 1024px) 100vw, 50vw"
+              />
+              <img
+                src="/codismile/location.jpg"
+                srcSet="/codismile/location-720.jpg 720w, /codismile/location.jpg 1080w"
+                sizes="(max-width: 1024px) 100vw, 50vw"
+                width="1080"
+                height="1080"
+                loading="lazy"
+                decoding="async"
+                alt="CodiSmile Dental Clinic storefront"
+              />
+            </picture>
             <div className="tw6-photo-note"><MapPin size={14} /><span>Ermita, Manila City</span></div>
           </div>
           <div className="tw6-story-copy">
@@ -407,7 +429,7 @@ export default function Landing() {
       <footer className="tw6-footer">
         <div className="tw6-footer-top">
           <div className="tw6-footer-brand">
-            <img src="/codismile/codismile-logo-96.png" srcSet="/codismile/codismile-logo-96.png 1x, /codismile/codismile-logo-192.png 2x" width="40" height="40" alt="" />
+            <picture><source type="image/webp" srcSet="/codismile/codismile-logo-96.webp 1x, /codismile/codismile-logo-192.webp 2x" /><img src="/codismile/codismile-logo-96.png" srcSet="/codismile/codismile-logo-96.png 1x, /codismile/codismile-logo-192.png 2x" width="40" height="40" alt="" /></picture>
             <div>
               <strong>ToothWise</strong>
               <span>AI-assisted dental screening and patient workflow for {CLINIC.name}.</span>

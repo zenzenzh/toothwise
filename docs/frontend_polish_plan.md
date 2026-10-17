@@ -123,6 +123,34 @@ Most of the per-page items were handled during the Phase 2 rewrites: Patients, S
 - **Layout without inline styles.** `Layout.jsx` now uses `.tw-shell` / `.tw-sb-*` / `.tw-topbar` classes; only `--sidebar-w` stays inline. Its mobile rules no longer need `!important`. Computed styles were identical before and after for the full and rail sidebar in both themes, and for mobile with the drawer closed and open.
 - **`!important` down to 16.** That's from 189 at the start; the remaining 16 are reduced motion, print, and the global input focus ring. Removing the others surfaced two rules that had only ever lost to an `!important`: a stale duplicate mobile popover position (deleted) and the landing highlights' `:nth-child(even)` border (now matched by specificity). The chat status dot got a scoped margin rule. Computed styles were re-verified identical on landing (375 and 1280 px), login, portal, the dashboard and patients pages at both widths, and the open popovers.
 
+### Lighthouse audit (done)
+Lighthouse 12 was run against the production build served with gzip, on the public pages at 390 px (mobile, simulated slow 4G) and 1440 px (desktop). The staff pages need a signed-in session and the backend, so Lighthouse couldn't reach them.
+
+| Page | Width | Perf | A11y | Best practices | LCP |
+|---|---|---|---|---|---|
+| Landing | 1440 | 99 | 100 | 100 | 0.8 s |
+| Landing | 390 | 83 | 100 | 100 | 4.0 s |
+| Login | 1440 | 100 | 100 | 100 | 0.7 s |
+| Login | 390 | 92 | 100 | 100 | 2.9 s |
+| Patient portal | 1440 | 100 | 100 | 100 | 0.7 s |
+| Patient portal | 390 | 91 | 100 | 100 | 3.0 s |
+
+CLS was 0 on every page.
+
+Fixes:
+- **Code splitting.** Routes are lazy-loaded behind a `Suspense` fallback, which takes the main bundle from 231 KB to 95 KB gzipped. Staff pages and recharts now load in their own chunks.
+- **Fonts.** Google Fonts no longer block rendering (preload, then swap to stylesheet, with a `<noscript>` fallback), and `<meta charset>` is now first in `<head>`.
+- **Images.**
+  - The hero, location, service and logo images are served as WebP through `<picture>`. That's 1,269 KB of photo JPEGs reduced to 810 KB.
+  - The hero image gets `fetchpriority="high"`.
+  - `sizes` matches the 1024 px single-column breakpoint.
+- **Contrast.** The nav brand subtitle (3.1:1) and footer copyright (4.36:1) now pass.
+- **Brand link name.** The `aria-label` now matches the visible text, so it no longer mismatches on desktop or leaves the link unnamed on mobile.
+
+Left as-is:
+- Mobile landing LCP is about 4 s, because the hero photo sits below the headline and is discovered by JS. Preloading it would need a landing-only tag in the shared `index.html`.
+- Lighthouse still reports about 40 KB of unused JS and about 20 KB of unused CSS in the shared bundle.
+
 ## Suggested order and checkpoints
 1. Phase 1 → visual check, should be no change.
 2. Phase 2 one page at a time, one commit per page, screenshot before and after in both themes.

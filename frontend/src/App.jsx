@@ -1,22 +1,27 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { useEffect } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { PatientAuthProvider } from './context/PatientAuthContext';
 import Landing from './pages/Landing';
-import PatientPortal from './pages/PatientPortal';
 import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
-import Patients from './pages/Patients';
-import PatientDetail from './pages/PatientDetail';
-import Screening from './pages/Screening';
-import ScreeningDetail from './pages/ScreeningDetail';
-import Dentists from './pages/Dentists';
-import AuditLog from './pages/AuditLog';
-import NotFound from './pages/NotFound';
-import PrivacyPolicy from './pages/PrivacyPolicy';
-import ThankYou from './pages/ThankYou';
-import Layout from './components/Layout';
+import RouteFallback from './components/RouteFallback';
+
+// Public entry pages stay in the main bundle; everything behind them
+// (staff workspace, charts, portal, static pages) loads on demand, so the
+// landing page doesn't ship recharts and every staff screen up front.
+const PatientPortal = lazy(() => import('./pages/PatientPortal'));
+const Layout = lazy(() => import('./components/Layout'));
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const Patients = lazy(() => import('./pages/Patients'));
+const PatientDetail = lazy(() => import('./pages/PatientDetail'));
+const Screening = lazy(() => import('./pages/Screening'));
+const ScreeningDetail = lazy(() => import('./pages/ScreeningDetail'));
+const Dentists = lazy(() => import('./pages/Dentists'));
+const AuditLog = lazy(() => import('./pages/AuditLog'));
+const NotFound = lazy(() => import('./pages/NotFound'));
+const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
+const ThankYou = lazy(() => import('./pages/ThankYou'));
 
 function Protected({ children }) {
   const { dentist } = useAuth();
@@ -79,6 +84,7 @@ export default function App() {
               error: { iconTheme: { primary: '#EF4444', secondary: '#181B23' } },
             }}
           />
+          <Suspense fallback={<RouteFallback />}>
           <Routes>
             <Route path="/" element={<RootRoute />} />
             <Route path="/login" element={<Login />} />
@@ -98,6 +104,7 @@ export default function App() {
 
             <Route path="*" element={<NotFound />} />
           </Routes>
+          </Suspense>
         </BrowserRouter>
       </PatientAuthProvider>
     </AuthProvider>
