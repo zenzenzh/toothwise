@@ -7,6 +7,8 @@ import Landing from './pages/Landing';
 import Login from './pages/Login';
 import RouteFallback from './components/RouteFallback';
 
+import { can } from './utils/permissions';
+
 // Public entry pages stay in the main bundle; everything behind them
 // (staff workspace, charts, portal, static pages) loads on demand, so the
 // landing page doesn't ship recharts and every staff screen up front.
@@ -28,9 +30,17 @@ function Protected({ children }) {
   return dentist ? children : <Navigate to="/login" replace />;
 }
 
-function AdminOnly({ children }) {
+// Dentist/administrator only: staff management and the audit trail.
+function DentistOnly({ children }) {
   const { dentist } = useAuth();
-  return dentist?.role === 'admin' ? children : <Navigate to="/dashboard" replace />;
+  return can(dentist?.role, 'manageStaff') ? children : <Navigate to="/dashboard" replace />;
+}
+
+// Clinical work (screenings) is open to the dentist and the assistant;
+// receptionists are kept out of clinical data.
+function ClinicalOnly({ children }) {
+  const { dentist } = useAuth();
+  return can(dentist?.role, 'clinical') ? children : <Navigate to="/dashboard" replace />;
 }
 
 function RootRoute() {
@@ -96,10 +106,10 @@ export default function App() {
               <Route index element={<Dashboard />} />
               <Route path="patients" element={<Patients />} />
               <Route path="patients/:id" element={<PatientDetail />} />
-              <Route path="patients/:id/screening" element={<Screening />} />
-              <Route path="screenings/:id" element={<ScreeningDetail />} />
-              <Route path="dentists" element={<AdminOnly><Dentists /></AdminOnly>} />
-              <Route path="audit-log" element={<AdminOnly><AuditLog /></AdminOnly>} />
+              <Route path="patients/:id/screening" element={<ClinicalOnly><Screening /></ClinicalOnly>} />
+              <Route path="screenings/:id" element={<ClinicalOnly><ScreeningDetail /></ClinicalOnly>} />
+              <Route path="dentists" element={<DentistOnly><Dentists /></DentistOnly>} />
+              <Route path="audit-log" element={<DentistOnly><AuditLog /></DentistOnly>} />
             </Route>
 
             <Route path="*" element={<NotFound />} />
