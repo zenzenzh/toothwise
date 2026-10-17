@@ -1,21 +1,16 @@
-import { useEffect, useState } from 'react';
-import { ArrowLeft, ScanSearch, Plus, ArrowUpRight } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { ArrowLeft, ScanSearch, ScanLine, ArrowUpRight, UserX, CloudOff, RotateCw, Lock } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, ReferenceArea } from 'recharts';
 import { patientsAPI } from '../api';
+import { useAuth } from '../context/AuthContext';
+import { can } from '../utils/permissions';
 import { formatDatePH, formatShortDatePH } from '../utils/datetime';
 import { SkeletonBlock, SkeletonCircle, SkeletonCard } from '../components/Skeleton';
-import toast from 'react-hot-toast';
-
+import Button from '../components/ui/Button';
+import EmptyState from '../components/ui/EmptyState';
+import RiskBadge, { RISK_COLOR } from '../components/ui/RiskBadge';
 import T from '../tokens';
-
-const C = { burgundy: T.burgundy, rose: T.rose, gold: T.rosegold, blush: T.blush, white: T.white, muted: T.muted };
-
-const RISK_STYLE = {
-  HIGH:   { background: 'var(--tw-danger-bg)', color: 'var(--tw-danger)', border: '1px solid var(--tw-danger-border)' },
-  MEDIUM: { background: 'var(--tw-warning-bg)', color: 'var(--tw-warning)', border: '1px solid var(--tw-warning-border)' },
-  LOW:    { background: 'var(--tw-success-bg)', color: 'var(--tw-success)', border: '1px solid var(--tw-success-border)' },
-};
 
 // Trend chart shows severity level, never the raw internal score - the
 // score still drives point height (so a genuine within-band change is
@@ -24,58 +19,121 @@ function RiskTrendTooltip({ active, payload }) {
   if (!active || !payload?.length) return null;
   const { date, level } = payload[0].payload;
   return (
-    <div style={{ background: C.white, borderRadius: 8, border: `1px solid ${C.gold}`, padding: '8px 12px', fontSize: 12 }}>
-      <div style={{ color: C.muted, marginBottom: 3 }}>{date}</div>
-      <span style={{ ...RISK_STYLE[level], padding: '2px 10px', borderRadius: 12, fontWeight: 700, fontSize: 10.5, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-        {level}
-      </span>
+    <div className="pd6-tooltip">
+      <div className="pd6-tooltip-date">{date}</div>
+      <RiskBadge level={level} size="sm" />
     </div>
   );
 }
 
 function riskTrendDot(props) {
-  const { cx, cy, payload } = props;
-  return <circle cx={cx} cy={cy} r={4} fill={RISK_STYLE[payload.level]?.color || C.rose} stroke={C.white} strokeWidth={1.5} />;
+  const { cx, cy, payload, index } = props;
+  return <circle key={index} cx={cx} cy={cy} r={5.5} fill={RISK_COLOR[payload.level] || T.accent} stroke={T.surface} strokeWidth={2} />;
 }
 
-export default function PatientDetail() {
-  const { id } = useParams();
-  const navigate = useNavigate();
-  const [patient, setPatient] = useState(null);
-  const [screenings, setScreenings] = useState([]);
-  const [riskTrend, setRiskTrend] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    Promise.all([patientsAPI.get(id), patientsAPI.screenings(id), patientsAPI.riskTrend(id)])
-      .then(([p, s, t]) => { setPatient(p.data); setScreenings(s.data); setRiskTrend(t.data); })
-      .catch(err => toast.error(err.friendlyMessage || 'Failed to load patient'))
-      .finally(() => setLoading(false));
-  }, [id]);
-
-  if (loading) return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+function DetailSkeleton() {
+  return (
+    <div className="tw-page-layout" aria-busy="true" aria-label="Loading patient">
+      <SkeletonBlock width={160} height={40} radius={10} />
+      <div className="pd6-skeleton-head">
         <SkeletonCircle size={72} />
         <div style={{ flex: 1 }}>
           <SkeletonBlock width={200} height={22} />
-          <div style={{ marginTop: 8 }}><SkeletonBlock width={140} height={13} /></div>
+          <SkeletonBlock width={140} height={13} style={{ marginTop: 8 }} />
         </div>
       </div>
       <SkeletonCard index={0} height={150} />
       <SkeletonCard index={1} height={220} />
     </div>
   );
+}
 
-  if (!patient) return (
-    <div className="patient-empty-view">
-      <div className="patient-empty-icon"><ScanSearch size={28} /></div>
-      <h3>Patient record not found</h3>
-      <p>The patient may have been removed or you may no longer have access to this record.</p>
-      <button className="tw-secondary-action-btn" onClick={() => navigate('/dashboard/patients')}>Back to Patients</button>
-    </div>
+export default function PatientDetail() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const { dentist: me } = useAuth();
+  // Receptionists may view the patient record but not clinical data
+  // (screening history / risk trend), which the API also enforces.
+  const canViewClinical = can(me?.role, 'clinical');
+  const [patient, setPatient] = useState(null);
+  const [screenings, setScreenings] = useState([]);
+  const [riskTrend, setRiskTrend] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null); // { notFound, message }
+  const [clinicalError, setClinicalError] = useState(null);
+
+  const load = useCallback(() => {
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+    setClinicalError(null);
+    setPatient(null);
+    setScreenings([]);
+    setRiskTrend([]);
+
+    // The patient record is required; history and trend load alongside it
+    // but a failure there only affects their own section.
+    const clinical = canViewClinical
+      ? Promise.allSettled([patientsAPI.screenings(id), patientsAPI.riskTrend(id)])
+      : Promise.resolve(null);
+
+    Promise.all([patientsAPI.get(id), clinical])
+      .then(([p, results]) => {
+        if (cancelled) return;
+        setPatient(p.data);
+        if (results) {
+          const [s, t] = results;
+          if (s.status === 'fulfilled') setScreenings(s.value.data);
+          else setClinicalError(s.reason?.friendlyMessage || 'Screening history could not be loaded.');
+          if (t.status === 'fulfilled') setRiskTrend(t.value.data);
+        }
+      })
+      .catch(err => {
+        if (cancelled) return;
+        setError({
+          notFound: err.response?.status === 404,
+          message: err.friendlyMessage || 'The patient record could not be loaded.',
+        });
+      })
+      .finally(() => { if (!cancelled) setLoading(false); });
+
+    return () => { cancelled = true; };
+  }, [id, canViewClinical]);
+
+  useEffect(() => load(), [load]);
+
+  const backButton = (
+    <Button variant="secondary" icon={ArrowLeft} onClick={() => navigate('/dashboard/patients')}>Back to Patients</Button>
   );
 
+  if (loading) return <DetailSkeleton />;
+
+  if (error) {
+    return (
+      <div className="tw-page-layout">
+        <div className="tw-page-header">{backButton}</div>
+        {error.notFound ? (
+          <EmptyState
+            className="tw-state--card"
+            icon={UserX}
+            title="Patient record not found"
+            message="The patient may have been removed, or you may no longer have access to this record."
+          />
+        ) : (
+          <EmptyState
+            className="tw-state--card"
+            role="alert"
+            icon={CloudOff}
+            title="Couldn't load this patient"
+            message={error.message}
+            action={<Button variant="secondary" icon={RotateCw} onClick={load}>Try again</Button>}
+          />
+        )}
+      </div>
+    );
+  }
+
+  const startScreening = () => navigate(`/dashboard/patients/${id}/screening`);
   const latestLevel = screenings[0]?.risk_level;
   const details = [
     { label: 'Age',     value: patient.age != null ? patient.age + ' years old' : '—' },
@@ -86,46 +144,43 @@ export default function PatientDetail() {
 
   return (
     <div className="tw-page-layout">
-
       <div className="tw-page-header">
-        <button className="tw-secondary-action-btn" onClick={() => navigate('/dashboard/patients')}><ArrowLeft size={15} /> Back to Patients</button>
-        <button className="tw-primary-action-btn" onClick={() => navigate(`/dashboard/patients/${id}/screening`)}><Plus size={16} /> New Screening</button>
+        {backButton}
+        {canViewClinical && <Button icon={ScanLine} onClick={startScreening}>New Screening</Button>}
       </div>
 
       {/* Profile header: avatar + identity left, latest risk right */}
-      <div style={s.profileCard} className="pd6-profile">
-        <div style={{ display: 'flex', alignItems: 'center', gap: 18, minWidth: 0, flexWrap: 'wrap' }}>
-          <div style={BIG_AVATAR}>{patient.full_name.charAt(0)}</div>
-          <div style={{ minWidth: 0 }}>
-            <h2 style={{ fontSize: 23, fontWeight: 700, color: C.burgundy, margin: 0, letterSpacing: '-0.02em', wordBreak: 'break-word' }}>{patient.full_name}</h2>
-            <p style={{ color: C.muted, fontSize: 12.5, marginTop: 4 }}>Patient ID #{patient.id}</p>
+      <section className="pd6-card pd6-profile" aria-label="Patient">
+        <div className="pd6-identity">
+          <div className="tw-avatar tw-avatar--lg" aria-hidden="true">{patient.full_name.charAt(0)}</div>
+          <div className="pd6-identity-text">
+            <h2 className="pd6-name">{patient.full_name}</h2>
+            <p className="pd6-id">Patient ID #{patient.id}</p>
           </div>
         </div>
         {latestLevel && (
-          <div style={s.profileRisk}>
-            <span style={s.profileRiskLabel}>Latest result</span>
-            <span style={{ ...RISK_STYLE[latestLevel], fontSize: 11.5, padding: '5px 14px', borderRadius: 20, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              {latestLevel}
-            </span>
+          <div className="pd6-latest">
+            <span className="pd6-eyebrow">Latest result</span>
+            <RiskBadge level={latestLevel} size="lg" />
           </div>
         )}
-      </div>
+      </section>
 
       {/* Details as a ruled definition list, not tiles */}
-      <div style={s.defsCard}>
-        {details.map((item, i) => (
-          <div key={i} className="pd6-def" style={s.defRow}>
-            <span style={s.defLabel}>{item.label}</span>
-            <span style={s.defValue}>{item.value}</span>
+      <dl className="pd6-card pd6-defs">
+        {details.map(item => (
+          <div key={item.label} className="pd6-def">
+            <dt>{item.label}</dt>
+            <dd>{item.value}</dd>
           </div>
         ))}
-      </div>
+      </dl>
 
-      {riskTrend.length >= 2 && (
-        <div style={s.card}>
-          <h3 style={s.sectionHeading}>Risk trend</h3>
+      {canViewClinical && riskTrend.length >= 2 && (
+        <section className="pd6-card" aria-labelledby="pd-trend-title">
+          <h3 id="pd-trend-title" className="pd6-section-title">Risk trend</h3>
           <ResponsiveContainer width="100%" height={200}>
-            <LineChart data={riskTrend.map(t => ({
+            <LineChart margin={{ top: 10, right: 14, bottom: 0, left: 0 }} data={riskTrend.map(t => ({
               date: formatShortDatePH(t.created_at),
               score: t.risk_score,
               level: t.risk_level,
@@ -133,111 +188,87 @@ export default function PatientDetail() {
               {/* Colored severity bands stand in for the numeric axis, so the
                   chart still shows exactly where a point falls without ever
                   printing a raw score. */}
-              <ReferenceArea y1={0} y2={35} fill={RISK_STYLE.LOW.color} fillOpacity={0.07} />
-              <ReferenceArea y1={35} y2={70} fill={RISK_STYLE.MEDIUM.color} fillOpacity={0.07} />
-              <ReferenceArea y1={70} y2={100} fill={RISK_STYLE.HIGH.color} fillOpacity={0.07} />
-              <CartesianGrid strokeDasharray="3 3" stroke={C.blush} />
-              <XAxis dataKey="date" tick={{ fontSize: 11, fill: C.muted }} />
+              <ReferenceArea y1={0} y2={35} fill={RISK_COLOR.LOW} fillOpacity={0.07} />
+              <ReferenceArea y1={35} y2={70} fill={RISK_COLOR.MEDIUM} fillOpacity={0.07} />
+              <ReferenceArea y1={70} y2={100} fill={RISK_COLOR.HIGH} fillOpacity={0.07} />
+              <CartesianGrid strokeDasharray="3 3" stroke={T.border} />
+              <XAxis dataKey="date" tick={{ fontSize: 11, fill: T.muted }} />
               <YAxis
                 domain={[0, 100]}
                 ticks={[17, 52, 85]}
                 tickFormatter={v => (v < 35 ? 'Low' : v < 70 ? 'Medium' : 'High')}
-                tick={{ fontSize: 10, fill: C.muted }}
+                tick={{ fontSize: 10, fill: T.muted }}
                 width={52}
               />
               <Tooltip content={<RiskTrendTooltip />} />
-              <Line type="monotone" dataKey="score" stroke={C.burgundy} strokeWidth={2.5} dot={riskTrendDot} />
+              <Line type="monotone" dataKey="score" stroke={T.text} strokeWidth={2.5} dot={riskTrendDot} />
             </LineChart>
           </ResponsiveContainer>
-        </div>
+        </section>
       )}
 
-      <div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 10, flexWrap: 'wrap', gap: 6 }}>
-          <h3 style={s.sectionHeading}>Screening history</h3>
-          <span style={{ fontSize: 12, color: C.muted }}>
-            {screenings.length} record{screenings.length !== 1 ? 's' : ''}
-          </span>
-        </div>
+      {!canViewClinical && (
+        <EmptyState
+          compact
+          className="tw-state--card"
+          icon={Lock}
+          title="Clinical history is restricted"
+          message="Screening results are visible to the dentist and the dental assistant."
+        />
+      )}
 
-        {screenings.length === 0 ? (
-          <div className="patient-empty-view compact">
-            <div className="patient-empty-icon"><ScanSearch size={28} /></div>
-            <h4>No screenings yet</h4>
-            <p>Run the first AI screening for this patient to begin the clinical history.</p>
-            <button className="tw-primary-action-btn" onClick={() => navigate(`/dashboard/patients/${id}/screening`)}>Start First Screening</button>
+      {canViewClinical && (
+        <section aria-labelledby="pd-history-title">
+          <div className="pd6-section-head">
+            <h3 id="pd-history-title" className="pd6-section-title">Screening history</h3>
+            {!clinicalError && (
+              <span className="pd6-count">{screenings.length} record{screenings.length !== 1 ? 's' : ''}</span>
+            )}
           </div>
-        ) : (
-          <div style={s.historyCard}>
-            {screenings.map((sc, i) => {
-              const level = sc.risk_level;
-              return (
-                <div key={sc.id}
-                  className="pd6-history-row"
-                  style={{ ...s.historyRow, ...(i === 0 ? { borderTop: 'none' } : {}) }}
-                  onClick={() => navigate('/dashboard/screenings/' + sc.id)}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={e => { if (e.key === 'Enter') navigate('/dashboard/screenings/' + sc.id); }}
-                >
-                  <div style={s.historyIcon}><ScanSearch size={18} /></div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 14, fontWeight: 600, color: C.burgundy }}>Screening #{sc.id}</div>
-                    <div style={{ fontSize: 11.5, color: C.muted, marginTop: 3 }}>
-                      {formatDatePH(sc.created_at)}
-                      {' · '}{sc.detection_count ?? 0} detection{(sc.detection_count ?? 0) !== 1 ? 's' : ''}
-                    </div>
-                  </div>
-                  {level && (
-                    <span style={{ ...RISK_STYLE[level], fontSize: 10.5, padding: '4px 13px', borderRadius: 20, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', flexShrink: 0 }}>
-                      {level}
-                    </span>
-                  )}
-                  <span style={s.historyArrow}><ArrowUpRight size={16} /></span>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
+
+          {clinicalError ? (
+            <EmptyState
+              compact
+              className="tw-state--card"
+              role="alert"
+              icon={CloudOff}
+              title="Couldn't load screening history"
+              message={clinicalError}
+              action={<Button variant="secondary" size="sm" icon={RotateCw} onClick={load}>Try again</Button>}
+            />
+          ) : screenings.length === 0 ? (
+            <EmptyState
+              compact
+              className="tw-state--card"
+              icon={ScanSearch}
+              title="No screenings yet"
+              message="Run the first AI screening for this patient to begin their clinical history."
+              action={<Button icon={ScanLine} onClick={startScreening}>Start First Screening</Button>}
+            />
+          ) : (
+            <ul className="pd6-card pd6-history">
+              {screenings.map(sc => {
+                const count = sc.detection_count ?? 0;
+                return (
+                  <li key={sc.id}>
+                    <button type="button" className="pd6-history-row" onClick={() => navigate('/dashboard/screenings/' + sc.id)}>
+                      <span className="pd6-history-icon" aria-hidden="true"><ScanSearch size={18} /></span>
+                      <span className="pd6-history-text">
+                        <span className="pd6-history-title">Screening #{sc.id}</span>
+                        <span className="pd6-history-meta">
+                          {formatDatePH(sc.created_at)} · {count} detection{count !== 1 ? 's' : ''}
+                        </span>
+                      </span>
+                      <RiskBadge level={sc.risk_level} size="sm" />
+                      <span className="pd6-history-arrow" aria-hidden="true"><ArrowUpRight size={16} /></span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </section>
+      )}
     </div>
   );
 }
-
-const CARD = {
-  background: T.white, borderRadius: 18, padding: '22px 24px',
-  border: `1px solid ${T.border}`, boxShadow: '0 10px 30px rgba(0,0,0,.06)',
-};
-const BIG_AVATAR = { width: 72, height: 72, borderRadius: '50%', background: `linear-gradient(135deg, ${T.rose}, ${T.rosegold})`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: 28, flexShrink: 0 };
-
-const s = {
-  card: CARD,
-  profileCard: {
-    ...CARD,
-    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-    gap: 16, flexWrap: 'wrap', padding: '24px 26px',
-  },
-  profileRisk: { display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 },
-  profileRiskLabel: { fontSize: 10, color: C.muted, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' },
-  defsCard: { ...CARD, padding: '8px 24px' },
-  defRow: {
-    display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 18,
-    padding: '13px 0', borderBottom: `1px solid ${T.border}`,
-  },
-  defLabel: { fontSize: 10.5, color: C.muted, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', flexShrink: 0 },
-  defValue: { fontSize: 13.5, color: C.burgundy, fontWeight: 500, textAlign: 'right', overflowWrap: 'anywhere' },
-  sectionHeading: { fontSize: 15.5, fontWeight: 700, color: C.burgundy, margin: 0, letterSpacing: '-0.01em' },
-  historyCard: { ...CARD, padding: '4px 20px' },
-  historyRow: {
-    display: 'flex', alignItems: 'center', gap: 15,
-    padding: '14px 2px', borderTop: `1px solid ${T.border}`,
-    cursor: 'pointer', borderRadius: 8,
-    transition: 'background 0.15s ease',
-  },
-  historyIcon: {
-    width: 42, height: 42, borderRadius: 12, background: C.blush, color: C.rose,
-    display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-    border: `1px solid ${T.border}`,
-  },
-  historyArrow: { color: C.rose, flexShrink: 0, display: 'flex', alignItems: 'center' },
-};

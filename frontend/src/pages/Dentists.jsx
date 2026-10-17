@@ -1,24 +1,56 @@
-import { useState, useEffect, useRef } from 'react';
-import { createPortal } from 'react-dom';
-import { KeyRound, Trash2, CircleCheck, CircleOff, Pencil, X, UserCog, ArrowRight } from 'lucide-react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { KeyRound, Trash2, CircleCheck, CircleOff, Pencil, UserCog, ArrowRight, UserPlus, SearchX, CloudOff, RotateCw, ShieldAlert } from 'lucide-react';
 import { dentistsAPI } from '../api';
 import { useAuth } from '../context/AuthContext';
+import { isDentist, ROLE_LABELS } from '../utils/permissions';
 import PasswordField from '../components/PasswordField';
 import { validateEmail, validatePassword, validateRequiredText, validateOptionalText, LIMITS } from '../utils/validation';
 import { SkeletonTableRows } from '../components/Skeleton';
+import PageHeader from '../components/ui/PageHeader';
+import Button from '../components/ui/Button';
+import Badge from '../components/ui/Badge';
+import EmptyState from '../components/ui/EmptyState';
+import Modal from '../components/ui/Modal';
+import ConfirmDialog from '../components/ui/ConfirmDialog';
+import FormField from '../components/ui/FormField';
+import SearchField from '../components/ui/SearchField';
 import toast from 'react-hot-toast';
-import T from '../tokens';
-
-const { burgundy: BURGUNDY, rose: ROSE, rosegold: ROSEGOLD, blush: BLUSH, white: WHITE, muted: MUTED } = T;
 
 const EMPTY_FORM = {
-  first_name: '', middle_name: '', last_name: '', email: '', password: '', role: 'dentist', license_no: ''
+  first_name: '', middle_name: '', last_name: '', email: '', password: '', role: 'receptionist', license_no: ''
 };
+
+const COLUMNS = ['Name', 'Role', 'License No.', 'Status', 'Actions'];
+
+// Role pill tones: dentist/administrator, receptionist, assistant.
+const ROLE_TONE = { dentist: 'accent', receptionist: 'warning', assistant: 'success' };
+
+// Form order, so validation focuses the first invalid field.
+const FIELD_IDS = [
+  ['first_name', 'st-first-name'],
+  ['middle_name', 'st-middle-name'],
+  ['last_name', 'st-last-name'],
+  ['email', 'st-email'],
+];
+
+function StaffTable({ children }) {
+  return (
+    <div className="tw-table-card tw-responsive-table">
+      <table className="tw-data-table tw-data-table--static">
+        <thead>
+          <tr>{COLUMNS.map(c => <th key={c} scope="col" className={c === 'License No.' ? 'tw-col-optional' : undefined}>{c}</th>)}</tr>
+        </thead>
+        <tbody>{children}</tbody>
+      </table>
+    </div>
+  );
+}
 
 export default function Dentists() {
   const { dentist: me } = useAuth();
   const [dentists, setDentists] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [showPwModal, setShowPwModal] = useState(false);
   const [editing, setEditing] = useState(null);
@@ -29,41 +61,26 @@ export default function Dentists() {
   const [search, setSearch] = useState('');
   const [formErrors, setFormErrors] = useState({});
   const [pwErrors, setPwErrors] = useState({});
+  const [confirm, setConfirm] = useState(null); // { type: 'delete' | 'deactivate', staff }
+  const [confirmBusy, setConfirmBusy] = useState(false);
+  const [togglingId, setTogglingId] = useState(null);
   const searchRef = useRef(null);
+  const allowed = isDentist(me?.role);
 
-  useEffect(() => { load(); }, []);
-
-  useEffect(() => {
-    const onKey = (e) => {
-      if (e.key === '/' && !e.ctrlKey && !e.metaKey && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
-        e.preventDefault();
-        searchRef.current?.focus();
-      }
-    };
-    document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
-  }, []);
-
-  useEffect(() => {
-    if (!showModal && !showPwModal) return;
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    const onKeyDown = (event) => {
-      if (event.key === 'Escape') { setShowModal(false); setShowPwModal(false); }
-    };
-    document.addEventListener('keydown', onKeyDown);
-    return () => {
-      document.removeEventListener('keydown', onKeyDown);
-      document.body.style.overflow = previousOverflow;
-    };
-  }, [showModal, showPwModal]);
-
-  function load() {
+  const load = useCallback(() => {
     setLoading(true);
+    setLoadError(null);
     dentistsAPI.list()
       .then(r => setDentists(r.data))
-      .catch(() => toast.error('Failed to load dentists'))
+      .catch(err => setLoadError(err.friendlyMessage || 'Staff accounts could not be loaded.'))
       .finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => { if (allowed) load(); }, [allowed, load]);
+
+  function setField(name, value) {
+    setForm(f => ({ ...f, [name]: value }));
+    if (formErrors[name]) setFormErrors(f => ({ ...f, [name]: undefined }));
   }
 
   function openAdd() {
@@ -113,6 +130,8 @@ export default function Dentists() {
     }
     if (Object.keys(nextErrors).length > 0) {
       setFormErrors(nextErrors);
+      const firstInvalid = FIELD_IDS.find(([name]) => nextErrors[name]);
+      if (firstInvalid) document.getElementById(firstInvalid[1])?.focus();
       return;
     }
     setFormErrors({});
@@ -120,16 +139,15 @@ export default function Dentists() {
     setSaving(true);
     try {
       if (editing) {
-        const update = {
+        await dentistsAPI.update(editing.id, {
           first_name: firstCheck.value,
           middle_name: middleCheck.value || null,
           last_name: lastCheck.value,
           email: emailCheck.value,
           role: form.role,
           license_no: form.license_no,
-        };
-        await dentistsAPI.update(editing.id, update);
-        toast.success('Dentist updated!');
+        });
+        toast.success('Staff member updated');
       } else {
         await dentistsAPI.create({
           first_name: firstCheck.value,
@@ -140,7 +158,7 @@ export default function Dentists() {
           role: form.role,
           license_no: form.license_no,
         });
-        toast.success('Dentist added!');
+        toast.success('Staff member added');
       }
       setShowModal(false);
       load();
@@ -151,24 +169,36 @@ export default function Dentists() {
     }
   }
 
-  async function handleDelete(d) {
-    if (!window.confirm(`Delete ${d.full_name}? This cannot be undone.`)) return;
+  async function setActive(d, isActive) {
+    setTogglingId(d.id);
     try {
-      await dentistsAPI.delete(d.id);
-      toast.success('Dentist deleted');
+      await dentistsAPI.update(d.id, { is_active: isActive });
+      toast.success(isActive ? `${d.full_name} activated` : `${d.full_name} deactivated`);
       load();
     } catch (err) {
-      toast.error(err.friendlyMessage || 'Failed to delete');
+      toast.error(err.friendlyMessage || 'Failed to update status');
+    } finally {
+      setTogglingId(null);
     }
   }
 
-  async function handleToggleActive(d) {
+  async function runConfirm() {
+    if (!confirm) return;
+    const { type, staff } = confirm;
+    setConfirmBusy(true);
     try {
-      await dentistsAPI.update(d.id, { is_active: !d.is_active });
-      toast.success(d.is_active ? 'Account deactivated' : 'Account activated');
-      load();
-    } catch {
-      toast.error('Failed to update status');
+      if (type === 'delete') {
+        await dentistsAPI.delete(staff.id);
+        toast.success(`${staff.full_name} deleted`);
+        load();
+      } else {
+        await setActive(staff, false);
+      }
+      setConfirm(null);
+    } catch (err) {
+      toast.error(err.friendlyMessage || 'Failed to delete');
+    } finally {
+      setConfirmBusy(false);
     }
   }
 
@@ -186,7 +216,7 @@ export default function Dentists() {
     setSaving(true);
     try {
       await dentistsAPI.resetPassword(pwTarget.id, pwForm.new_password);
-      toast.success('Password updated!');
+      toast.success('Password updated');
       setShowPwModal(false);
     } catch (err) {
       toast.error(err.friendlyMessage || 'Failed to update password');
@@ -195,292 +225,261 @@ export default function Dentists() {
     }
   }
 
-  const filtered = dentists.filter(d =>
-    d.full_name.toLowerCase().includes(search.toLowerCase()) ||
-    d.email.toLowerCase().includes(search.toLowerCase())
-  );
-
-  if (me?.role !== 'admin') {
+  if (!allowed) {
     return (
-      <div style={s.forbidden}>
-        <div style={s.forbiddenIcon}><UserCog size={32} /></div>
-        <h3 style={s.forbiddenTitle}>Admin Access Required</h3>
-        <p style={s.forbiddenText}>Only administrators can manage dentist accounts.</p>
+      <div className="tw-page-layout">
+        <EmptyState
+          className="tw-state--card"
+          icon={ShieldAlert}
+          title="Dentist access required"
+          message="Only the dentist (administrator) can manage staff accounts."
+        />
       </div>
     );
   }
 
+  const q = search.trim().toLowerCase();
+  const filtered = q
+    ? dentists.filter(d => d.full_name.toLowerCase().includes(q) || d.email.toLowerCase().includes(q))
+    : dentists;
+  const activeCount = dentists.filter(d => d.is_active).length;
+
+  const subtitle = loadError
+    ? undefined
+    : loading && dentists.length === 0
+      ? 'Loading accounts…'
+      : q
+        ? `${filtered.length} of ${dentists.length} members`
+        : `${dentists.length} ${dentists.length === 1 ? 'member' : 'members'} · ${activeCount} active`;
+
+  let body;
+  if (loadError) {
+    body = (
+      <EmptyState
+        className="tw-state--card"
+        role="alert"
+        icon={CloudOff}
+        title="Couldn't load staff"
+        message={loadError}
+        action={<Button variant="secondary" icon={RotateCw} onClick={load}>Try again</Button>}
+      />
+    );
+  } else if (loading && dentists.length === 0) {
+    body = <StaffTable><SkeletonTableRows columns={5} rows={5} /></StaffTable>;
+  } else if (filtered.length === 0 && q) {
+    body = (
+      <EmptyState
+        className="tw-state--card"
+        icon={SearchX}
+        title="No matching staff"
+        message={`Nobody matches “${search.trim()}”. Try a name or email address.`}
+        action={<Button variant="secondary" onClick={() => { setSearch(''); searchRef.current?.focus(); }}>Clear search</Button>}
+      />
+    );
+  } else if (filtered.length === 0) {
+    body = (
+      <EmptyState
+        className="tw-state--card"
+        icon={UserCog}
+        title="No staff members yet"
+        message="Add the first staff member to get started."
+        action={<Button icon={UserPlus} onClick={openAdd}>Add Staff Member</Button>}
+      />
+    );
+  } else {
+    body = (
+      <StaffTable>
+        {filtered.map((d, i) => {
+          const isMe = d.id === me?.id;
+          return (
+            <tr key={d.id} className="stagger-item staff6-row" style={{ '--stagger-index': i }}>
+              <td data-label="Name">
+                <div className="tw-person">
+                  <div className={`tw-avatar ${d.is_active ? '' : 'tw-avatar--muted'}`.trim()} aria-hidden="true">{d.full_name.charAt(0)}</div>
+                  <div className="tw-person__text">
+                    <div className="tw-person__name">
+                      {d.full_name}
+                      {isMe && <Badge tone="info" className="tw-person__tag">You</Badge>}
+                    </div>
+                    <div className="tw-person__meta" title={d.email}>{d.email}</div>
+                  </div>
+                </div>
+              </td>
+              <td data-label="Role"><Badge tone={ROLE_TONE[d.role] || 'neutral'}>{ROLE_LABELS[d.role] || d.role}</Badge></td>
+              <td data-label="License No." className="tw-col-optional">{d.license_no || '—'}</td>
+              <td data-label="Status">
+                <Badge tone={d.is_active ? 'success' : 'neutral'} dot>{d.is_active ? 'Active' : 'Inactive'}</Badge>
+              </td>
+              <td data-label="Actions">
+                <div className="tw-row-actions">
+                  <button type="button" className="tw-row-btn tw-row-btn--icon" onClick={() => openEdit(d)} title="Edit" aria-label={`Edit ${d.full_name}`}>
+                    <Pencil size={15} aria-hidden="true" />
+                  </button>
+                  <button type="button" className="tw-row-btn tw-row-btn--icon" onClick={() => openPw(d)} title="Reset password" aria-label={`Reset password for ${d.full_name}`}>
+                    <KeyRound size={15} aria-hidden="true" />
+                  </button>
+                  {!isMe && (
+                    <>
+                      <button
+                        type="button"
+                        className="tw-row-btn tw-row-btn--icon"
+                        onClick={() => (d.is_active ? setConfirm({ type: 'deactivate', staff: d }) : setActive(d, true))}
+                        disabled={togglingId === d.id}
+                        title={d.is_active ? 'Deactivate' : 'Activate'}
+                        aria-label={`${d.is_active ? 'Deactivate' : 'Activate'} ${d.full_name}`}
+                      >
+                        {d.is_active ? <CircleOff size={15} aria-hidden="true" /> : <CircleCheck size={15} aria-hidden="true" />}
+                      </button>
+                      <button
+                        type="button"
+                        className="tw-row-btn tw-row-btn--icon tw-row-btn--danger"
+                        onClick={() => setConfirm({ type: 'delete', staff: d })}
+                        title="Delete"
+                        aria-label={`Delete ${d.full_name}`}
+                      >
+                        <Trash2 size={15} aria-hidden="true" />
+                      </button>
+                    </>
+                  )}
+                </div>
+              </td>
+            </tr>
+          );
+        })}
+      </StaffTable>
+    );
+  }
+
+  const confirmStaff = confirm?.staff;
+
   return (
     <div className="tw-page-layout">
-      {/* Header */}
-      <div className="tw-page-header">
-        <div className="tw-page-title-wrap">
-          <h2>Staff</h2>
-          <p>{dentists.length} members</p>
-        </div>
-        <button className="tw-primary-action-btn" onClick={openAdd}>+ Add Staff Member</button>
-      </div>
+      <PageHeader
+        title="Staff"
+        subtitle={subtitle}
+        actions={<Button icon={UserPlus} onClick={openAdd}>Add Staff Member</Button>}
+      />
 
-      {/* Search */}
-      <div style={s.searchWrap}>
-        <span style={s.searchIcon}><KeyRound size={16} aria-hidden="true" /></span>
-        <input
-          ref={searchRef}
-          style={s.searchInput}
-          placeholder="Search by name or email... (press /)"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-        />
-      </div>
+      <SearchField
+        id="staff-search"
+        ref={searchRef}
+        label="Search staff by name or email"
+        placeholder="Search by name or email…"
+        value={search}
+        onChange={setSearch}
+      />
 
-      {/* Table */}
-      <div style={s.tableCard} className="tw-responsive-table">
-        {loading ? (
-          <table style={s.table}>
-            <thead>
-              <tr>
-                <th style={s.th}>Name</th>
-                <th style={s.th}>Email</th>
-                <th style={s.th}>Role</th>
-                <th style={s.th}>License No.</th>
-                <th style={s.th}>Status</th>
-                <th style={s.th}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <SkeletonTableRows columns={6} rows={5} />
-            </tbody>
-          </table>
-        ) : filtered.length === 0 ? (
-          <div style={s.emptyState}>
-            <div style={s.emptyIcon}><UserCog size={32} /></div>
-            <h3 style={s.emptyTitle}>No staff members found</h3>
-            <p style={s.emptyDesc}>Add the first staff member to get started.</p>
-            <button className="tw-primary-action-btn" onClick={openAdd}>+ Add Staff Member</button>
-          </div>
-        ) : (
-          <table style={s.table}>
-            <thead>
-              <tr>
-                <th style={s.th}>Name</th>
-                <th style={s.th}>Email</th>
-                <th style={s.th}>Role</th>
-                <th style={s.th}>License No.</th>
-                <th style={s.th}>Status</th>
-                <th style={s.th}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((d, i) => (
-                <tr
-                  key={d.id}
-                  className="stagger-item staff6-row"
-                  style={{ ...s.tr, '--stagger-index': i }}
-                >
-                  <td style={s.td} data-label="Name">
-                    <div style={s.nameCell}>
-                      <div style={s.avatar}>{d.full_name.charAt(0)}</div>
-                      <div>
-                        <span style={s.name}>{d.full_name}</span>
-                        {d.id === me?.id && (
-                          <span style={s.youBadge}>You</span>
-                        )}
-                      </div>
-                    </div>
-                  </td>
-                  <td style={s.td} data-label="Email">{d.email}</td>
-                  <td style={s.td} data-label="Role">
-                    <span style={{
-                      ...s.roleBadge,
-                      background: d.role === 'admin' ? T.dangerBg : T.indigoBg,
-                      color: d.role === 'admin' ? T.danger : T.indigo,
-                    }}>
-                      {d.role}
-                    </span>
-                  </td>
-                  <td style={s.td} data-label="License No.">{d.license_no || '—'}</td>
-                  <td style={s.td} data-label="Status">
-                    <span style={{
-                      ...s.statusBadge,
-                      background: d.is_active ? T.successBg : '#F5F5F5',
-                      color: d.is_active ? T.success : '#999',
-                    }}>
-                      {d.is_active ? 'Active' : 'Inactive'}
-                    </span>
-                  </td>
-                  <td style={s.td} data-label="Actions">
-                    <div style={s.actions}>
-                      <button style={s.actionBtn} onClick={() => openEdit(d)} title="Edit" aria-label={`Edit ${d.full_name}`}><Pencil size={15} aria-hidden="true" /></button>
-                      <button style={s.actionBtn} onClick={() => openPw(d)} title="Reset Password"><KeyRound size={15} /></button>
-                      {d.id !== me?.id && (
-                        <>
-                          <button
-                            style={s.actionBtn}
-                            onClick={() => handleToggleActive(d)}
-                            title={d.is_active ? 'Deactivate' : 'Activate'}
-                          >
-                            {d.is_active ? <CircleOff size={15} /> : <CircleCheck size={15} />}
-                          </button>
-                          <button
-                            style={{ ...s.actionBtn, ...s.deleteBtn }}
-                            onClick={() => handleDelete(d)}
-                            title="Delete"
-                          >
-                            <Trash2 size={15} />
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
+      <div aria-live="polite" aria-busy={loading}>{body}</div>
 
-      {/* Add/Edit Modal */}
-      {showModal && createPortal((
-        <div className="tw6-modal-overlay" onClick={() => setShowModal(false)}>
-          <div className="tw6-modal" role="dialog" aria-modal="true" aria-labelledby="dentist-modal-title" onClick={e => e.stopPropagation()}>
-            <div className="tw6-modal-head">
-              <div className="tw6-modal-heading">
-                <span className="tw6-modal-icon"><UserCog size={19} /></span>
-                <div><h3 id="dentist-modal-title">{editing ? 'Edit staff member' : 'Add a staff member'}</h3></div>
-              </div>
-              <button className="tw6-modal-close" onClick={() => setShowModal(false)} aria-label="Close staff form"><X size={18} /></button>
+      <Modal
+        isOpen={showModal}
+        onClose={() => { if (!saving) setShowModal(false); }}
+        title={editing ? 'Edit staff member' : 'Add a staff member'}
+        icon={UserCog}
+        dismissible={!saving}
+      >
+        <form onSubmit={handleSave} className="tw6-modal-form" noValidate>
+          <div className="tw6-modal-section">
+            <div className="tw6-modal-grid tw6-modal-grid-3">
+              <FormField id="st-first-name" label="First name" required error={formErrors.first_name}>
+                {a => <input {...a} className="tw6-modal-input" value={form.first_name} onChange={e => setField('first_name', e.target.value)} placeholder="Juan" maxLength={LIMITS.NAME_MAX} autoComplete="off" />}
+              </FormField>
+              <FormField id="st-middle-name" label="Middle name / initial" error={formErrors.middle_name}>
+                {a => <input {...a} className="tw6-modal-input" value={form.middle_name} onChange={e => setField('middle_name', e.target.value)} placeholder="Santos" maxLength={LIMITS.NAME_MAX} autoComplete="off" />}
+              </FormField>
+              <FormField id="st-last-name" label="Last name" required error={formErrors.last_name}>
+                {a => <input {...a} className="tw6-modal-input" value={form.last_name} onChange={e => setField('last_name', e.target.value)} placeholder="Dela Cruz" maxLength={LIMITS.NAME_MAX} autoComplete="off" />}
+              </FormField>
             </div>
-            <form onSubmit={handleSave} className="tw6-modal-form" noValidate>
-              <div className="tw6-modal-section">
-                <div className="tw6-modal-grid tw6-modal-grid-3">
-                  <div className="tw6-modal-field">
-                    <label className="tw6-modal-label">First name *</label>
-                    <input className="tw6-modal-input" value={form.first_name} onChange={e => { setForm({ ...form, first_name: e.target.value }); if (formErrors.first_name) setFormErrors(f => ({ ...f, first_name: undefined })); }} placeholder="Juan" maxLength={LIMITS.NAME_MAX} required aria-invalid={!!formErrors.first_name} />
-                    {formErrors.first_name && <p className="tw6-modal-error" role="alert">{formErrors.first_name}</p>}
-                  </div>
-                  <div className="tw6-modal-field">
-                    <label className="tw6-modal-label">Middle name / initial</label>
-                    <input className="tw6-modal-input" value={form.middle_name} onChange={e => { setForm({ ...form, middle_name: e.target.value }); if (formErrors.middle_name) setFormErrors(f => ({ ...f, middle_name: undefined })); }} placeholder="Santos" maxLength={LIMITS.NAME_MAX} aria-invalid={!!formErrors.middle_name} />
-                    {formErrors.middle_name && <p className="tw6-modal-error" role="alert">{formErrors.middle_name}</p>}
-                  </div>
-                  <div className="tw6-modal-field">
-                    <label className="tw6-modal-label">Last name *</label>
-                    <input className="tw6-modal-input" value={form.last_name} onChange={e => { setForm({ ...form, last_name: e.target.value }); if (formErrors.last_name) setFormErrors(f => ({ ...f, last_name: undefined })); }} placeholder="Dela Cruz" maxLength={LIMITS.NAME_MAX} required aria-invalid={!!formErrors.last_name} />
-                    {formErrors.last_name && <p className="tw6-modal-error" role="alert">{formErrors.last_name}</p>}
-                  </div>
-                </div>
-              </div>
-              <div className="tw6-modal-section">
-                <div className="tw6-modal-grid tw6-modal-grid-2">
-                  <div className="tw6-modal-field"><label className="tw6-modal-label">Email *</label><input className="tw6-modal-input" type="email" value={form.email} onChange={e => { setForm({ ...form, email: e.target.value }); if (formErrors.email) setFormErrors(f => ({ ...f, email: undefined })); }} placeholder="dentist@codismile.com" maxLength={LIMITS.EMAIL_MAX} required aria-invalid={!!formErrors.email} />{formErrors.email && <p className="tw6-modal-error" role="alert">{formErrors.email}</p>}</div>
-                </div>
-              </div>
-              {!editing && <div className="tw6-modal-section">
-                <div className="tw6-modal-field"><label className="tw6-modal-label">Password *</label>
-                  <PasswordField value={form.password} onChange={v => { setForm({ ...form, password: v }); if (formErrors.password) setFormErrors(f => ({ ...f, password: undefined })); }} label="Password *" showRequirements error={formErrors.password} inputClassName="tw6-modal-input tw6-modal-input-password" labelClassName="tw6-modal-label" fieldClassName="tw6-modal-field" />
-                </div></div>}
-              <div className="tw6-modal-section">
-                <div className="tw6-modal-grid tw6-modal-grid-2">
-                  <div className="tw6-modal-field"><label className="tw6-modal-label">Role *</label><select className="tw6-modal-input" value={form.role} onChange={e => setForm({ ...form, role: e.target.value })}><option value="dentist">Dentist</option><option value="admin">Admin</option></select></div>
-                  <div className="tw6-modal-field"><label className="tw6-modal-label">PRC license no.</label><input className="tw6-modal-input" value={form.license_no} onChange={e => setForm({ ...form, license_no: e.target.value })} placeholder="PRC-12345" /></div>
-                </div>
-              </div>
-              <div className="tw6-modal-footer">
-                <button type="button" className="tw6-modal-cancel" onClick={() => setShowModal(false)}>Cancel</button>
-                <button type="submit" className="tw6-modal-save" disabled={saving}>{saving ? 'Saving...' : editing ? 'Save changes' : 'Add staff member'}<ArrowRight size={15} /></button>
-              </div>
-            </form>
           </div>
-        </div>
-      ), document.body)}
+          <div className="tw6-modal-section">
+            <FormField id="st-email" label="Email" required error={formErrors.email}>
+              {a => <input {...a} className="tw6-modal-input" type="email" value={form.email} onChange={e => setField('email', e.target.value)} placeholder="staff@codismile.com" maxLength={LIMITS.EMAIL_MAX} autoComplete="off" />}
+            </FormField>
+          </div>
+          {!editing && (
+            <div className="tw6-modal-section">
+              <PasswordField
+                value={form.password}
+                onChange={v => setField('password', v)}
+                label="Password *"
+                showRequirements
+                error={formErrors.password}
+                inputClassName="tw6-modal-input tw6-modal-input-password"
+                labelClassName="tw6-modal-label"
+                fieldClassName="tw6-modal-field"
+              />
+            </div>
+          )}
+          <div className="tw6-modal-section">
+            <div className="tw6-modal-grid tw6-modal-grid-2">
+              <FormField id="st-role" label="Role" required hint={form.role === 'dentist' ? 'Administrators can manage staff and view the audit trail.' : undefined}>
+                {a => (
+                  <select {...a} className="tw6-modal-input" value={form.role} onChange={e => setField('role', e.target.value)}>
+                    <option value="dentist">Dentist (administrator)</option>
+                    <option value="receptionist">Receptionist</option>
+                    <option value="assistant">Assistant</option>
+                  </select>
+                )}
+              </FormField>
+              <FormField id="st-license" label="PRC license no.">
+                {a => <input {...a} className="tw6-modal-input" value={form.license_no} onChange={e => setField('license_no', e.target.value)} placeholder="PRC-12345" autoComplete="off" />}
+              </FormField>
+            </div>
+          </div>
+          <div className="tw6-modal-footer">
+            <button type="button" className="tw6-modal-cancel" onClick={() => setShowModal(false)} disabled={saving}>Cancel</button>
+            <button type="submit" className="tw6-modal-save" disabled={saving} aria-busy={saving}>
+              {saving ? 'Saving…' : editing ? 'Save changes' : 'Add staff member'}
+              {!saving && <ArrowRight size={15} aria-hidden="true" />}
+            </button>
+          </div>
+        </form>
+      </Modal>
 
-      {/* Password Reset Modal */}
-      {showPwModal && createPortal((
-        <div className="tw6-modal-overlay" onClick={() => setShowPwModal(false)}>
-          <div className="tw6-modal tw6-modal-compact" role="dialog" aria-modal="true" aria-labelledby="password-modal-title" onClick={e => e.stopPropagation()}>
-            <div className="tw6-modal-head"><div className="tw6-modal-heading"><span className="tw6-modal-icon"><KeyRound size={19} /></span><div><h3 id="password-modal-title">Reset password</h3></div></div><button className="tw6-modal-close" onClick={() => setShowPwModal(false)} aria-label="Close password form"><X size={18} /></button></div>
-            <div className="tw6-modal-target"><div className="tw6-modal-target-mark">{pwTarget?.full_name?.charAt(0)?.toUpperCase() || 'S'}</div><div><strong>{pwTarget?.full_name}</strong><span>{pwTarget?.email}</span></div></div>
-            <form onSubmit={handlePwSave} className="tw6-modal-form" noValidate>
-              <PasswordField value={pwForm.new_password} onChange={v => { setPwForm({ ...pwForm, new_password: v }); if (pwErrors.new_password) setPwErrors(e => ({ ...e, new_password: undefined })); }} label="New password *" showRequirements error={pwErrors.new_password} inputClassName="tw6-modal-input tw6-modal-input-password" labelClassName="tw6-modal-label" fieldClassName="tw6-modal-field" />
-              <PasswordField value={pwForm.confirm} onChange={v => { setPwForm({ ...pwForm, confirm: v }); if (pwErrors.confirm) setPwErrors(e => ({ ...e, confirm: undefined })); }} label="Confirm password *" placeholder="Repeat password" error={pwErrors.confirm} inputClassName="tw6-modal-input tw6-modal-input-password" labelClassName="tw6-modal-label" fieldClassName="tw6-modal-field" />
-              <div className="tw6-modal-footer"><button type="button" className="tw6-modal-cancel" onClick={() => setShowPwModal(false)}>Cancel</button><button type="submit" className="tw6-modal-save" disabled={saving}>{saving ? 'Updating...' : 'Update password'}<ArrowRight size={15} /></button></div>
-            </form>
+      <Modal
+        isOpen={showPwModal}
+        onClose={() => { if (!saving) setShowPwModal(false); }}
+        title="Reset password"
+        icon={KeyRound}
+        className="tw6-modal-compact"
+        dismissible={!saving}
+      >
+        <div className="tw6-modal-target">
+          <div className="tw6-modal-target-mark" aria-hidden="true">{pwTarget?.full_name?.charAt(0)?.toUpperCase() || 'S'}</div>
+          <div className="tw6-modal-target-text">
+            <strong>{pwTarget?.full_name}</strong>
+            <span>{pwTarget?.email}</span>
           </div>
         </div>
-      ), document.body)}
+        <form onSubmit={handlePwSave} className="tw6-modal-form" noValidate>
+          <PasswordField value={pwForm.new_password} onChange={v => { setPwForm(f => ({ ...f, new_password: v })); if (pwErrors.new_password) setPwErrors(x => ({ ...x, new_password: undefined })); }} label="New password *" showRequirements error={pwErrors.new_password} inputClassName="tw6-modal-input tw6-modal-input-password" labelClassName="tw6-modal-label" fieldClassName="tw6-modal-field" />
+          <PasswordField value={pwForm.confirm} onChange={v => { setPwForm(f => ({ ...f, confirm: v })); if (pwErrors.confirm) setPwErrors(x => ({ ...x, confirm: undefined })); }} label="Confirm password *" placeholder="Repeat password" error={pwErrors.confirm} inputClassName="tw6-modal-input tw6-modal-input-password" labelClassName="tw6-modal-label" fieldClassName="tw6-modal-field" />
+          <div className="tw6-modal-footer">
+            <button type="button" className="tw6-modal-cancel" onClick={() => setShowPwModal(false)} disabled={saving}>Cancel</button>
+            <button type="submit" className="tw6-modal-save" disabled={saving} aria-busy={saving}>
+              {saving ? 'Updating…' : 'Update password'}
+              {!saving && <ArrowRight size={15} aria-hidden="true" />}
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      <ConfirmDialog
+        open={!!confirm}
+        onCancel={() => { if (!confirmBusy) setConfirm(null); }}
+        onConfirm={runConfirm}
+        busy={confirmBusy}
+        title={confirm?.type === 'delete' ? 'Delete staff account?' : 'Deactivate account?'}
+        message={confirmStaff ? (
+          confirm.type === 'delete' ? (
+            <><strong>{confirmStaff.full_name}</strong> will be permanently removed and can no longer sign in. This can't be undone.</>
+          ) : (
+            <><strong>{confirmStaff.full_name}</strong> won't be able to sign in until the account is activated again.</>
+          )
+        ) : ''}
+        confirmText={confirm?.type === 'delete' ? 'Delete account' : 'Deactivate'}
+      />
     </div>
   );
 }
-
-const s = {
-  searchWrap: {
-    display: 'flex', alignItems: 'center', gap: 10,
-    background: WHITE, border: `1px solid ${T.border}`,
-    borderRadius: 11, padding: '0 16px',
-    boxShadow: '0 2px 8px rgba(0,0,0,.06)',
-  },
-  searchIcon: { fontSize: 16, color: MUTED },
-  searchInput: {
-    flex: 1, background: 'transparent', border: 'none',
-    padding: '12px 0', fontSize: 14, color: BURGUNDY,
-    fontFamily: 'inherit', outline: 'none',
-  },
-  emptyState: {
-    display: 'flex', flexDirection: 'column', alignItems: 'center',
-    justifyContent: 'center', padding: 80, gap: 16,
-    background: WHITE, borderRadius: 18,
-    border: `1px solid ${T.border}`,
-    boxShadow: '0 10px 30px rgba(0,0,0,.06)',
-  },
-  emptyIcon: { fontSize: 48, color: MUTED },
-  emptyTitle: { fontSize: 20, fontWeight: 700, color: BURGUNDY },
-  emptyDesc: { fontSize: 13, color: MUTED },
-  tableCard: {
-    background: WHITE, borderRadius: 18,
-    border: `1px solid ${T.border}`,
-    boxShadow: '0 10px 30px rgba(0,0,0,.06)',
-    overflow: 'hidden',
-  },
-  table: { width: '100%', borderCollapse: 'collapse' },
-  th: {
-    padding: '13px 18px', fontSize: 10.5, fontWeight: 700,
-    color: MUTED, textTransform: 'uppercase', letterSpacing: '0.07em',
-    borderBottom: `1px solid ${T.border}`, textAlign: 'left',
-    background: WHITE,
-  },
-  tr: { transition: 'background 0.12s ease' },
-  td: { padding: '13px 18px', fontSize: 13, color: BURGUNDY, borderBottom: `1px solid ${T.border}` },
-  nameCell: { display: 'flex', alignItems: 'center', gap: 11 },
-  avatar: {
-    width: 38, height: 38, borderRadius: '50%',
-    background: `linear-gradient(135deg, ${ROSE}, ${ROSEGOLD})`,
-    display: 'flex', alignItems: 'center', justifyContent: 'center',
-    color: WHITE, fontWeight: 700, fontSize: 16, flexShrink: 0,
-  },
-  name: { fontWeight: 600, fontSize: 14.5, color: BURGUNDY },
-  youBadge: {
-    fontSize: 10, background: T.indigoBg, color: T.indigo,
-    padding: '2px 8px', borderRadius: 10, fontWeight: 600,
-  },
-  roleBadge: {
-    fontSize: 11, padding: '4px 10px', borderRadius: 10,
-    fontWeight: 700, textTransform: 'capitalize',
-  },
-  statusBadge: {
-    fontSize: 11, padding: '4px 10px', borderRadius: 10, fontWeight: 600,
-  },
-  actions: { display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' },
-  actionBtn: {
-    background: BLUSH, border: `1px solid ${T.border}`, borderRadius: 8,
-    padding: '6px 9px', cursor: 'pointer', fontSize: 14,
-    color: BURGUNDY,
-  },
-  deleteBtn: { background: T.dangerBg, border: `1px solid ${T.dangerBorder}`, color: T.danger },
-  forbidden: {
-    display: 'flex', flexDirection: 'column', alignItems: 'center',
-    justifyContent: 'center', height: 400, gap: 16,
-  },
-  forbiddenIcon: { fontSize: 48, color: MUTED },
-  forbiddenTitle: { fontSize: 20, fontWeight: 700, color: BURGUNDY },
-  forbiddenText: { fontSize: 14, color: MUTED, textAlign: 'center', maxWidth: 360 },
-};

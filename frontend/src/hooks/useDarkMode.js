@@ -18,6 +18,11 @@ export default function useDarkMode() {
     try { localStorage.setItem(THEME_KEY, theme); } catch {}
   }, [theme]);
 
+  // Dark mode belongs to the staff workspace only. Without this, signing
+  // out (or any client-side navigation out of Layout) left the class on
+  // <body> and rendered the light-only public/portal pages half-dark.
+  useEffect(() => () => document.body.classList.remove('dark-mode'), []);
+
   const toggle = useCallback(() => setTheme(t => t === 'dark' ? 'light' : 'dark'), []);
 
   return { isDark: theme === 'dark', toggle };

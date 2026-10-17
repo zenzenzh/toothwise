@@ -1,9 +1,12 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import PropTypes from 'prop-types';
+import { TriangleAlert } from 'lucide-react';
+import Modal from './Modal';
 
 /**
- * ConfirmDialog component following the ToothWise design system.
- * Used for destructive actions confirmation.
+ * ConfirmDialog — branded replacement for window.confirm.
+ * Focus starts on Cancel so Enter never triggers a destructive action by
+ * accident. While `busy`, both buttons are disabled and Esc is ignored.
  */
 const ConfirmDialog = ({
   open,
@@ -14,51 +17,38 @@ const ConfirmDialog = ({
   confirmText = 'Confirm',
   cancelText = 'Cancel',
   variant = 'danger',
+  busy = false,
 }) => {
-  if (!open) return null;
+  const cancelRef = useRef(null);
 
   return (
-    <div
-      className="tw-modal-overlay"
-      onClick={onCancel}
-      style={{
-        position: 'fixed',
-        inset: 0,
-        background: 'rgba(0, 0, 0, 0.5)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 1000,
-        backdropFilter: 'blur(2px)',
-      }}
+    <Modal
+      isOpen={open}
+      onClose={onCancel}
+      title={title}
+      icon={variant === 'danger' ? TriangleAlert : undefined}
+      className={`tw6-modal--confirm tw6-modal--${variant}`}
+      initialFocus={cancelRef}
+      dismissible={!busy}
     >
-      <div
-        className="tw-modal"
-        onClick={(e) => e.stopPropagation()}
-        style={{
-          background: 'var(--tw-white)',
-          borderRadius: 'var(--tw-radius-lg)',
-          padding: 'var(--tw-space-6)',
-          width: '100%',
-          maxWidth: '400px',
-          boxShadow: 'var(--tw-shadow-xl)'
-        }}
-      >
-        <h3 style={{ marginBottom: 'var(--tw-space-3)', color: 'var(--tw-burgundy)' }}>{title}</h3>
-        <p style={{ fontSize: 'var(--tw-text-caption)', color: 'var(--tw-muted)' }}>{message}</p>
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--tw-space-3)', marginTop: 'var(--tw-space-6)' }}>
-          <button className="tw-btn tw-btn--secondary" onClick={onCancel}>
+      <div className="tw6-modal-form">
+        <div className="tw6-confirm-message">{message}</div>
+        <div className="tw6-modal-footer">
+          <button ref={cancelRef} type="button" className="tw6-modal-cancel" onClick={onCancel} disabled={busy}>
             {cancelText}
           </button>
           <button
-            className={`tw-btn ${variant === 'danger' ? 'tw-btn--danger' : 'tw-btn--primary'}`}
+            type="button"
+            className={`tw6-modal-save ${variant === 'danger' ? 'tw6-modal-save--danger' : ''}`.trim()}
             onClick={onConfirm}
+            disabled={busy}
+            aria-busy={busy}
           >
-            {confirmText}
+            {busy ? 'Working…' : confirmText}
           </button>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 };
 
@@ -67,10 +57,11 @@ ConfirmDialog.propTypes = {
   onConfirm: PropTypes.func.isRequired,
   onCancel: PropTypes.func.isRequired,
   title: PropTypes.string.isRequired,
-  message: PropTypes.string.isRequired,
+  message: PropTypes.node.isRequired,
   confirmText: PropTypes.string,
   cancelText: PropTypes.string,
   variant: PropTypes.oneOf(['danger', 'primary']),
+  busy: PropTypes.bool,
 };
 
 export default ConfirmDialog;

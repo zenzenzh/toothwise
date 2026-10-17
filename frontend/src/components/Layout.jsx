@@ -6,12 +6,13 @@ import {
   Moon, Sun,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { isDentist, ROLE_LABELS } from '../utils/permissions';
 import useDarkMode from '../hooks/useDarkMode';
 import LogoMark from './LogoMark';
 import SEO from './SEO';
 import { dashboardAPI, patientsAPI } from '../api';
+import { MOBILE_BREAKPOINT } from '../tokens';
 
-const MOBILE_BREAKPOINT = 900;
 const COLLAPSE_KEY = 'tw_sidebar_collapsed';
 
 function initials(name = 'Staff') {
@@ -55,7 +56,7 @@ export default function Layout() {
   const navItems = useMemo(() => [
     { to: '/dashboard', label: 'Overview', icon: LayoutDashboard, exact: true },
     { to: '/dashboard/patients', label: 'Patients', icon: Users },
-    ...(dentist?.role === 'admin' ? [
+    ...(isDentist(dentist?.role) ? [
       { to: '/dashboard/dentists', label: 'Staff', icon: UserCog },
       { to: '/dashboard/audit-log', label: 'Audit trail', icon: ShieldCheck },
     ] : []),
@@ -237,7 +238,7 @@ export default function Layout() {
             <div style={styles.avatar}>{initials(dentist?.full_name)}</div>
             {!railCollapsed && <div style={{ minWidth: 0 }}>
               <div style={styles.userName}>{dentist?.full_name || 'Clinic staff'}</div>
-              <div style={styles.userRole}>{dentist?.role || 'staff'}</div>
+              <div style={styles.userRole}>{ROLE_LABELS[dentist?.role] || dentist?.role || 'Staff'}</div>
             </div>}
           </div>
           <button onClick={handleLogout} style={{ ...styles.logout, justifyContent: railCollapsed ? 'center' : 'flex-start' }}>

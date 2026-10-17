@@ -1,169 +1,197 @@
-import { ShieldCheck } from 'lucide-react';
 import { useState, useEffect, useCallback } from 'react';
+import { ShieldCheck, ShieldAlert, CloudOff, RotateCw, ListFilter } from 'lucide-react';
 import { auditAPI } from '../api';
 import { useAuth } from '../context/AuthContext';
+import { isDentist } from '../utils/permissions';
 import { formatDateTimePH } from '../utils/datetime';
 import { SkeletonTableRows } from '../components/Skeleton';
-import toast from 'react-hot-toast';
+import PageHeader from '../components/ui/PageHeader';
+import Button from '../components/ui/Button';
+import EmptyState from '../components/ui/EmptyState';
+import SearchField from '../components/ui/SearchField';
 
-const ACTION_COLOR = (action) => {
-  if (action.includes('delete')) return 'var(--tw-danger)';
-  if (action.includes('create')) return 'var(--tw-success)';
-  if (action.includes('login.failed') || action.includes('rejected')) return 'var(--tw-warning)';
-  return 'var(--tw-navy)';
-};
+const LIMIT = 200;
+const COLUMNS = ['When', 'Actor', 'Action', 'Entity', 'Details'];
+
+// Every action the backend writes (backend/app/routers), grouped for the filter.
+const ACTION_GROUPS = [
+  { label: 'Sign-in', actions: [
+    ['login.success', 'Login succeeded'],
+    ['login.failed', 'Login failed'],
+    ['login.rejected_inactive', 'Login rejected (inactive)'],
+  ] },
+  { label: 'Patients', actions: [
+    ['patient.create', 'Patient created'],
+    ['patient.self_register', 'Patient self-registered'],
+    ['patient.update', 'Patient updated'],
+    ['patient.delete', 'Patient deleted'],
+  ] },
+  { label: 'Screenings', actions: [
+    ['screening.create', 'Screening created'],
+    ['screening.tier_confirm', 'Screening tier confirmed'],
+    ['screening.report_pdf', 'PDF report exported'],
+    ['screening.delete', 'Screening deleted'],
+  ] },
+  { label: 'Staff', actions: [
+    ['dentist.create', 'Staff created'],
+    ['dentist.update', 'Staff updated'],
+    ['dentist.activate', 'Staff activated'],
+    ['dentist.deactivate', 'Staff deactivated'],
+    ['dentist.password_reset', 'Password reset'],
+    ['dentist.delete', 'Staff deleted'],
+  ] },
+  { label: 'Assistant', actions: [
+    ['toothwise.chatbot', 'Chatbot used'],
+  ] },
+];
+const ACTION_LABELS = Object.fromEntries(ACTION_GROUPS.flatMap(g => g.actions));
+
+function actionTone(action) {
+  if (action.includes('delete') || action.includes('deactivate')) return 'danger';
+  if (action.includes('failed') || action.includes('rejected') || action.includes('password_reset')) return 'warning';
+  if (action.includes('create') || action.includes('register') || action.includes('activate')) return 'success';
+  return 'neutral';
+}
+
+function AuditTable({ children }) {
+  return (
+    <div className="tw-table-card tw-responsive-table">
+      <table className="tw-data-table tw-data-table--static">
+        <thead>
+          <tr>{COLUMNS.map(c => <th key={c} scope="col" className={c === 'Entity' ? 'tw-col-optional' : undefined}>{c}</th>)}</tr>
+        </thead>
+        <tbody>{children}</tbody>
+      </table>
+    </div>
+  );
+}
 
 export default function AuditLog() {
   const { dentist: me } = useAuth();
+  const allowed = isDentist(me?.role);
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
   const [actionFilter, setActionFilter] = useState('');
+  const [search, setSearch] = useState('');
 
   const load = useCallback(() => {
     setLoading(true);
-    auditAPI.list({ action: actionFilter || undefined, limit: 200 })
+    setLoadError(null);
+    auditAPI.list({ action: actionFilter || undefined, limit: LIMIT })
       .then(r => setLogs(r.data))
-      .catch(err => toast.error(err.friendlyMessage || 'Failed to load audit log'))
+      .catch(err => setLoadError(err.friendlyMessage || 'The audit log could not be loaded.'))
       .finally(() => setLoading(false));
   }, [actionFilter]);
 
   useEffect(() => {
-    if (me?.role === 'admin') load();
-  }, [me, load]);
+    if (allowed) load();
+  }, [allowed, load]);
 
-  // Client-side gate for a clean, consistent UX (matches the Dentists
+  // Client-side gate for a clean, consistent UX (matches the Staff
   // page). This is NOT the security boundary - the backend independently
-  // rejects non-admin requests to /audit-logs regardless of what the UI
+  // rejects non-dentist requests to /audit-logs regardless of what the UI
   // shows or hides here.
-  if (me?.role !== 'admin') {
+  if (!allowed) {
     return (
-      <div style={s.forbidden}>
-        <div style={s.forbiddenIcon}><ShieldCheck size={32} /></div>
-        <h3 style={s.forbiddenTitle}>Admin Access Required</h3>
-        <p style={s.forbiddenText}>Only administrators can view the audit log.</p>
+      <div className="tw-page-layout">
+        <EmptyState
+          className="tw-state--card"
+          icon={ShieldAlert}
+          title="Dentist access required"
+          message="Only the dentist (administrator) can view the audit log."
+        />
       </div>
+    );
+  }
+
+  const q = search.trim().toLowerCase();
+  const visible = q
+    ? logs.filter(l => [l.actor_email, l.details, l.entity_type, l.action, ACTION_LABELS[l.action]]
+        .some(v => v && String(v).toLowerCase().includes(q)))
+    : logs;
+
+  const subtitle = loadError
+    ? 'System activity trail'
+    : loading && logs.length === 0
+      ? 'Loading activity…'
+      : `${q ? `${visible.length} of ` : ''}${logs.length} ${logs.length === 1 ? 'entry' : 'entries'}${logs.length >= LIMIT ? ` (latest ${LIMIT})` : ''}`;
+
+  let body;
+  if (loadError) {
+    body = (
+      <EmptyState
+        className="tw-state--card"
+        role="alert"
+        icon={CloudOff}
+        title="Couldn't load the audit log"
+        message={loadError}
+        action={<Button variant="secondary" icon={RotateCw} onClick={load}>Try again</Button>}
+      />
+    );
+  } else if (loading && logs.length === 0) {
+    body = <AuditTable><SkeletonTableRows columns={5} rows={7} /></AuditTable>;
+  } else if (visible.length === 0) {
+    const filtered = actionFilter || q;
+    body = (
+      <EmptyState
+        className="tw-state--card"
+        icon={filtered ? ListFilter : ShieldCheck}
+        title={filtered ? 'No matching entries' : 'No activity yet'}
+        message={filtered ? 'Nothing matches the current filter or search.' : 'Actions such as sign-ins and record changes will appear here.'}
+        action={filtered ? <Button variant="secondary" onClick={() => { setActionFilter(''); setSearch(''); }}>Clear filters</Button> : undefined}
+      />
+    );
+  } else {
+    body = (
+      <AuditTable>
+        {visible.map((l, i) => (
+          <tr key={l.id} className="stagger-item audit6-row" style={{ '--stagger-index': Math.min(i, 20) }}>
+            <td data-label="When"><time dateTime={l.created_at} className="audit6-when">{formatDateTimePH(l.created_at)}</time></td>
+            <td data-label="Actor"><span className="tw-cell-clip" title={l.actor_email || 'system'}>{l.actor_email || 'system'}</span></td>
+            <td data-label="Action">
+              <span className={`tw-pill tw-pill--${actionTone(l.action)}`} title={l.action}>
+                {ACTION_LABELS[l.action] || l.action}
+              </span>
+            </td>
+            <td data-label="Entity" className="tw-col-optional">{l.entity_type ? `${l.entity_type} #${l.entity_id}` : '—'}</td>
+            <td data-label="Details"><span className="audit6-details" title={l.details || undefined}>{l.details || '—'}</span></td>
+          </tr>
+        ))}
+      </AuditTable>
     );
   }
 
   return (
     <div className="tw-page-layout">
-      <div className="tw-page-header">
-        <div className="tw-page-title-wrap">
-          <h2>Audit Log</h2>
-          <p>System activity trail</p>
-        </div>
-        <select style={s.filterSelect} value={actionFilter} onChange={e => setActionFilter(e.target.value)}>
-          <option value="">All actions</option>
-          <option value="login.success">Login success</option>
-          <option value="login.failed">Login failed</option>
-          <option value="patient.create">Patient created</option>
-          <option value="patient.update">Patient updated</option>
-          <option value="patient.delete">Patient deleted</option>
-          <option value="dentist.create">Dentist created</option>
-          <option value="dentist.password_reset">Password reset</option>
-          <option value="screening.create">Screening created</option>
-          <option value="screening.delete">Screening deleted</option>
-        </select>
-      </div>
-
-      {loading ? (
-        <div className="audit6-table-card tw-responsive-table">
-          <table style={s.table}>
-            <thead>
-              <tr>
-                <th style={s.th}>When</th>
-                <th style={s.th}>Actor</th>
-                <th style={s.th}>Action</th>
-                <th style={s.th}>Entity</th>
-                <th style={s.th}>Details</th>
-              </tr>
-            </thead>
-            <tbody>
-              <SkeletonTableRows columns={5} rows={7} />
-            </tbody>
-          </table>
-        </div>
-      ) : logs.length === 0 ? (
-        <div style={s.emptyState}>
-          <div style={s.emptyIcon}><ShieldCheck size={32} /></div>
-          <h3 style={s.emptyTitle}>No entries</h3>
-          <p style={s.emptyDesc}>No matching audit entries for the selected filter.</p>
-        </div>
-      ) : (
-        <div className="audit6-table-card tw-responsive-table">
-          <table style={s.table}>
-            <thead>
-              <tr>
-                <th style={s.th}>When</th>
-                <th style={s.th}>Actor</th>
-                <th style={s.th}>Action</th>
-                <th style={s.th}>Entity</th>
-                <th style={s.th}>Details</th>
-              </tr>
-            </thead>
-            <tbody>
-              {logs.map((l, i) => (
-                <tr key={l.id} className="stagger-item audit6-row" style={{ ...s.tr, '--stagger-index': i }}>
-                  <td style={s.td} data-label="When">{formatDateTimePH(l.created_at)}</td>
-                  <td style={s.td} data-label="Actor">{l.actor_email || 'system'}</td>
-                  <td style={s.td} data-label="Action">
-                    <span style={{ ...s.actionBadge, color: ACTION_COLOR(l.action), borderColor: ACTION_COLOR(l.action) }}>
-                      {l.action}
-                    </span>
-                  </td>
-                  <td style={s.td} data-label="Entity">{l.entity_type ? `${l.entity_type} #${l.entity_id}` : '—'}</td>
-                  <td style={s.td} data-label="Details"><span style={s.detailsText}>{l.details || '—'}</span></td>
-                </tr>
+      <PageHeader
+        title="Audit Log"
+        subtitle={subtitle}
+        actions={
+          <div className="audit6-filter">
+            <label htmlFor="audit-action" className="sr-only">Filter by action</label>
+            <ListFilter size={15} className="audit6-filter-icon" aria-hidden="true" />
+            <select id="audit-action" className="audit6-select" value={actionFilter} onChange={e => setActionFilter(e.target.value)}>
+              <option value="">All actions</option>
+              {ACTION_GROUPS.map(g => (
+                <optgroup key={g.label} label={g.label}>
+                  {g.actions.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                </optgroup>
               ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+            </select>
+          </div>
+        }
+      />
+
+      <SearchField
+        id="audit-search"
+        label="Search the audit log"
+        placeholder="Search by actor, action or details…"
+        value={search}
+        onChange={setSearch}
+      />
+
+      <div aria-live="polite" aria-busy={loading}>{body}</div>
     </div>
   );
 }
-
-const s = {
-  filterSelect: {
-    background: 'var(--tw-surface)', border: '1px solid var(--tw-border)', borderRadius: 11,
-    padding: '10px 14px', fontSize: 13, color: 'var(--tw-text)', fontFamily: 'inherit',
-    minWidth: 220,
-  },
-  emptyState: {
-    display: 'flex', flexDirection: 'column', alignItems: 'center',
-    justifyContent: 'center', padding: 80, gap: 16,
-    background: 'var(--tw-surface)', borderRadius: 18,
-    border: '1px solid var(--tw-border)',
-    boxShadow: 'var(--tw-shadow)',
-  },
-  emptyIcon: { fontSize: 48, color: 'var(--tw-muted)' },
-  emptyTitle: { fontSize: 20, fontWeight: 700, color: 'var(--tw-text)' },
-  emptyDesc: { fontSize: 13, color: 'var(--tw-muted)' },
-  tableCard: {
-    background: 'var(--tw-surface)', borderRadius: 18,
-    border: '1px solid var(--tw-border)',
-    boxShadow: 'var(--tw-shadow)',
-    overflow: 'hidden',
-  },
-  table: { width: '100%', borderCollapse: 'collapse' },
-  th: {
-    padding: '13px 18px', fontSize: 10.5, fontWeight: 700,
-    color: 'var(--tw-muted)', textTransform: 'uppercase', letterSpacing: '0.07em',
-    borderBottom: '1px solid var(--tw-border)', textAlign: 'left',
-    background: 'var(--tw-surface)',
-  },
-  tr: { transition: 'background 0.12s ease' },
-  td: { padding: '13px 18px', fontSize: 13, color: 'var(--tw-text)', borderBottom: '1px solid var(--tw-border)' },
-  actionBadge: {
-    display: 'inline-block', border: '1px solid', borderRadius: 20,
-    padding: '3px 10px', fontSize: 11, fontWeight: 700, fontFamily: 'monospace',
-  },
-  detailsText: { color: 'var(--tw-muted)', fontSize: 12 },
-  forbidden: {
-    display: 'flex', flexDirection: 'column', alignItems: 'center',
-    justifyContent: 'center', height: 400, gap: 16,
-  },
-  forbiddenIcon: { fontSize: 48, color: 'var(--tw-muted)' },
-  forbiddenTitle: { fontSize: 20, fontWeight: 700, color: 'var(--tw-text)' },
-  forbiddenText: { fontSize: 14, color: 'var(--tw-muted)', textAlign: 'center', maxWidth: 360 },
-};

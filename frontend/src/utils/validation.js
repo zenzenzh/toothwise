@@ -99,8 +99,8 @@ export function validateOptionalText(rawValue, label, max) {
 
 // ---------- Image upload validation (dental screening photos) ----------
 
-const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
-const MAX_IMAGE_BYTES = 15 * 1024 * 1024; // 15 MB
+export const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+export const MAX_IMAGE_BYTES = 15 * 1024 * 1024; // 15 MB
 
 export function validateImageFile(file) {
   if (!file) return { valid: false, message: 'Please choose an image to upload.' };

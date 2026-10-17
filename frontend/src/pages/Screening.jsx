@@ -1,34 +1,45 @@
 import { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Upload, RefreshCw, ScanLine, CheckCircle2, Image as ImageIcon } from 'lucide-react';
-import api, { screeningsAPI } from '../api';
-import { validateImageFile } from '../utils/validation';
+import { Upload, RefreshCw, ScanLine, CheckCircle2, ArrowLeft, ArrowRight, Info, Check } from 'lucide-react';
+import api, { patientsAPI, screeningsAPI } from '../api';
+import { validateImageFile, ALLOWED_IMAGE_TYPES, MAX_IMAGE_BYTES } from '../utils/validation';
+import Button from '../components/ui/Button';
+import RiskBadge from '../components/ui/RiskBadge';
 import toast from 'react-hot-toast';
 
-import T from '../tokens';
+const STEPS = [
+  { key: 'upload', label: 'Choose image' },
+  { key: 'preview', label: 'Review & analyse' },
+  { key: 'results', label: 'Results' },
+];
+const MAX_MB = Math.round(MAX_IMAGE_BYTES / (1024 * 1024));
 
-const C = {
-  burgundy: T.burgundy,
-  rose: T.rose,
-  gold: T.rosegold,
-  blush: T.blush,
-  white: T.white,
-  muted: T.muted,
-  border: T.border,
-};
+function formatBytes(bytes) {
+  return bytes >= 1024 * 1024 ? `${(bytes / (1024 * 1024)).toFixed(1)} MB` : `${Math.max(1, Math.round(bytes / 1024))} KB`;
+}
 
-const CARD = {
-  background: T.white,
-  borderRadius: 14,
-  padding: '28px',
-  boxShadow: '0 2px 12px rgba(0,0,0,.08)',
-  border: `1px solid ${T.border}`,
-};
+function Stepper({ current }) {
+  const currentIndex = STEPS.findIndex(s => s.key === current);
+  return (
+    <ol className="scr-steps" aria-label="Screening progress">
+      {STEPS.map((s, i) => {
+        const state = i < currentIndex ? 'done' : i === currentIndex ? 'current' : 'todo';
+        return (
+          <li key={s.key} className={`scr-step scr-step--${state}`} aria-current={state === 'current' ? 'step' : undefined}>
+            <span className="scr-step-dot" aria-hidden="true">{state === 'done' ? <Check size={13} strokeWidth={3} /> : i + 1}</span>
+            <span className="scr-step-label">{s.label}</span>
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
 
 export default function Screening() {
   const { id: patientId } = useParams();
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
+  const dragDepth = useRef(0);
 
   const [step, setStep] = useState('upload'); // 'upload' | 'preview' | 'results'
   const [selectedFile, setSelectedFile] = useState(null);
@@ -36,6 +47,8 @@ export default function Screening() {
   const [screening, setScreening] = useState(null);
   const [loading, setLoading] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [fileError, setFileError] = useState(null);
+  const [patientName, setPatientName] = useState(null);
 
   // AI inference can be switched off server-side (DETECTION_ENABLED=false)
   // e.g. when presenting without the models. The health endpoint is the
@@ -47,52 +60,56 @@ export default function Screening() {
     }).catch(() => {});
   }, []);
 
+  useEffect(() => {
+    patientsAPI.get(patientId).then(r => setPatientName(r.data?.full_name)).catch(() => {});
+  }, [patientId]);
+
+  // Object URLs are cheaper than data URLs for large photos; release them.
+  useEffect(() => () => { if (previewUrl) URL.revokeObjectURL(previewUrl); }, [previewUrl]);
+
   function handleFileSelect(file) {
     if (!file) return;
     const check = validateImageFile(file);
     if (!check.valid) {
-      toast.error(check.message);
+      setFileError(check.message);
       if (fileInputRef.current) fileInputRef.current.value = '';
       return;
     }
+    setFileError(null);
     setSelectedFile(file);
-    const reader = new FileReader();
-    reader.onerror = () => toast.error('Unable to read this image. Please choose another file.');
-    reader.onload = ev => {
-      setPreviewUrl(ev.target.result);
-      setStep('preview');
-    };
-    reader.readAsDataURL(file);
+    setPreviewUrl(URL.createObjectURL(file));
+    setStep('preview');
   }
 
-  function handleFileInputChange(e) {
-    const file = e.target.files?.[0];
-    if (file) handleFileSelect(file);
+  function openPicker() {
+    fileInputRef.current?.click();
   }
 
-  function handleDragOver(e) {
+  function handleDragEnter(e) {
     e.preventDefault();
-    e.stopPropagation();
+    dragDepth.current += 1;
     setIsDragging(true);
   }
 
   function handleDragLeave(e) {
     e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
+    // Child elements fire their own enter/leave; only clear on the last one.
+    dragDepth.current = Math.max(0, dragDepth.current - 1);
+    if (dragDepth.current === 0) setIsDragging(false);
   }
 
   function handleDrop(e) {
     e.preventDefault();
-    e.stopPropagation();
+    dragDepth.current = 0;
     setIsDragging(false);
-    const file = e.dataTransfer.files?.[0];
-    if (file) handleFileSelect(file);
+    handleFileSelect(e.dataTransfer.files?.[0]);
   }
 
   function resetUpload() {
     setSelectedFile(null);
     setPreviewUrl(null);
+    setScreening(null);
+    setFileError(null);
     setStep('upload');
     if (fileInputRef.current) fileInputRef.current.value = '';
   }
@@ -101,10 +118,6 @@ export default function Screening() {
     if (loading) return; // guard against double-submit
     if (!detectionEnabled) {
       toast.error('AI screening is temporarily unavailable.');
-      return;
-    }
-    if (!selectedFile) {
-      toast.error('Please choose an image first.');
       return;
     }
     const check = validateImageFile(selectedFile);
@@ -120,7 +133,6 @@ export default function Screening() {
       const { data: result } = await screeningsAPI.create(patientId, selectedFile);
       setScreening(result);
       setStep('results');
-      toast.success('Detection complete!');
     } catch (err) {
       toast.error(err.friendlyMessage || 'Detection failed. Please try again.');
     } finally {
@@ -128,132 +140,113 @@ export default function Screening() {
     }
   }
 
+  const fused = (screening?.detections || []).filter(d => !d.detection_set || d.detection_set === 'fused');
+  const detectionCount = screening?.detection_count ?? fused.length;
+
   return (
-    <div className="screening-page tw-page-layout" style={{ maxWidth: 800, margin: '0 auto' }}>
+    <div className="screening-page tw-page-layout scr-page">
       <div>
-        <button onClick={() => navigate('/dashboard/patients/' + patientId)} className="tw-secondary-action-btn">
-          ← Back to Patient
-        </button>
+        <Button variant="secondary" icon={ArrowLeft} onClick={() => navigate('/dashboard/patients/' + patientId)} disabled={loading}>
+          Back to Patient
+        </Button>
       </div>
 
       <div className="tw-page-title-wrap">
-        <h2>New AI Screening — Patient #{patientId}</h2>
+        <h2>New AI Screening</h2>
+        <p>{patientName ? `${patientName} · Patient #${patientId}` : `Patient #${patientId}`}</p>
       </div>
 
+      <Stepper current={step} />
+
+      {!detectionEnabled && step !== 'results' && (
+        <div className="scr-notice" role="status">
+          <Info size={16} aria-hidden="true" />
+          <span>AI screening is temporarily unavailable. You can still choose an image, but analysis is switched off on the server.</span>
+        </div>
+      )}
+
       {step === 'upload' && (
-        <div className="screening-card" style={CARD}>
+        <section className="scr-card">
           <div
-            onDragOver={handleDragOver}
+            className={`scr-drop ${isDragging ? 'is-dragging' : ''} ${fileError ? 'has-error' : ''}`.trim()}
+            role="button"
+            tabIndex={0}
+            aria-describedby={fileError ? 'scr-file-error' : 'scr-file-hint'}
+            onClick={openPicker}
+            onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openPicker(); } }}
+            onDragEnter={handleDragEnter}
+            onDragOver={e => e.preventDefault()}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
-            style={{
-              border: `2px dashed ${isDragging ? 'var(--tw-primary, #6B2D46)' : T.border}`,
-              borderRadius: 14,
-              padding: '52px 24px',
-              textAlign: 'center',
-              background: isDragging ? 'rgba(107, 45, 70, 0.04)' : T.blush,
-              transition: 'all 0.2s ease',
-              cursor: 'pointer',
-            }}
-            onClick={() => fileInputRef.current?.click()}
           >
-            <div
-              style={{
-                width: 60,
-                height: 60,
-                borderRadius: 16,
-                background: T.bg,
-                display: 'grid',
-                placeItems: 'center',
-                margin: '0 auto 16px',
-                color: C.rose,
-              }}
-            >
-              <Upload size={28} strokeWidth={1.75} />
-            </div>
-            <h3 style={{ fontSize: 16, fontWeight: 700, color: C.burgundy, marginBottom: 8 }}>
-              Upload Dental Image
-            </h3>
-            <p style={{ color: C.muted, fontSize: 13.5, marginBottom: 20, maxWidth: 440, margin: '0 auto 20px', lineHeight: 1.5 }}>
-              Drag and drop an image here or click to browse. Supports JPEG, PNG, or WebP up to 10MB.
-            </p>
-            <button
-              type="button"
-              className="tw-primary-action-btn"
-              style={{ display: 'inline-flex', pointerEvents: 'none' }}
-            >
-              Choose Dental Image
-            </button>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              onChange={handleFileInputChange}
-              style={{ display: 'none' }}
-            />
+            <span className="scr-drop-icon" aria-hidden="true"><Upload size={26} strokeWidth={1.75} /></span>
+            <span className="scr-drop-title">{isDragging ? 'Drop the image to upload' : 'Upload a dental image'}</span>
+            <span id="scr-file-hint" className="scr-drop-hint">
+              Drag and drop here, or click to browse. JPEG, PNG or WebP, up to {MAX_MB} MB.
+            </span>
+            <span className="tw-btn tw-btn--primary scr-drop-btn" aria-hidden="true">Choose image</span>
           </div>
-        </div>
+          {fileError && <p id="scr-file-error" className="scr-error" role="alert">{fileError}</p>}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept={ALLOWED_IMAGE_TYPES.join(',')}
+            onChange={e => handleFileSelect(e.target.files?.[0])}
+            hidden
+          />
+        </section>
       )}
 
       {step === 'preview' && (
-        <div style={{ ...CARD, textAlign: 'center' }}>
-          <div style={{ marginBottom: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-            <ImageIcon size={18} color={C.burgundy} />
-            <span style={{ fontSize: 14, fontWeight: 600, color: C.burgundy }}>
-              {selectedFile?.name || 'Selected dental image'}
-            </span>
-            {selectedFile?.size && (
-              <span style={{ fontSize: 12, color: C.muted }}>
-                ({(selectedFile.size / (1024 * 1024)).toFixed(2)} MB)
-              </span>
+        <section className="scr-card scr-preview">
+          <div className="scr-file">
+            <span className="scr-file-name" title={selectedFile?.name}>{selectedFile?.name || 'Selected dental image'}</span>
+            {selectedFile?.size > 0 && <span className="scr-file-size">{formatBytes(selectedFile.size)}</span>}
+          </div>
+
+          <div className={`scr-image ${loading ? 'is-analysing' : ''}`.trim()}>
+            <img src={previewUrl} alt={`Teeth selected for screening${patientName ? ` of ${patientName}` : ''}`} />
+            {loading && (
+              <div className="scr-scan" aria-hidden="true"><span className="scr-scan-line" /></div>
             )}
           </div>
 
-          <img
-            src={previewUrl}
-            alt="Selected dental specimen for screening"
-            style={{ width: '100%', maxWidth: 500, borderRadius: 12, marginBottom: 20, border: `2px solid ${T.border}` }}
-          />
+          <p className="sr-only" role="status" aria-live="polite">
+            {loading ? 'Analysing the image. This can take up to a minute.' : ''}
+          </p>
+          {loading && <p className="scr-analysing-text" aria-hidden="true">Analysing with the YOLOv8 + YOLOv12 ensemble… this can take up to a minute.</p>}
 
-          <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <button onClick={resetUpload} className="tw-secondary-action-btn">
-              <RefreshCw size={15} /> Change Image
-            </button>
-            <button
+          <div className="scr-actions">
+            <Button variant="secondary" icon={RefreshCw} onClick={resetUpload} disabled={loading}>Change image</Button>
+            <Button
+              icon={ScanLine}
               onClick={runDetection}
               disabled={loading || !detectionEnabled}
+              aria-busy={loading}
               title={detectionEnabled ? undefined : 'AI screening is temporarily unavailable.'}
-              className="tw-primary-action-btn"
-              style={{ ...(detectionEnabled ? {} : { opacity: 0.55, cursor: 'not-allowed' }) }}
             >
-              {loading ? (
-                <>
-                  <ScanLine size={16} /> Analyzing...
-                </>
-              ) : (
-                <>
-                  <ScanLine size={16} /> Run Detection
-                </>
-              )}
-            </button>
+              {loading ? 'Analysing…' : 'Run detection'}
+            </Button>
           </div>
-
-          {!detectionEnabled && (
-            <p style={{ color: C.muted, fontSize: 12.5, marginTop: 14 }}>
-              AI screening is temporarily unavailable. The image is kept — detection can be re-enabled later.
-            </p>
-          )}
-        </div>
+        </section>
       )}
 
-      {step === 'results' && (
-        <div style={{ ...CARD, textAlign: 'center', padding: '48px 24px' }}>
-          <CheckCircle2 size={52} strokeWidth={1.7} aria-hidden="true" style={{ marginBottom: 12, color: T.success }} />
-          <h3 style={{ color: C.burgundy, fontWeight: 700 }}>Analysis Complete</h3>
-          <button onClick={() => navigate('/dashboard/screenings/' + screening.id)} className="tw-primary-action-btn" style={{ marginTop: 20 }}>
-            View Detailed Results →
-          </button>
-        </div>
+      {step === 'results' && screening && (
+        <section className="scr-card scr-result" aria-labelledby="scr-result-title">
+          <span className="scr-result-icon" aria-hidden="true"><CheckCircle2 size={34} strokeWidth={1.8} /></span>
+          <h3 id="scr-result-title" className="scr-result-title">Analysis complete</h3>
+          <div className="scr-result-summary">
+            {screening.risk_level && <RiskBadge level={screening.risk_level} suffix="risk" size="lg" />}
+            <span className="scr-result-count">{detectionCount} finding{detectionCount !== 1 ? 's' : ''} detected</span>
+          </div>
+          <p className="scr-result-note">AI results are assistive. Review the findings before discussing them with the patient.</p>
+          <div className="scr-actions">
+            <Button variant="secondary" icon={RefreshCw} onClick={resetUpload}>Screen another image</Button>
+            <Button icon={ArrowRight} iconPosition="right" onClick={() => navigate('/dashboard/screenings/' + screening.id)}>
+              View detailed results
+            </Button>
+          </div>
+        </section>
       )}
     </div>
   );

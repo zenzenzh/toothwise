@@ -2,38 +2,24 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 /**
- * Badge component following the ToothWise design system.
- * Uses semantic classes for risk levels and status.
+ * Badge.
+ *  - `tone` (neutral | accent | success | warning | danger | info) renders a
+ *    soft, sentence-case pill — use for roles, statuses and tags.
+ *  - `variant` keeps the legacy uppercase risk/status badges (risk-high, …).
  */
-const Badge = ({
-  children,
-  className = '',
-  variant = 'default',
-  ...props
-}) => {
-  const variantClasses = {
-    default: 'tw-badge',
-    high: 'risk-high',
-    HIGH: 'risk-high',
-    moderate: 'risk-moderate',
-    medium: 'risk-moderate',
-    MEDIUM: 'risk-moderate',
-    low: 'risk-low',
-    LOW: 'risk-low',
-    scheduled: 'status-scheduled',
-    completed: 'status-completed',
-    cancelled: 'status-cancelled',
-    no_show: 'status-no_show',
-    active: 'status-active',
-    inactive: 'status-inactive',
-    admin: 'status-role-admin',
-    dentist: 'status-role-dentist',
-  };
+const LEGACY = {
+  high: 'risk-high', HIGH: 'risk-high',
+  moderate: 'risk-moderate', medium: 'risk-moderate', MEDIUM: 'risk-moderate',
+  low: 'risk-low', LOW: 'risk-low',
+};
 
-  const combinedClassName = `tw-badge ${variantClasses[variant] || ''} ${className}`.trim();
-
+const Badge = ({ children, className = '', variant, tone, dot = false, ...props }) => {
+  const cls = tone
+    ? `tw-pill tw-pill--${tone}`
+    : `tw-badge ${LEGACY[variant] || ''}`;
   return (
-    <span className={combinedClassName} {...props}>
+    <span className={`${cls} ${className}`.replace(/\s+/g, ' ').trim()} {...props}>
+      {dot && <span className="tw-pill__dot" aria-hidden="true" />}
       {children}
     </span>
   );
@@ -43,6 +29,8 @@ Badge.propTypes = {
   children: PropTypes.node.isRequired,
   className: PropTypes.string,
   variant: PropTypes.string,
+  tone: PropTypes.oneOf(['neutral', 'accent', 'success', 'warning', 'danger', 'info']),
+  dot: PropTypes.bool,
 };
 
 export default Badge;

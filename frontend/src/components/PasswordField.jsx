@@ -2,11 +2,11 @@ import { useState, useId } from 'react';
 import { Eye, EyeOff, Check } from 'lucide-react';
 import { passwordRequirements } from '../utils/validation';
 
-const BURGUNDY = '#4B2F35';
-const MUTED = '#6F5B61';
-const BLUSH = '#FBF7F5';
-const BORDER = '#E5DADC';
-const GOOD = '#2D7A52';
+const BURGUNDY = 'var(--tw-text)';
+const MUTED = 'var(--tw-muted)';
+const BLUSH = 'var(--tw-surface-alt)';
+const BORDER = 'var(--tw-border)';
+const GOOD = 'var(--tw-success)';
 
 /**
  * Password input with a show/hide toggle (accessible - real <button> with
@@ -88,9 +88,9 @@ const s = {
   toggleBtn: {
     position: 'absolute', right: 4, top: '50%', transform: 'translateY(-50%)',
     background: 'transparent', border: 'none', cursor: 'pointer', fontSize: 16,
-    padding: '6px 8px', lineHeight: 1,
+    padding: '6px 8px', lineHeight: 1, color: MUTED,
   },
-  error: { fontSize: 11.5, color: '#C4505A', margin: '2px 0 0 0' },
+  error: { fontSize: 11.5, color: 'var(--tw-danger)', margin: '2px 0 0 0' },
   reqList: { listStyle: 'none', margin: '2px 0 0 0', padding: 0, display: 'flex', flexDirection: 'column', gap: 2 },
   reqItem: { fontSize: 11, transition: 'color 0.15s' },
 };
