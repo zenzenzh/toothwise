@@ -33,7 +33,7 @@ const FAQS = [
   ['Does the AI replace a dentist?', 'No. ToothWise is an assistive screening system. A qualified dental professional should review AI-assisted findings and make clinical decisions.'],
   ['Can the chatbot see my patient record?', 'No. The public AI assistant is intentionally separated from individual patient records and screening results. Use the secure Patient Portal for account-specific information.'],
   ['How do I book a visit?', 'Contact CodiSmile Dental Clinic directly by phone to schedule a visit — the Patient Portal covers account access and screening history, not booking.'],
-  ['What are the clinic hours?', 'CodiSmile is open Monday–Saturday, 9:00 AM–6:00 PM, and Sunday, 10:00 AM–4:00 PM.'],
+  ['What are the clinic hours?', 'CodiSmile is open Monday–Saturday, 9:00 AM–5:00 PM, and Sunday, 9:00 AM–2:00 PM.'],
 ];
 
 const HIGHLIGHTS = [
@@ -409,7 +409,7 @@ export default function Landing() {
             <ul className="tw6-contact-list">
               <li><MapPin size={18} /><span>{CLINIC.address}</span></li>
               <li><Phone size={18} /><a href={phoneHref}>{CLINIC.phone}</a></li>
-              <li><Clock3 size={18} /><span>Mon–Sat 9:00 AM–6:00 PM · Sun 10:00 AM–4:00 PM</span></li>
+              <li><Clock3 size={18} /><span>Mon–Sat 9:00 AM–5:00 PM · Sun 9:00 AM–2:00 PM</span></li>
             </ul>
             <div className="tw6-actions">
               <a className="tw6-btn tw6-btn-primary" target="_blank" rel="noreferrer" href={directionsUrl}><Navigation size={16} /> Get directions</a>
@@ -449,7 +449,7 @@ export default function Landing() {
           <div className="tw6-footer-col">
             <span>Contact</span>
             <a href={phoneHref}>{CLINIC.phone}</a>
-            <p>Mon–Sat 9:00 AM–6:00 PM<br />Sun 10:00 AM–4:00 PM</p>
+            <p>Mon–Sat 9:00 AM–5:00 PM<br />Sun 9:00 AM–2:00 PM</p>
           </div>
           <div className="tw6-footer-col tw6-footer-nav">
             <span>Explore</span>
