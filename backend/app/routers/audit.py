@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from app import models, schemas
 from app.database import get_db
-from app.security import require_admin
+from app.security import require_dentist
 
 router = APIRouter(prefix="/audit-logs", tags=["audit"])
 
@@ -14,9 +14,9 @@ def list_audit_logs(
     entity_type: str | None = None,
     limit: int = 100,
     db: Session = Depends(get_db),
-    _: models.Dentist = Depends(require_admin),
+    _: models.Dentist = Depends(require_dentist),
 ):
-    """Admin-only. Most recent entries first, capped at 500 per request."""
+    """Dentist/administrator-only. Most recent entries first, capped at 500 per request."""
     query = db.query(models.AuditLog)
     if action:
         query = query.filter(models.AuditLog.action == action)

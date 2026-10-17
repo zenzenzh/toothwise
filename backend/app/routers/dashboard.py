@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from app import models, schemas
 from app.database import get_db
-from app.security import get_current_dentist
+from app.security import get_current_staff
 
 router = APIRouter(prefix="/dashboard", tags=["dashboard"])
 
@@ -15,7 +15,7 @@ router = APIRouter(prefix="/dashboard", tags=["dashboard"])
 @router.get("/summary", response_model=schemas.DashboardSummary)
 def summary(
     db: Session = Depends(get_db),
-    _: models.Dentist = Depends(get_current_dentist),
+    _: models.Dentist = Depends(get_current_staff),
 ):
     total_screenings = db.query(func.count(models.Screening.id)).scalar() or 0
     total_patients = db.query(func.count(models.Patient.id)).scalar() or 0

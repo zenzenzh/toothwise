@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from app import models, schemas
 from app.audit import log_action
 from app.database import get_db
-from app.security import get_current_dentist
+from app.security import get_current_staff, require_clinical, require_dentist
 from app.utils.names import combine_name
 
 router = APIRouter(prefix="/patients", tags=["patients"])
@@ -15,7 +15,7 @@ router = APIRouter(prefix="/patients", tags=["patients"])
 def list_patients(
     search: str | None = None,
     db: Session = Depends(get_db),
-    _: models.Dentist = Depends(get_current_dentist),
+    _: models.Dentist = Depends(get_current_staff),
 ):
     query = db.query(models.Patient)
     if search:
@@ -50,7 +50,7 @@ def list_patients(
 def create_patient(
     payload: schemas.PatientCreate,
     db: Session = Depends(get_db),
-    current: models.Dentist = Depends(get_current_dentist),
+    current: models.Dentist = Depends(get_current_staff),
 ):
     data = payload.model_dump()
     data["full_name"] = combine_name(data["first_name"], data.get("middle_name"), data["last_name"])
@@ -67,7 +67,7 @@ def create_patient(
 def get_patient(
     patient_id: int,
     db: Session = Depends(get_db),
-    _: models.Dentist = Depends(get_current_dentist),
+    _: models.Dentist = Depends(get_current_staff),
 ):
     patient = db.query(models.Patient).get(patient_id)
     if not patient:
@@ -80,7 +80,7 @@ def update_patient(
     patient_id: int,
     payload: schemas.PatientUpdate,
     db: Session = Depends(get_db),
-    current: models.Dentist = Depends(get_current_dentist),
+    current: models.Dentist = Depends(get_current_staff),
 ):
     patient = db.query(models.Patient).get(patient_id)
     if not patient:
@@ -100,7 +100,7 @@ def update_patient(
 def delete_patient(
     patient_id: int,
     db: Session = Depends(get_db),
-    current: models.Dentist = Depends(get_current_dentist),
+    current: models.Dentist = Depends(require_dentist),
 ):
     patient = db.query(models.Patient).get(patient_id)
     if not patient:
@@ -114,7 +114,7 @@ def delete_patient(
 def list_patient_screenings(
     patient_id: int,
     db: Session = Depends(get_db),
-    _: models.Dentist = Depends(get_current_dentist),
+    _: models.Dentist = Depends(require_clinical),
 ):
     patient = db.query(models.Patient).get(patient_id)
     if not patient:
@@ -143,7 +143,7 @@ def list_patient_screenings(
 def get_patient_risk_trend(
     patient_id: int,
     db: Session = Depends(get_db),
-    _: models.Dentist = Depends(get_current_dentist),
+    _: models.Dentist = Depends(require_clinical),
 ):
     """Chronological risk_score/risk_level per screening, oldest first -
     feeds the trend chart on the patient detail page."""

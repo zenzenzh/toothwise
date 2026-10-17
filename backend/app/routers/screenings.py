@@ -15,7 +15,9 @@ from app.ml.recommender import (
 from app.ml.risk_engine import compute_risk
 from app.ml.train_knn import append_labeled_case
 from app.ml.yolo_detector import get_detector
-from app.security import get_current_dentist, get_current_patient
+from app.security import (
+    get_current_staff, get_current_patient, require_clinical, require_dentist,
+)
 from app.utils.image_utils import save_upload
 from app.utils.pdf_report import generate_screening_report_pdf
 
@@ -117,7 +119,7 @@ def create_screening(
     patient_id: int,
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
-    current: models.Dentist = Depends(get_current_dentist),
+    current: models.Dentist = Depends(require_clinical),
 ):
     patient = db.query(models.Patient).get(patient_id)
     if not patient:
@@ -185,7 +187,7 @@ def create_screening(
 def get_screening(
     screening_id: int,
     db: Session = Depends(get_db),
-    _: models.Dentist = Depends(get_current_dentist),
+    _: models.Dentist = Depends(require_clinical),
 ):
     screening = db.query(models.Screening).get(screening_id)
     if not screening:
@@ -198,7 +200,7 @@ def confirm_screening_tier(
     screening_id: int,
     payload: schemas.TierConfirm,
     db: Session = Depends(get_db),
-    current: models.Dentist = Depends(get_current_dentist),
+    current: models.Dentist = Depends(require_dentist),
 ):
     """
     Dentist reviews the AI-predicted severity tier and records the true
@@ -244,7 +246,7 @@ def confirm_screening_tier(
 def get_screening_image(
     screening_id: int,
     db: Session = Depends(get_db),
-    _: models.Dentist = Depends(get_current_dentist),
+    _: models.Dentist = Depends(require_clinical),
 ):
     """Staff-facing counterpart of get_my_screening_image - authenticated
     image serving, replacing the old public static mount."""
@@ -258,7 +260,7 @@ def get_screening_image(
 def delete_screening(
     screening_id: int,
     db: Session = Depends(get_db),
-    current: models.Dentist = Depends(get_current_dentist),
+    current: models.Dentist = Depends(require_dentist),
 ):
     screening = db.query(models.Screening).get(screening_id)
     if not screening:
@@ -272,7 +274,7 @@ def delete_screening(
 def compare_models(
     screening_id: int,
     db: Session = Depends(get_db),
-    _: models.Dentist = Depends(get_current_dentist),
+    _: models.Dentist = Depends(require_clinical),
 ):
     """
     Per-screening YOLOv8 vs YOLOv12 comparison: what each model detected
@@ -339,7 +341,7 @@ def add_clinical_note(
     screening_id: int,
     payload: schemas.ClinicalNoteCreate,
     db: Session = Depends(get_db),
-    current: models.Dentist = Depends(get_current_dentist),
+    current: models.Dentist = Depends(require_dentist),
 ):
     screening = db.query(models.Screening).get(screening_id)
     if not screening:
@@ -358,7 +360,7 @@ def add_clinical_note(
 def download_screening_report(
     screening_id: int,
     db: Session = Depends(get_db),
-    current: models.Dentist = Depends(get_current_dentist),
+    current: models.Dentist = Depends(require_clinical),
 ):
     screening = db.query(models.Screening).get(screening_id)
     if not screening:

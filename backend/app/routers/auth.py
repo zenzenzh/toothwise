@@ -7,7 +7,7 @@ from app.database import get_db
 from app.rate_limit import limiter
 from app.security import (
     verify_password, hash_password, create_access_token,
-    get_current_dentist, get_current_patient,
+    get_current_staff, get_current_patient,
 )
 from app.utils.names import combine_name
 
@@ -47,7 +47,7 @@ def login(request: Request, payload: schemas.LoginRequest, db: Session = Depends
 
 
 @router.get("/me", response_model=schemas.DentistOut)
-def me(current: models.Dentist = Depends(get_current_dentist)):
+def me(current: models.Dentist = Depends(get_current_staff)):
     return current
 
 

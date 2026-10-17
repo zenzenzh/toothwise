@@ -149,6 +149,32 @@ def _backfill_name_parts():
                 logger.info("Backfilled name parts for %s legacy %s row(s).", len(rows), table)
 
 
+def _migrate_roles_v2():
+    """
+    Option-B staff roles: ('admin', 'dentist') -> ('dentist', 'receptionist',
+    'assistant'), where `dentist` is the clinic administrator.
+
+    Adds the two new enum labels and folds any legacy `admin` account into
+    `dentist`. No-op once applied. PostgreSQL will not let a newly added enum
+    label be used in the same transaction, so the ALTER TYPE statements run on
+    their own AUTOCOMMIT connection before the data update.
+    """
+    if engine.dialect.name == "postgresql":
+        with engine.connect() as conn:
+            conn = conn.execution_options(isolation_level="AUTOCOMMIT")
+            for label in ("receptionist", "assistant"):
+                conn.execute(text(f"ALTER TYPE dentistrole ADD VALUE IF NOT EXISTS '{label}'"))
+    with engine.begin() as conn:
+        # CAST(... AS VARCHAR) so this also works on a fresh DB whose enum no
+        # longer has an 'admin' label (comparing the enum column to the bare
+        # literal 'admin' would raise "invalid input value for enum").
+        result = conn.execute(
+            text("UPDATE dentists SET role = 'dentist' WHERE CAST(role AS VARCHAR) = 'admin'")
+        )
+        if result.rowcount:
+            logger.info("Migrated %s legacy 'admin' staff account(s) to 'dentist'.", result.rowcount)
+
+
 @app.on_event("startup")
 def on_startup():
     Path(settings.UPLOAD_DIR).mkdir(parents=True, exist_ok=True)
@@ -158,6 +184,7 @@ def on_startup():
     for attempt in range(1, 4):
         try:
             Base.metadata.create_all(bind=engine)
+            _migrate_roles_v2()
             _ensure_new_columns()
             _backfill_name_parts()
             logger.info("Database tables ensured.")
@@ -189,7 +216,7 @@ def on_startup():
                 last_name=seed_last,
                 email=settings.SEED_ADMIN_EMAIL.strip().lower(),
                 hashed_password=hash_password(settings.SEED_ADMIN_PASSWORD),
-                role=models.DentistRole.admin,
+                role=models.DentistRole.dentist,
                 license_no=settings.SEED_ADMIN_LICENSE.strip(),
             )
             db.add(admin)

@@ -33,13 +33,13 @@ def verify_password(plain: str, hashed: str) -> bool:
 
 
 def create_access_token(
-    subject: str, scope: str = "dentist", expires_minutes: Optional[int] = None
+    subject: str, scope: str = "staff", expires_minutes: Optional[int] = None
 ) -> str:
     """
-    scope distinguishes a staff (dentist/admin) token from a patient-portal
-    token, so a patient account can never be used to call staff-only
-    endpoints and vice versa, even if emails were ever to collide across
-    the two tables.
+    scope distinguishes a staff token (any clinic role: dentist, receptionist,
+    assistant) from a patient-portal token, so a patient account can never be
+    used to call staff-only endpoints and vice versa, even if emails were ever
+    to collide across the two tables.
     """
     expire = datetime.now(timezone.utc) + timedelta(
         minutes=expires_minutes or settings.ACCESS_TOKEN_EXPIRE_MINUTES
@@ -48,9 +48,10 @@ def create_access_token(
     return jwt.encode(payload, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
 
 
-def get_current_dentist(
+def get_current_staff(
     token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)
 ) -> models.Dentist:
+    """Any authenticated clinic-staff account (dentist, receptionist, assistant)."""
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -59,10 +60,10 @@ def get_current_dentist(
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
         email: str = payload.get("sub")
-        # Tokens issued before the scope claim existed have no "scope" key
-        # at all - treat those as staff tokens too so already-logged-in
-        # dentists aren't kicked out by this change.
-        if email is None or payload.get("scope") not in (None, "dentist"):
+        # Staff tokens carry scope="staff". Tokens issued before this scope
+        # existed have no "scope" key (None) or the legacy value "dentist" -
+        # accept both so already-logged-in staff aren't kicked out.
+        if email is None or payload.get("scope") not in (None, "staff", "dentist"):
             raise credentials_exception
     except JWTError:
         raise credentials_exception
@@ -71,6 +72,11 @@ def get_current_dentist(
     if dentist is None or not dentist.is_active:
         raise credentials_exception
     return dentist
+
+
+# Backwards-compatible alias: the staff table is still called ``dentists`` and
+# older modules/imports may reference the previous name.
+get_current_dentist = get_current_staff
 
 
 def get_current_patient(
@@ -96,10 +102,32 @@ def get_current_patient(
     return patient
 
 
-def require_admin(current: models.Dentist = Depends(get_current_dentist)) -> models.Dentist:
-    if current.role != models.DentistRole.admin:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Admin privileges required for this action",
-        )
-    return current
+def require_roles(*roles: "models.DentistRole"):
+    """Build a dependency that allows only the given staff roles through.
+
+    Usage::
+
+        @router.get("", dependencies=[Depends(require_roles(DentistRole.dentist))])
+
+    The returned callable is a normal FastAPI dependency, so it can also be
+    used as a parameter default (``current = Depends(require_roles(...))``)
+    when the handler needs the resolved account.
+    """
+    allowed = set(roles)
+
+    def dependency(current: models.Dentist = Depends(get_current_staff)) -> models.Dentist:
+        if current.role not in allowed:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Your role does not permit this action.",
+            )
+        return current
+
+    return dependency
+
+
+# `dentist` is the administrator role - full access.
+require_dentist = require_roles(models.DentistRole.dentist)
+# Screening work (create/read/image/PDF) is opened to the dentist and the
+# dental assistant; receptionists are excluded from clinical data.
+require_clinical = require_roles(models.DentistRole.dentist, models.DentistRole.assistant)

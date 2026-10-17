@@ -87,9 +87,11 @@ def client():
 
 @pytest.fixture()
 def seed_admin(client):
-    """Ensure the default admin exists and return the plain-text password
-    so callers can log in.  The app's startup event already seeds this
-    account, so we only insert if it's missing."""
+    """Ensure the full-access dentist/administrator exists and return the
+    plain-text password so callers can log in.  The app's startup event
+    already seeds this account, so we only insert if it's missing.
+
+    Under the three-role model `dentist` IS the administrator role."""
     password = "CodiSmile@2025"
     session = SessionLocal()
     try:
@@ -103,7 +105,7 @@ def seed_admin(client):
                 last_name="Admin",
                 email="admin@codismile.com",
                 hashed_password=hash_password(password),
-                role=models.DentistRole.admin,
+                role=models.DentistRole.dentist,
                 license_no="TEST-001",
             )
             session.add(admin)
@@ -115,7 +117,7 @@ def seed_admin(client):
 
 @pytest.fixture()
 def admin_token(client, seed_admin):
-    """Log in as the seeded admin and return the JWT."""
+    """Log in as the seeded dentist/administrator and return the JWT."""
     resp = client.post("/api/auth/login", json={
         "email": "admin@codismile.com",
         "password": seed_admin,
@@ -126,48 +128,70 @@ def admin_token(client, seed_admin):
 
 @pytest.fixture()
 def admin_headers(admin_token):
-    """Authorization headers dict for authenticated admin requests."""
+    """Authorization headers dict for the dentist/administrator account."""
     return {"Authorization": f"Bearer {admin_token}"}
 
 
-@pytest.fixture()
-def seed_dentist(client, seed_admin):
-    """Create a non-admin dentist and return {"email", "password", "id"}."""
-    password = "Dentist123!"
+def _seed_staff(role, email, password):
+    """Insert one limited staff account and return its login details."""
     session = SessionLocal()
     try:
-        d = models.Dentist(
-            full_name="Dr. Test Dentist",
+        staff = models.Dentist(
+            full_name=f"Test {role.value.title()}",
             first_name="Test",
-            last_name="Dentist",
-            email="dentist@test.com",
+            last_name=role.value.title(),
+            email=email,
             hashed_password=hash_password(password),
-            role=models.DentistRole.dentist,
-            license_no="TEST-002",
+            role=role,
         )
-        session.add(d)
+        session.add(staff)
         session.commit()
-        session.refresh(d)
-        dentist_id = d.id
+        session.refresh(staff)
+        staff_id = staff.id
     finally:
         session.close()
-    return {"email": "dentist@test.com", "password": password, "id": dentist_id}
+    return {"email": email, "password": password, "id": staff_id}
 
 
-@pytest.fixture()
-def dentist_token(client, seed_dentist):
-    """Log in as the seeded non-admin dentist and return the JWT."""
+def _login(client, account):
     resp = client.post("/api/auth/login", json={
-        "email": seed_dentist["email"],
-        "password": seed_dentist["password"],
+        "email": account["email"],
+        "password": account["password"],
     })
-    assert resp.status_code == 200, f"Dentist login failed: {resp.text}"
+    assert resp.status_code == 200, f"Staff login failed: {resp.text}"
     return resp.json()["access_token"]
 
 
 @pytest.fixture()
-def dentist_headers(dentist_token):
-    return {"Authorization": f"Bearer {dentist_token}"}
+def seed_receptionist(client, seed_admin):
+    """A front-desk receptionist (limited staff role)."""
+    return _seed_staff(models.DentistRole.receptionist, "receptionist@test.com", "Reception123!")
+
+
+@pytest.fixture()
+def receptionist_token(client, seed_receptionist):
+    return _login(client, seed_receptionist)
+
+
+@pytest.fixture()
+def receptionist_headers(receptionist_token):
+    return {"Authorization": f"Bearer {receptionist_token}"}
+
+
+@pytest.fixture()
+def seed_assistant(client, seed_admin):
+    """A dental assistant (clinical staff role)."""
+    return _seed_staff(models.DentistRole.assistant, "assistant@test.com", "Assistant123!")
+
+
+@pytest.fixture()
+def assistant_token(client, seed_assistant):
+    return _login(client, seed_assistant)
+
+
+@pytest.fixture()
+def assistant_headers(assistant_token):
+    return {"Authorization": f"Bearer {assistant_token}"}
 
 
 @pytest.fixture()

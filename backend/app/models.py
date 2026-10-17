@@ -16,8 +16,16 @@ def _utcnow():
 
 
 class DentistRole(str, enum.Enum):
-    admin = "admin"
-    dentist = "dentist"
+    """Staff roles held in the single ``dentists`` staff table.
+
+    ``dentist`` is the clinic administrator: it holds full access, including
+    staff management and the audit trail. ``receptionist`` and ``assistant``
+    are least-privilege clinic-staff roles. The exact endpoint permissions
+    for each role live in ``app/security.py``.
+    """
+    dentist = "dentist"          # administrator - full access
+    receptionist = "receptionist"
+    assistant = "assistant"
 
 
 class RiskLevel(str, enum.Enum):

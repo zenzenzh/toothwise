@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from app import models, schemas
 from app.audit import log_action
 from app.database import get_db
-from app.security import hash_password, get_current_dentist, require_admin
+from app.security import hash_password, get_current_staff, require_dentist
 from app.utils.names import combine_name
 
 router = APIRouter(prefix="/dentists", tags=["dentists"])
@@ -14,7 +14,7 @@ router = APIRouter(prefix="/dentists", tags=["dentists"])
 def list_dentists(
     search: str | None = None,
     db: Session = Depends(get_db),
-    _: models.Dentist = Depends(get_current_dentist),
+    _: models.Dentist = Depends(require_dentist),
 ):
     query = db.query(models.Dentist)
     if search:
@@ -29,7 +29,7 @@ def list_dentists(
 def get_dentist(
     dentist_id: int,
     db: Session = Depends(get_db),
-    _: models.Dentist = Depends(get_current_dentist),
+    _: models.Dentist = Depends(require_dentist),
 ):
     dentist = db.query(models.Dentist).get(dentist_id)
     if not dentist:
@@ -41,7 +41,7 @@ def get_dentist(
 def create_dentist(
     payload: schemas.DentistCreate,
     db: Session = Depends(get_db),
-    current: models.Dentist = Depends(require_admin),
+    current: models.Dentist = Depends(require_dentist),
 ):
     existing = db.query(models.Dentist).filter(
         models.Dentist.email == payload.email
@@ -72,7 +72,7 @@ def update_dentist(
     dentist_id: int,
     payload: schemas.DentistUpdate,
     db: Session = Depends(get_db),
-    current: models.Dentist = Depends(get_current_dentist),
+    current: models.Dentist = Depends(get_current_staff),
 ):
     dentist = db.query(models.Dentist).get(dentist_id)
     if not dentist:
@@ -80,11 +80,11 @@ def update_dentist(
 
     data = payload.model_dump(exclude_unset=True)
 
-    if current.role != models.DentistRole.admin:
+    if current.role != models.DentistRole.dentist:
         if current.id != dentist_id:
             raise HTTPException(status.HTTP_403_FORBIDDEN, "Not allowed.")
         if any(k in data for k in ("role", "email", "is_active")):
-            raise HTTPException(status.HTTP_403_FORBIDDEN, "Dentists cannot modify role, email, or active status.")
+            raise HTTPException(status.HTTP_403_FORBIDDEN, "Only the dentist/administrator can modify role, email, or active status.")
 
     if "password" in data and data["password"]:
         dentist.hashed_password = hash_password(data.pop("password"))
@@ -104,7 +104,7 @@ def reset_password(
     dentist_id: int,
     payload: schemas.DentistPasswordReset,
     db: Session = Depends(get_db),
-    current: models.Dentist = Depends(require_admin),
+    current: models.Dentist = Depends(require_dentist),
 ):
     dentist = db.query(models.Dentist).get(dentist_id)
     if not dentist:
@@ -120,7 +120,7 @@ def reset_password(
 def deactivate_dentist(
     dentist_id: int,
     db: Session = Depends(get_db),
-    current: models.Dentist = Depends(require_admin),
+    current: models.Dentist = Depends(require_dentist),
 ):
     dentist = db.query(models.Dentist).get(dentist_id)
     if not dentist:
@@ -137,7 +137,7 @@ def deactivate_dentist(
 def delete_dentist(
     dentist_id: int,
     db: Session = Depends(get_db),
-    current: models.Dentist = Depends(require_admin),
+    current: models.Dentist = Depends(require_dentist),
 ):
     if current.id == dentist_id:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "You cannot delete your own account.")

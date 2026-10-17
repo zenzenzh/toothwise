@@ -4,12 +4,18 @@ One-time bootstrap for initial CodiSmile staff accounts.
 No credentials are stored in this source file. Set the environment variables
 below before running from the backend directory:
 
-  SEED_ADMIN_EMAIL
+  SEED_ADMIN_EMAIL      -> dentist / administrator account (full access)
   SEED_ADMIN_PASSWORD
   SEED_ADMIN_NAME
   SEED_ADMIN_LICENSE
 
-Optional dentist accounts can be supplied with DENTIST1_* and DENTIST2_*.
+Optional extra accounts can be supplied with these prefixes:
+
+  DENTIST1_* / DENTIST2_*        -> additional dentists (role: dentist)
+  RECEPTION1_* / RECEPTION2_*    -> receptionists (role: receptionist)
+  ASSISTANT1_* / ASSISTANT2_*    -> dental assistants (role: assistant)
+
+Each uses the same _NAME / _EMAIL / _PASSWORD (_LICENSE for dentists) keys.
 """
 import os
 import sys
@@ -47,11 +53,20 @@ def main():
     Base.metadata.create_all(bind=engine)
 
     accounts = []
-    admin = account_from_env("SEED_ADMIN", models.DentistRole.admin, require_license=True)
+    # The dentist is the clinic administrator (full access).
+    admin = account_from_env("SEED_ADMIN", models.DentistRole.dentist, require_license=True)
     if admin:
         accounts.append(admin)
     for prefix in ("DENTIST1", "DENTIST2"):
         account = account_from_env(prefix, models.DentistRole.dentist)
+        if account:
+            accounts.append(account)
+    for prefix in ("RECEPTION1", "RECEPTION2"):
+        account = account_from_env(prefix, models.DentistRole.receptionist)
+        if account:
+            accounts.append(account)
+    for prefix in ("ASSISTANT1", "ASSISTANT2"):
+        account = account_from_env(prefix, models.DentistRole.assistant)
         if account:
             accounts.append(account)
 
