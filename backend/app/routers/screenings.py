@@ -84,7 +84,7 @@ def get_my_screening(
     belongs to someone else, so a patient can't tell the difference
     between "not yours" and "doesn't exist" by probing IDs.
     """
-    screening = db.query(models.Screening).get(screening_id)
+    screening = db.get(models.Screening, screening_id)
     if not screening or screening.patient_id != current_patient.id:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Screening not found.")
     return _to_patient_out(screening)
@@ -103,7 +103,7 @@ def get_my_screening_image(
     with no login required at all. Same 404-not-403 ownership check as
     get_my_screening.
     """
-    screening = db.query(models.Screening).get(screening_id)
+    screening = db.get(models.Screening, screening_id)
     if not screening or screening.patient_id != current_patient.id:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Screening not found.")
     return FileResponse(_resolve_image_path(screening.image_path))
@@ -121,7 +121,7 @@ def create_screening(
     db: Session = Depends(get_db),
     current: models.Dentist = Depends(require_clinical),
 ):
-    patient = db.query(models.Patient).get(patient_id)
+    patient = db.get(models.Patient, patient_id)
     if not patient:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Patient not found.")
 
@@ -189,7 +189,7 @@ def get_screening(
     db: Session = Depends(get_db),
     _: models.Dentist = Depends(require_clinical),
 ):
-    screening = db.query(models.Screening).get(screening_id)
+    screening = db.get(models.Screening, screening_id)
     if not screening:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Screening not found.")
     return screening
@@ -211,7 +211,7 @@ def confirm_screening_tier(
     stays as-is alongside the review, because overwriting it would
     silently destroy the exact data point this endpoint exists to capture.
     """
-    screening = db.query(models.Screening).get(screening_id)
+    screening = db.get(models.Screening, screening_id)
     if not screening:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Screening not found.")
 
@@ -250,7 +250,7 @@ def get_screening_image(
 ):
     """Staff-facing counterpart of get_my_screening_image - authenticated
     image serving, replacing the old public static mount."""
-    screening = db.query(models.Screening).get(screening_id)
+    screening = db.get(models.Screening, screening_id)
     if not screening:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Screening not found.")
     return FileResponse(_resolve_image_path(screening.image_path))
@@ -262,7 +262,7 @@ def delete_screening(
     db: Session = Depends(get_db),
     current: models.Dentist = Depends(require_dentist),
 ):
-    screening = db.query(models.Screening).get(screening_id)
+    screening = db.get(models.Screening, screening_id)
     if not screening:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Screening not found.")
     log_action(db, current, "screening.delete", "screening", screening.id)
@@ -286,7 +286,7 @@ def compare_models(
     backend/training/evaluate_models.py against your labeled test set
     after training and use those numbers for your thesis's Chapter 4.
     """
-    screening = db.query(models.Screening).get(screening_id)
+    screening = db.get(models.Screening, screening_id)
     if not screening:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Screening not found.")
 
@@ -343,7 +343,7 @@ def add_clinical_note(
     db: Session = Depends(get_db),
     current: models.Dentist = Depends(require_dentist),
 ):
-    screening = db.query(models.Screening).get(screening_id)
+    screening = db.get(models.Screening, screening_id)
     if not screening:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Screening not found.")
 
@@ -362,7 +362,7 @@ def download_screening_report(
     db: Session = Depends(get_db),
     current: models.Dentist = Depends(require_clinical),
 ):
-    screening = db.query(models.Screening).get(screening_id)
+    screening = db.get(models.Screening, screening_id)
     if not screening:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Screening not found.")
 

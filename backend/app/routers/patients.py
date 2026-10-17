@@ -69,7 +69,7 @@ def get_patient(
     db: Session = Depends(get_db),
     _: models.Dentist = Depends(get_current_staff),
 ):
-    patient = db.query(models.Patient).get(patient_id)
+    patient = db.get(models.Patient, patient_id)
     if not patient:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Patient not found.")
     return patient
@@ -82,7 +82,7 @@ def update_patient(
     db: Session = Depends(get_db),
     current: models.Dentist = Depends(get_current_staff),
 ):
-    patient = db.query(models.Patient).get(patient_id)
+    patient = db.get(models.Patient, patient_id)
     if not patient:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Patient not found.")
     updates = payload.model_dump(exclude_unset=True)
@@ -102,7 +102,7 @@ def delete_patient(
     db: Session = Depends(get_db),
     current: models.Dentist = Depends(require_dentist),
 ):
-    patient = db.query(models.Patient).get(patient_id)
+    patient = db.get(models.Patient, patient_id)
     if not patient:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Patient not found.")
     log_action(db, current, "patient.delete", "patient", patient.id, patient.full_name)
@@ -116,7 +116,7 @@ def list_patient_screenings(
     db: Session = Depends(get_db),
     _: models.Dentist = Depends(require_clinical),
 ):
-    patient = db.query(models.Patient).get(patient_id)
+    patient = db.get(models.Patient, patient_id)
     if not patient:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Patient not found.")
 
@@ -147,7 +147,7 @@ def get_patient_risk_trend(
 ):
     """Chronological risk_score/risk_level per screening, oldest first -
     feeds the trend chart on the patient detail page."""
-    patient = db.query(models.Patient).get(patient_id)
+    patient = db.get(models.Patient, patient_id)
     if not patient:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Patient not found.")
 

@@ -31,7 +31,7 @@ def get_dentist(
     db: Session = Depends(get_db),
     _: models.Dentist = Depends(require_dentist),
 ):
-    dentist = db.query(models.Dentist).get(dentist_id)
+    dentist = db.get(models.Dentist, dentist_id)
     if not dentist:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Dentist not found.")
     return dentist
@@ -74,7 +74,7 @@ def update_dentist(
     db: Session = Depends(get_db),
     current: models.Dentist = Depends(get_current_staff),
 ):
-    dentist = db.query(models.Dentist).get(dentist_id)
+    dentist = db.get(models.Dentist, dentist_id)
     if not dentist:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Dentist not found.")
 
@@ -106,7 +106,7 @@ def reset_password(
     db: Session = Depends(get_db),
     current: models.Dentist = Depends(require_dentist),
 ):
-    dentist = db.query(models.Dentist).get(dentist_id)
+    dentist = db.get(models.Dentist, dentist_id)
     if not dentist:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Dentist not found.")
     dentist.hashed_password = hash_password(payload.new_password)
@@ -122,7 +122,7 @@ def deactivate_dentist(
     db: Session = Depends(get_db),
     current: models.Dentist = Depends(require_dentist),
 ):
-    dentist = db.query(models.Dentist).get(dentist_id)
+    dentist = db.get(models.Dentist, dentist_id)
     if not dentist:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Dentist not found.")
     dentist.is_active = not dentist.is_active
@@ -141,7 +141,7 @@ def delete_dentist(
 ):
     if current.id == dentist_id:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "You cannot delete your own account.")
-    dentist = db.query(models.Dentist).get(dentist_id)
+    dentist = db.get(models.Dentist, dentist_id)
     if not dentist:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Dentist not found.")
     log_action(db, current, "dentist.delete", "dentist", dentist.id, dentist.email)
