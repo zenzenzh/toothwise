@@ -250,7 +250,7 @@ body.dark-mode .tw-risk--medium { color: var(--tw-warning); }
 }
 .tw6-modal-heading { display: flex; align-items: center; gap: 10px; }
 .tw6-modal-icon { width: 38px; height: 38px; border-radius: 11px; background: var(--tw-surface-alt); color: var(--tw-navy); display: grid; place-items: center; flex: none; }
-.tw6-modal-heading h3 { margin: 0; font: 700 18px/1.1 'Manrope',sans-serif; color: var(--tw-text); letter-spacing: -.02em; }
+.tw6-modal-heading :is(h2, h3) { margin: 0; font: 700 18px/1.1 'Manrope',sans-serif; color: var(--tw-text); letter-spacing: -.02em; }
 .tw6-modal-close { width: 36px; height: 36px; border-radius: 10px; border: 1px solid var(--tw-border); background: var(--tw-surface); color: var(--tw-muted); display: grid; place-items: center; cursor: pointer; transition: background var(--dur-fast), color var(--dur-fast), border-color var(--dur-fast); }
 .tw6-modal-close:hover { background: var(--tw-surface-alt); border-color: var(--tw-teal); color: var(--tw-text); }
 .tw6-modal-form { padding: 20px 22px 18px; display: flex; flex-direction: column; gap: 16px; overflow-y: auto; max-height: calc(100dvh - 200px); }
@@ -289,7 +289,7 @@ textarea.tw6-modal-input { min-height: 90px; resize: vertical; }
 @media (max-width: 640px) {
   .tw6-modal { width: 100%; max-height: calc(100dvh - 24px); border-radius: 16px; }
   .tw6-modal-head { padding: 16px 18px; }
-  .tw6-modal-heading h3 { font-size: 17px; }
+  .tw6-modal-heading :is(h2, h3) { font-size: 17px; }
   .tw6-modal-form { padding: 18px 18px 14px; }
   .tw6-modal-grid-2, .tw6-modal-grid-3 { grid-template-columns: 1fr; }
   .tw6-modal-footer { flex-direction: column-reverse; gap: 8px; }

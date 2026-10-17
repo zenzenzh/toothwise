@@ -178,7 +178,7 @@ export default function PatientDetail() {
 
       {canViewClinical && riskTrend.length >= 2 && (
         <section className="pd6-card" aria-labelledby="pd-trend-title">
-          <h3 id="pd-trend-title" className="pd6-section-title">Risk trend</h3>
+          <h2 id="pd-trend-title" className="pd6-section-title">Risk trend</h2>
           <ResponsiveContainer width="100%" height={200}>
             <LineChart margin={{ top: 10, right: 14, bottom: 0, left: 0 }} data={riskTrend.map(t => ({
               date: formatShortDatePH(t.created_at),
@@ -220,7 +220,7 @@ export default function PatientDetail() {
       {canViewClinical && (
         <section aria-labelledby="pd-history-title">
           <div className="pd6-section-head">
-            <h3 id="pd-history-title" className="pd6-section-title">Screening history</h3>
+            <h2 id="pd-history-title" className="pd6-section-title">Screening history</h2>
             {!clinicalError && (
               <span className="pd6-count">{screenings.length} record{screenings.length !== 1 ? 's' : ''}</span>
             )}

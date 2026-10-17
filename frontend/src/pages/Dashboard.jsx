@@ -116,7 +116,7 @@ export default function Dashboard() {
 
       <div className="dash6-charts">
         <section className="dash6-chart-card" aria-labelledby="dash-trend-title">
-          <h3 id="dash-trend-title" className="dash6-chart-title">Monthly screening trend</h3>
+          <h2 id="dash-trend-title" className="dash6-chart-title">Monthly screening trend</h2>
           <p className="dash6-chart-sub">Last 6 months</p>
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={stats.monthly_trend} barSize={28}>
@@ -135,7 +135,7 @@ export default function Dashboard() {
         </section>
 
         <section className="dash6-chart-card" aria-labelledby="dash-breakdown-title">
-          <h3 id="dash-breakdown-title" className="dash6-chart-title">Detection breakdown</h3>
+          <h2 id="dash-breakdown-title" className="dash6-chart-title">Detection breakdown</h2>
           <p className="dash6-chart-sub">By anomaly type</p>
           {pieData.length > 0 ? (
             <div className="dash6-pie">
@@ -172,7 +172,7 @@ export default function Dashboard() {
       </div>
 
       <section aria-labelledby="dash-actions-title">
-        <h3 id="dash-actions-title" className="dash6-section-title">Quick actions</h3>
+        <h2 id="dash-actions-title" className="dash6-section-title">Quick actions</h2>
         <div className="dash6-actions-grid">
           {QUICK_ACTIONS.map((a, i) => (
             <button

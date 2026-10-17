@@ -282,7 +282,7 @@ export default function ScreeningDetail() {
         {/* LEFT COLUMN: IMAGE */}
         <section className="sd-card" aria-labelledby="sd-view-title">
           <div className="sd-view-head">
-            <h3 id="sd-view-title" className="sd-sec-title">AI detection view</h3>
+            <h2 id="sd-view-title" className="sd-sec-title">AI detection view</h2>
             <label className="sd-toggle">
               <input type="checkbox" checked={showBoxes} onChange={e => setShowBoxes(e.target.checked)} />
               Show bounding boxes
@@ -341,7 +341,7 @@ export default function ScreeningDetail() {
         {/* RIGHT COLUMN: PLAN & NOTES */}
         <div className="sd-side">
           <section className="sd-card" aria-labelledby="sd-plan-title">
-            <h3 id="sd-plan-title" className="sd-sec-title">Prevention plan</h3>
+            <h2 id="sd-plan-title" className="sd-sec-title">Prevention plan</h2>
             {recommendations.length > 0 ? (
               <ul className="sd-recs">
                 {recommendations.map((r, i) => (
@@ -357,7 +357,7 @@ export default function ScreeningDetail() {
           </section>
 
           <section className="sd-card" aria-labelledby="sd-notes-title">
-            <h3 id="sd-notes-title" className="sd-sec-title">Clinical notes</h3>
+            <h2 id="sd-notes-title" className="sd-sec-title">Clinical notes</h2>
             {notes.length > 0 ? (
               <ul className="sd-notes">
                 {notes.map(n => (

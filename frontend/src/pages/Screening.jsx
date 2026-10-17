@@ -234,7 +234,7 @@ export default function Screening() {
       {step === 'results' && screening && (
         <section className="scr-card scr-result" aria-labelledby="scr-result-title">
           <span className="scr-result-icon" aria-hidden="true"><CheckCircle2 size={34} strokeWidth={1.8} /></span>
-          <h3 id="scr-result-title" className="scr-result-title">Analysis complete</h3>
+          <h2 id="scr-result-title" className="scr-result-title">Analysis complete</h2>
           <div className="scr-result-summary">
             {screening.risk_level && <RiskBadge level={screening.risk_level} suffix="risk" size="lg" />}
             <span className="scr-result-count">{detectionCount} finding{detectionCount !== 1 ? 's' : ''} detected</span>

@@ -78,7 +78,7 @@ const Modal = ({
         <div className="tw6-modal-head">
           <div className="tw6-modal-heading">
             {Icon && <span className="tw6-modal-icon" aria-hidden="true"><Icon size={19} /></span>}
-            <h3 id={titleId}>{title}</h3>
+            <h2 id={titleId}>{title}</h2>
           </div>
           {dismissible && (
             <button type="button" className="tw6-modal-close" onClick={onClose} aria-label="Close dialog">

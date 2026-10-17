@@ -19,7 +19,7 @@ const EmptyState = ({
     <div className="tw-state__icon" aria-hidden="true">
       <Icon size={compact ? 22 : 26} strokeWidth={1.75} />
     </div>
-    <h3 className="tw-state__title">{title || 'No data available'}</h3>
+    <h2 className="tw-state__title">{title || 'No data available'}</h2>
     {message !== null && (
       <p className="tw-state__text">{message || 'There is nothing to display at the moment.'}</p>
     )}

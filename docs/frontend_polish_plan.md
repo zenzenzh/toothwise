@@ -151,6 +151,13 @@ Left as-is:
 - Mobile landing LCP is about 4 s, because the hero photo sits below the headline and is discovered by JS. Preloading it would need a landing-only tag in the shared `index.html`.
 - Lighthouse still reports about 40 KB of unused JS and about 20 KB of unused CSS in the shared bundle.
 
+### Staff-page accessibility audit (done)
+Lighthouse can't reach the signed-in screens, so I ran axe-core 4.14 (the copy bundled with Lighthouse) in the dev build with stubbed data. Tags: WCAG 2.0/2.1 A and AA, plus best-practice. Coverage: all 8 staff routes (including a not-found screening) and 5 dialogs (patient form, staff form, delete confirmation, reset password), each in light and dark mode.
+- **Found:** heading order. Pages open with an `<h1>`, but section, dialog and empty-state titles were `<h3>`.
+- **Fixed:** those titles are now `<h2>`, and the modal CSS selector accepts both.
+- **Checked:** computed heading styles are identical before and after.
+- **Re-run:** zero violations everywhere.
+
 ## Suggested order and checkpoints
 1. Phase 1 → visual check, should be no change.
 2. Phase 2 one page at a time, one commit per page, screenshot before and after in both themes.
