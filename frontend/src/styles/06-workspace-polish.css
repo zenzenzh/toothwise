@@ -104,13 +104,13 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   
   
   .screening-page {
-    padding: 12px !important;
+    padding: 12px;
   }
 
   .screening-page h2 {
-    margin: 14px 0 16px !important;
-    font-size: 1.55rem !important;
-    line-height: 1.16 !important;
+    margin: 14px 0 16px;
+    font-size: 1.55rem;
+    line-height: 1.16;
     letter-spacing: 0;
     text-wrap: balance;
   }

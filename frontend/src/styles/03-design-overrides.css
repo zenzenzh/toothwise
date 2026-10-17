@@ -32,7 +32,7 @@ a { color:var(--tw-teal-dark); }
 .tw-sidebar .codismile-logo { background:#fff; border-radius:12px; padding:4px; }
 .tw-main { background:var(--tw-bg); }
 .tw-content { max-width:1440px; width:100%; margin:0 auto; }
-.nav-link { min-height:44px !important; }
+.nav-link { min-height:44px; }
 .dashboard-popover { transform-origin:top right; }
 .dashboard-icon-button { min-height:44px; }
 
@@ -64,7 +64,7 @@ button:not(:disabled):hover { transform:none; }
 }
 @media (prefers-reduced-motion:reduce) {
   html { scroll-behavior:auto; }
-  *,*::before,*::after { animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:var(--dur-fast) !important; scroll-behavior:auto !important; }
+  *,*::before,*::after { animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration: .001ms !important; scroll-behavior:auto !important; }
   .tw-reveal { opacity:1 !important; transform:none !important; }
 }
 

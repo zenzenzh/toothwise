@@ -207,26 +207,25 @@ export default function Layout() {
   }
 
   return (
-    <div style={{ ...styles.shell, '--sidebar-w': railCollapsed ? '84px' : '260px' }}>
+    <div className="tw-shell" style={{ '--sidebar-w': railCollapsed ? '84px' : '260px' }}>
       <SEO title={route.title} description={route.description} noIndex />
       {mobileOpen && <div className="tw-backdrop" onClick={() => setMobileOpen(false)} aria-hidden="true" />}
 
       <aside
         ref={sidebarRef}
         className={`tw-sidebar${mobileOpen ? ' mobile-open' : ''}${railCollapsed ? ' collapsed' : ''}`}
-        style={styles.sidebar}
         aria-label="Primary navigation"
       >
         <div>
-          <div style={{ ...styles.brandRow, justifyContent: railCollapsed ? 'center' : 'flex-start' }}>
-            <div style={styles.logo}><LogoMark size={38} alt="CodiSmile Dental Clinic" /></div>
+          <div className="tw-sb-brand">
+            <div className="tw-sb-logo"><LogoMark size={38} alt="CodiSmile Dental Clinic" /></div>
             {!railCollapsed && <div>
-              <div className="tw-sb-brand-name" style={styles.brandName}>TOOTHWISE</div>
-              <div className="tw-sb-brand-sub" style={styles.brandSub}>CODISMILE CLINIC</div>
+              <div className="tw-sb-brand-name">TOOTHWISE</div>
+              <div className="tw-sb-brand-sub">CODISMILE CLINIC</div>
             </div>}
           </div>
 
-          <nav style={{ ...styles.nav, marginTop: railCollapsed ? 22 : 18 }}>
+          <nav className="tw-sb-nav">
             {navItems.map(item => (
               <NavLink
                 key={item.to}
@@ -234,7 +233,6 @@ export default function Layout() {
                 end={item.exact}
                 title={railCollapsed ? item.label : undefined}
                 className="nav-link tw-sb-link"
-                style={{ ...styles.navLink, justifyContent: railCollapsed ? 'center' : 'flex-start' }}
               >
                 <item.icon size={19} strokeWidth={2} />
                 {!railCollapsed && <span>{item.label}</span>}
@@ -243,28 +241,28 @@ export default function Layout() {
           </nav>
         </div>
 
-        <div style={styles.sidebarBottom}>
-          <button className="nav-link tw-sb-collapse" onClick={toggleSidebar} style={{ ...styles.collapseButton, justifyContent: railCollapsed ? 'center' : 'flex-start' }}>
-            <ChevronLeft size={18} style={{ transform: railCollapsed ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }} />
+        <div className="tw-sb-bottom">
+          <button className="nav-link tw-sb-collapse" onClick={toggleSidebar}>
+            <ChevronLeft size={18} className="tw-sb-collapse-icon" />
             {mobileOpen ? <span>Close menu</span> : !railCollapsed && <span>Collapse menu</span>}
           </button>
-          <div className="tw-sb-user" style={styles.userCard}>
-            <div className="tw-sb-avatar" style={styles.avatar}>{initials(dentist?.full_name)}</div>
-            {!railCollapsed && <div style={{ minWidth: 0 }}>
-              <div className="tw-sb-user-name" style={styles.userName}>{dentist?.full_name || 'Clinic staff'}</div>
-              <div className="tw-sb-user-role" style={styles.userRole}>{ROLE_LABELS[dentist?.role] || dentist?.role || 'Staff'}</div>
+          <div className="tw-sb-user">
+            <div className="tw-sb-avatar">{initials(dentist?.full_name)}</div>
+            {!railCollapsed && <div className="tw-sb-user-text">
+              <div className="tw-sb-user-name">{dentist?.full_name || 'Clinic staff'}</div>
+              <div className="tw-sb-user-role">{ROLE_LABELS[dentist?.role] || dentist?.role || 'Staff'}</div>
             </div>}
           </div>
-          <button className="tw-sb-logout" onClick={handleLogout} style={{ ...styles.logout, justifyContent: railCollapsed ? 'center' : 'flex-start' }}>
+          <button className="tw-sb-logout" onClick={handleLogout}>
             <LogOut size={17} />
             {!railCollapsed && <span>Sign out</span>}
           </button>
         </div>
       </aside>
 
-      <main className={`tw-main${railCollapsed ? ' collapsed' : ''}`} style={styles.main}>
-        <header className="tw-topbar" style={styles.topbar}>
-          <div className="tw-top-left" style={styles.topLeft}>
+      <main className={`tw-main${railCollapsed ? ' collapsed' : ''}`}>
+        <header className="tw-topbar">
+          <div className="tw-top-left">
             <button ref={hamburgerRef} className="tw-hamburger" onClick={toggleSidebar} aria-label="Toggle navigation" aria-expanded={mobileOpen}>
               {mobileOpen ? <X size={19} /> : <Menu size={19} />}
             </button>
@@ -281,19 +279,19 @@ export default function Layout() {
               </ol>
             </nav>
           </div>
-          <div className="tw-top-right" style={{ ...styles.topRight, position: 'relative' }}>
-            <button className="dashboard-icon-button tw-icon-button" style={styles.iconButton} title="Notifications" aria-label="Notifications"
+          <div className="tw-top-right">
+            <button className="dashboard-icon-button tw-icon-button" title="Notifications" aria-label="Notifications"
               onClick={openNotifications}>
               <Bell size={17} />
               {!notificationRead && <span className="dashboard-notification-dot" />}
             </button>
-            <button className="dashboard-icon-button tw-icon-button" style={styles.iconButton} title="Search patients" aria-label="Search patients"
+            <button className="dashboard-icon-button tw-icon-button" title="Search patients" aria-label="Search patients"
               onClick={openSearch}>
               <Search size={17} />
             </button>
             <button
               className="dashboard-icon-button tw-icon-button"
-              style={styles.iconButton}
+             
               onClick={toggleTheme}
               title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
               aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
@@ -346,7 +344,7 @@ export default function Layout() {
           </div>
         </header>
 
-        <div className="tw-content" style={styles.content}>
+        <div className="tw-content">
           <div key={location.pathname} className="page-enter">
             <Outlet />
           </div>
@@ -355,31 +353,3 @@ export default function Layout() {
     </div>
   );
 }
-
-const styles = {
-  shell: { minHeight: '100vh', background: 'var(--tw-bg)', color: 'var(--tw-text)' },
-  sidebar: {
-    position: 'fixed', inset: '0 auto 0 0', zIndex: 200, display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
-    padding: '20px 12px', overflowY: 'auto', width: 'var(--sidebar-w, 260px)',
-    transition: 'width .2s ease, background .2s ease',
-  },
-  brandRow: { display: 'flex', alignItems: 'center', gap: 12, minHeight: 52, padding: '2px 10px' },
-  logo: { width: 44, height: 44, borderRadius: 14, display: 'grid', placeItems: 'center', background: '#FFFFFF', boxShadow: 'none', flexShrink: 0 },
-  brandName: { fontWeight: 900, letterSpacing: '.12em', fontSize: 14 },
-  brandSub: { fontSize: 9, marginTop: 3, letterSpacing: '.1em', fontWeight: 800 },
-  nav: { display: 'flex', flexDirection: 'column', gap: 6, padding: '0 4px' },
-  navLink: { display: 'flex', alignItems: 'center', gap: 12, borderRadius: 12, padding: '12px 13px', textDecoration: 'none', fontSize: 13, fontWeight: 700 },
-  sidebarBottom: { display: 'flex', flexDirection: 'column', gap: 9 },
-  collapseButton: { width: '100%', border: 0, padding: '10px 13px', borderRadius: 10, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 12, fontSize: 11, fontWeight: 700 },
-  userCard: { display: 'flex', alignItems: 'center', gap: 10, padding: '12px 8px' },
-  avatar: { width: 38, height: 38, borderRadius: 12, display: 'grid', placeItems: 'center', fontSize: 13, fontWeight: 900, flexShrink: 0 },
-  userName: { fontWeight: 800, fontSize: 12, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 160 },
-  userRole: { textTransform: 'capitalize', fontSize: 10, marginTop: 2 },
-  logout: { borderRadius: 11, padding: '10px 12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 11, fontSize: 12, fontWeight: 700 },
-  main: { minHeight: '100vh', display: 'flex', flexDirection: 'column', marginLeft: 'var(--sidebar-w, 260px)', transition: 'margin-left .2s ease' },
-  topbar: { height: 78, background: 'color-mix(in srgb, var(--tw-surface) 92%, transparent)', backdropFilter: 'blur(14px)', borderBottom: '1px solid var(--tw-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 30px', position: 'sticky', top: 0, zIndex: 100 },
-  topLeft: { display: 'flex', alignItems: 'center', gap: 14 },
-  topRight: { display: 'flex', alignItems: 'center', gap: 8 },
-  iconButton: { width: 38, height: 38, border: '1px solid var(--tw-border)', borderRadius: 11, background: 'var(--tw-surface)', color: 'var(--tw-muted)', display: 'grid', placeItems: 'center', cursor: 'pointer' },
-  content: { flex: 1, padding: '28px 30px 36px', minWidth: 0 },
-};

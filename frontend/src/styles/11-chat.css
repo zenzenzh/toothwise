@@ -55,7 +55,9 @@
   display: flex; align-items: center; gap: 6px;
   font-size: 12px; line-height: 1.4; color: rgba(255,255,255,.72); margin-top: 3px;
 }
-.chat-status-dot { width: 7px !important; height: 7px; border-radius: 50%; background: var(--tw-teal); box-shadow: 0 0 0 2px rgba(186,121,118,.22); flex: 0 0 auto; }
+.chat-status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--tw-teal); box-shadow: 0 0 0 2px rgba(186,121,118,.22); flex: 0 0 auto; }
+/* The header's generic span rules add margin-top; the dot sits flush. */
+.chat-panel-header > div > div:last-child span.chat-status-dot { margin: 0; }
 .chat-panel-header button {
   width: 40px; height: 40px; min-height: 40px; flex: 0 0 auto;
   border: 0; border-radius: 12px; background: rgba(255,255,255,.12);

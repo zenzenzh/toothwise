@@ -75,6 +75,54 @@ body.dark-mode {
 .tw-sb-logout:hover { background: var(--sb-hover); color: var(--sb-text-strong); }
 .tw-sb-link:focus-visible, .tw-sb-collapse:focus-visible, .tw-sb-logout:focus-visible { outline: 2px solid var(--sb-active-border); outline-offset: -2px; }
 
+/* ── Staff shell layout (Layout.jsx) ──────────────────────────────
+   Formerly inline styles; as classes, the responsive rules below can
+   override them by source order instead of !important. --sidebar-w is
+   set inline on .tw-shell (84px rail / 260px full). */
+.tw-shell { min-height: 100vh; background: var(--tw-bg); color: var(--tw-text); }
+.tw-sidebar {
+  position: fixed; inset: 0 auto 0 0; z-index: 200;
+  display: flex; flex-direction: column; justify-content: space-between;
+  width: var(--sidebar-w, 260px); padding: 20px 12px; overflow-y: auto;
+  transition: width var(--dur) ease, background var(--dur) ease;
+}
+.tw-sb-brand { display: flex; align-items: center; justify-content: flex-start; gap: 12px; min-height: 52px; padding: 2px 10px; }
+.tw-sb-logo { width: 44px; height: 44px; flex-shrink: 0; display: grid; place-items: center; border-radius: 14px; background: #FFFFFF; box-shadow: none; }
+.tw-sb-brand-name { font-size: 14px; font-weight: 900; letter-spacing: .12em; }
+.tw-sb-brand-sub { margin-top: 3px; font-size: 9px; font-weight: 800; letter-spacing: .1em; }
+.tw-sb-nav { display: flex; flex-direction: column; gap: 6px; margin-top: 18px; padding: 0 4px; }
+.tw-sb-link { display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 13px; border-radius: 12px; font-size: 13px; font-weight: 700; text-decoration: none; }
+.tw-sb-bottom { display: flex; flex-direction: column; gap: 9px; }
+.tw-sb-collapse { width: 100%; display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 10px 13px; border: 0; border-radius: 10px; font-size: 11px; font-weight: 700; cursor: pointer; }
+.tw-sb-collapse-icon { transition: transform var(--dur) ease; }
+.tw-sb-user { display: flex; align-items: center; gap: 10px; padding: 12px 8px; }
+.tw-sb-avatar { width: 38px; height: 38px; flex-shrink: 0; display: grid; place-items: center; border-radius: 12px; font-size: 13px; font-weight: 900; }
+.tw-sb-user-text { min-width: 0; }
+.tw-sb-user-name { max-width: 160px; font-size: 12px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tw-sb-user-role { margin-top: 2px; font-size: 10px; text-transform: capitalize; }
+.tw-sb-logout { display: flex; align-items: center; justify-content: flex-start; gap: 11px; padding: 10px 12px; border-radius: 11px; font-size: 12px; font-weight: 700; cursor: pointer; }
+/* Collapsed rail: centre everything, flip the chevron. */
+.tw-sidebar.collapsed .tw-sb-brand,
+.tw-sidebar.collapsed .tw-sb-link,
+.tw-sidebar.collapsed .tw-sb-collapse,
+.tw-sidebar.collapsed .tw-sb-logout { justify-content: center; }
+.tw-sidebar.collapsed .tw-sb-nav { margin-top: 22px; }
+.tw-sidebar.collapsed .tw-sb-collapse-icon { transform: rotate(180deg); }
+
+.tw-main { min-height: 100vh; display: flex; flex-direction: column; margin-left: var(--sidebar-w, 260px); transition: margin-left var(--dur) ease; }
+.tw-topbar {
+  position: sticky; top: 0; z-index: 100;
+  height: 78px; padding: 0 30px;
+  display: flex; align-items: center; justify-content: space-between;
+  background: color-mix(in srgb, var(--tw-surface) 92%, transparent);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--tw-border);
+}
+.tw-top-left { display: flex; align-items: center; gap: 14px; }
+.tw-top-right { position: relative; display: flex; align-items: center; gap: 8px; }
+.tw-icon-button { width: 38px; height: 38px; display: grid; place-items: center; border: 1px solid var(--tw-border); border-radius: 11px; background: var(--tw-surface); color: var(--tw-muted); cursor: pointer; }
+.tw-content { flex: 1; min-width: 0; padding: 28px 30px 36px; }
+
 /* ── Dark mode: remaining component overrides ─────────────────────
    Everything else follows the token swap in body.dark-mode above. */
 body.dark-mode .dashboard-popover { background: var(--tw-surface); border-color: var(--tw-border); color: var(--tw-text); }
@@ -150,19 +198,19 @@ body.dark-mode .skeleton, body.dark-mode .pp-thumb--skeleton { background:linear
 .tw-label { font-size:12px; font-weight:800; color:var(--tw-navy); letter-spacing:.02em; }
 
 @media (max-width: 900px) {
-  .tw-sidebar { width:270px !important; transform:translateX(-100%); }
+  .tw-sidebar { width:270px; transform:translateX(-100%); }
   .tw-sidebar.mobile-open { transform:translateX(0); box-shadow:16px 0 40px rgba(0,0,0,.22); }
-  .tw-main { margin-left:0 !important; }
-  .tw-content { padding:20px !important; }
-  .tw-topbar { padding:0 16px !important; height:66px !important; }
-  .tw-top-left { gap:10px !important; }
+  .tw-main { margin-left:0; }
+  .tw-content { padding:20px; }
+  .tw-topbar { padding:0 16px; height:66px; }
+  .tw-top-left { gap:10px; }
           .auth-panel { padding:34px; }
 }
 @media (max-width: 640px) {
     .auth-panel { padding:26px 20px; }
-      .tw-topbar { padding:0 12px !important; }
-  .tw-top-right { gap:6px !important; }
-  .tw-icon-button { width:34px !important; height:34px !important; }
+      .tw-topbar { padding:0 12px; }
+  .tw-top-right { gap:6px; }
+  .tw-icon-button { width:34px; height:34px; }
 }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto !important; }
@@ -170,7 +218,7 @@ body.dark-mode .skeleton, body.dark-mode .pp-thumb--skeleton { background:linear
     animation-duration: .001ms !important;
     animation-iteration-count: 1 !important;
     animation-delay: 0s !important;
-    transition-duration: var(--dur-fast) !important;
+    transition-duration: .001ms !important;
     transition-delay: 0s !important;
   }
 }

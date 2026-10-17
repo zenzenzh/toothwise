@@ -161,6 +161,6 @@ select.auth6-input { appearance: auto; }
 @media (prefers-reduced-motion: reduce) {
   .auth6-blob { animation: none; }
   .auth6-card > * { animation: fade-in-soft 200ms ease both; }
-  .auth6-tab-pill, .auth6-input, .auth6-submit, .auth6-tabs button { transition-duration: var(--dur-fast); }
+  .auth6-tab-pill, .auth6-input, .auth6-submit, .auth6-tabs button { transition-duration: .001ms; }
 }
 @keyframes fade-in-soft { to { opacity: 1; transform: none; } }

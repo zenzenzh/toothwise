@@ -118,6 +118,11 @@ Most of the per-page items were handled during the Phase 2 rewrites: Patients, S
 - **Verification.** Compared computed styles (20 properties, every element) against the pre-prune stylesheet on landing, login, portal, privacy, 404, all 7 staff routes in light and dark, an open dialog, and 4 routes at 375 px. The only difference is the sidebar background going back to its original `#352126`. A control run with an empty stylesheet flagged every element, so the comparison is sensitive.
 - **Not done.** No Lighthouse run (it isn't installed here). About 100 `!important`s remain, mostly in the landing CSS (`07-landing.css`) and in the Layout mobile rules that fight its inline layout styles.
 
+### Follow-ups after Phase 5 (done)
+- **Reduced-motion fix.** The Phase 5 duration normalizer had also rewritten `transition-duration: .001ms` inside six reduced-motion blocks to `var(--dur-fast)`, so reduced-motion users still got 120 ms transitions. Restored them to `.001ms`.
+- **Layout without inline styles.** `Layout.jsx` now uses `.tw-shell` / `.tw-sb-*` / `.tw-topbar` classes; only `--sidebar-w` stays inline. Its mobile rules no longer need `!important`. Computed styles were identical before and after for the full and rail sidebar in both themes, and for mobile with the drawer closed and open.
+- **`!important` down to 16.** That's from 189 at the start; the remaining 16 are reduced motion, print, and the global input focus ring. Removing the others surfaced two rules that had only ever lost to an `!important`: a stale duplicate mobile popover position (deleted) and the landing highlights' `:nth-child(even)` border (now matched by specificity). The chat status dot got a scoped margin rule. Computed styles were re-verified identical on landing (375 and 1280 px), login, portal, the dashboard and patients pages at both widths, and the open popovers.
+
 ## Suggested order and checkpoints
 1. Phase 1 → visual check, should be no change.
 2. Phase 2 one page at a time, one commit per page, screenshot before and after in both themes.
