@@ -23,12 +23,13 @@
 -- values_callable=. app/models.py defines:
 --   RiskLevel: low="LOW", medium="MEDIUM", high="HIGH"   -> stored as "low"/"medium"/"high"
 --   Sex:       male="Male", female="Female"              -> stored as "male"/"female"
---   DentistRole: admin="admin", dentist="dentist"        -> name == value, no difference
+--   DentistRole: dentist="dentist", receptionist=..., assistant=...  -> name == value
+--   (dentist is the administrator role: full access, staff management, audit log)
 -- The labels below MUST be the member NAMES (lowercase), not the
 -- human-readable VALUES, or every insert/query fails with
 -- "invalid input value for enum ...".
 DO $$ BEGIN
-    CREATE TYPE dentistrole AS ENUM ('admin', 'dentist');
+    CREATE TYPE dentistrole AS ENUM ('dentist', 'receptionist', 'assistant');
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
