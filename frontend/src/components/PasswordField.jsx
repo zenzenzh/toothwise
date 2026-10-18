@@ -90,7 +90,7 @@ const s = {
     background: 'transparent', border: 'none', cursor: 'pointer', fontSize: 16,
     padding: '6px 8px', lineHeight: 1, color: MUTED,
   },
-  error: { fontSize: 11.5, color: 'var(--tw-danger)', margin: '2px 0 0 0' },
+  error: { fontSize: 14, color: 'var(--tw-danger)', margin: '2px 0 0 0' },
   reqList: { listStyle: 'none', margin: '2px 0 0 0', padding: 0, display: 'flex', flexDirection: 'column', gap: 2 },
-  reqItem: { fontSize: 11, transition: 'color 0.15s' },
+  reqItem: { fontSize: 14, lineHeight: 1.5, transition: 'color 0.15s' },
 };

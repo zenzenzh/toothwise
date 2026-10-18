@@ -10,7 +10,6 @@
   background: var(--tw-surface);
   border: 1px solid var(--tw-border);
   border-radius: var(--tw-radius-xl, 20px);
-  box-shadow: var(--tw-shadow-md);
   padding: var(--tw-space-6, 24px);
 }
 .tw-card--flat {
@@ -42,8 +41,8 @@
 .tw-btn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
 body.dark-mode .tw-btn--primary { color: var(--tw-bg); box-shadow: none; }
 body.dark-mode .tw-btn--primary:hover:not(:disabled) { background: var(--tw-navy-dark); }
-.tw-btn--primary { background: var(--tw-navy); color: #fff; box-shadow: 0 8px 22px rgba(53,33,38,.12); }
-.tw-btn--primary:hover:not(:disabled) { background: var(--tw-navy-dark); transform: translateY(-1px); box-shadow: 0 12px 28px rgba(53,33,38,.16); }
+.tw-btn--primary { background: var(--tw-navy); color: #fff; }
+.tw-btn--primary:hover:not(:disabled) { background: var(--tw-navy-dark); transform: translateY(-1px); }
 .tw-btn--primary:active:not(:disabled) { transform: scale(0.97); }
 .tw-btn--rose { background: var(--tw-teal); color: #fff; }
 .tw-btn--rose:hover:not(:disabled) { background: var(--tw-teal-dark); }
@@ -57,7 +56,7 @@ body.dark-mode .tw-btn--primary:hover:not(:disabled) { background: var(--tw-navy
 .tw-btn--danger { background: #B33A45; color: #fff; }
 .tw-btn--danger:hover:not(:disabled) { background: #9A2F39; }
 .tw-btn--danger:active:not(:disabled) { transform: scale(0.97); }
-.tw-btn--sm { min-height: 36px; padding: 0 14px; font-size: 12px; border-radius: var(--tw-radius-sm, 8px); }
+.tw-btn--sm { min-height: 36px; padding: 0 14px; font-size: 13px; border-radius: var(--tw-radius-sm, 8px); }
 .tw-btn--lg { min-height: 52px; padding: 0 28px; font-size: 15px; }
 
 /* Badge */
@@ -67,7 +66,7 @@ body.dark-mode .tw-btn--primary:hover:not(:disabled) { background: var(--tw-navy
   gap: 5px;
   padding: 4px 12px;
   border-radius: var(--tw-radius-full, 999px);
-  font-size: 10px;
+  font-size: 13px;
   font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -79,7 +78,7 @@ body.dark-mode .tw-btn--primary:hover:not(:disabled) { background: var(--tw-navy
 
 /* Field / Label / Input */
 .tw-field { display: flex; flex-direction: column; gap: 7px; min-width: 0; }
-.tw-label { font-size: 12px; font-weight: 800; color: var(--tw-navy); letter-spacing: 0.02em; }
+.tw-label { font-size: 13px; font-weight: 800; color: var(--tw-navy); letter-spacing: 0.02em; }
 .tw-input {
   width: 100%;
   height: 48px;
@@ -95,8 +94,8 @@ body.dark-mode .tw-btn--primary:hover:not(:disabled) { background: var(--tw-navy
 .tw-input:focus { border-color: var(--tw-teal); box-shadow: 0 0 0 4px rgba(186,121,118,.12); outline: none; }
 .tw-input::placeholder { color: var(--tw-muted); }
 select.tw-input { appearance: auto; }
-.tw-field-error { color: #B33A45; font-size: 11.5px; margin: 0; }
-.tw-meta { font-size: 11px; color: var(--tw-muted); margin: 0; }
+.tw-field-error { color: #B33A45; font-size: 13px; margin: 0; }
+.tw-meta { font-size: 13px; color: var(--tw-muted); margin: 0; }
 
 /* Empty / error state (components/ui/EmptyState) */
 .tw-state {
@@ -136,7 +135,4 @@ select.tw-input { appearance: auto; }
 .tw-state--compact .tw-state__title { font-size: var(--fs-sm); }
 .tw-state--compact .tw-state__text { font-size: var(--fs-xs); }
 
-/* Submit (shared with auth) */
-.public-button{ min-height:44px; border-radius:12px; padding:0 20px; background:var(--tw-navy); color:#fff; box-shadow:0 8px 22px rgba(53,33,38,.12); }
-.public-button:hover{ background:var(--tw-navy-dark); color:#fff; transform:translateY(-1px); }
 

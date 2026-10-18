@@ -64,10 +64,7 @@
 /* Root & shell */
 .pp2-root {
   min-height: 100vh;
-  background:
-    radial-gradient(ellipse at 8% 6%, rgba(186,121,118,0.18) 0%, transparent 38%),
-    radial-gradient(ellipse at 92% 94%, rgba(196,140,138,0.14) 0%, transparent 35%),
-    #F5EFEC;
+  background: #F5EFEC;
   font-family: 'Manrope', 'Segoe UI', Arial, sans-serif;
 }
 .pp2-shell {
@@ -99,7 +96,7 @@
   width: 36px;
   height: 36px;
   border-radius: 12px;
-  background: linear-gradient(135deg, var(--tw-teal), #8B4A6B);
+  background: var(--tw-navy);
   color: #fff;
   display: flex;
   align-items: center;
@@ -139,11 +136,9 @@
   flex-direction: column;
 }
 .pp2-greet-kicker {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   color: #8C5B60;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
   margin: 0 0 6px;
 }
 .pp2-greet-name {
@@ -173,7 +168,6 @@
   background: rgba(255,255,255,0.92);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  box-shadow: 0 14px 44px rgba(59,40,49,0.09);
 }
 .pp2-status--neutral { border-color: var(--tw-border); }
 .pp2-status--good   { border-color: #C3E8D2; background: #EFF8F3; }
@@ -210,11 +204,9 @@
 }
 .pp2-status-label {
   display: block;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--tw-muted);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
   margin-bottom: 3px;
 }
 .pp2-status-value {
@@ -268,11 +260,9 @@
 }
 .pp2-fact + .pp2-fact { border-left: 1px solid var(--tw-border); }
 .pp2-fact-label {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--tw-muted);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
   margin-bottom: 4px;
 }
 .pp2-fact-value {
@@ -298,7 +288,7 @@
   margin: 0;
 }
 .pp2-history-count {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 800;
   color: var(--tw-text);
   background: rgba(186,121,118,0.16);
@@ -356,11 +346,10 @@
   left: 10px;
   padding: 4px 10px;
   border-radius: 999px;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 800;
   letter-spacing: 0.06em;
   color: #fff;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.18);
 }
 .pp2-risk-pill--high     { background: #B91C1C; }
 .pp2-risk-pill--moderate { background: #B45309; }
@@ -376,7 +365,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--tw-muted);
   min-width: 0;
@@ -385,7 +374,7 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 800;
   color: var(--tw-text);
   white-space: nowrap;
@@ -539,7 +528,7 @@
   padding: 6px 10px;
   border-radius: 999px;
   background: var(--chip-color, #eee);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   color: #fff;
 }
@@ -572,7 +561,7 @@
   border-radius: 7px;
   background: #4B2F35;
   color: #fff;
-  font-size: 10px;
+  font-size: 13px;
   font-weight: 800;
   display: flex;
   align-items: center;

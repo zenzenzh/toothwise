@@ -1,165 +1,145 @@
-/* Auth card (auth6): staff login + portal sign-in.
+/* Auth (auth6): staff login + portal sign-in.
    Part of the ordered stylesheet split - see src/index.css. */
 /* ==========================================================================
-   AUTH (auth6) — simple, interactive centered card
+   AUTH (auth6) — one centered white card on a flat cream page.
    Shared by staff /login and the patient portal auth card.
-   Motion: transform/opacity only, ease-out curves, <300ms, reduced-motion aware.
+   Motion: transform/opacity only, ease-out curves, <450ms, reduced-motion aware.
    ========================================================================== */
 .auth6 {
   --a6-plum: oklch(34% .055 348);
   --a6-dark: oklch(23% .045 348);
+  --a6-ink: oklch(26% .045 350);
   --a6-rose: oklch(66% .075 26);
   --a6-rose-soft: oklch(84% .055 26);
-  --a6-cream: oklch(97% .012 38);
+  --a6-cream: oklch(96.5% .014 38);
   --a6-paper: oklch(99% .006 38);
-  --a6-line: oklch(88% .022 350);
+  --a6-line: oklch(86% .024 350);
   --a6-muted: oklch(45% .03 350);
   --a6-ease: cubic-bezier(0.23, 1, 0.32, 1);
   min-height: 100dvh;
-  display: grid;
-  place-items: center;
-  padding: clamp(16px, 4vw, 40px);
-  background:
-    radial-gradient(circle at 18% 8%, oklch(66% .075 26 / .07), transparent 34%),
-    var(--a6-paper);
-  overflow: hidden;
-  position: relative;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px;
+  padding: clamp(24px, 5vw, 56px) 16px;
+  background: var(--a6-cream);
+  color: var(--a6-ink);
 }
 
-/* Slow brand-tinted blobs behind the card — decorative, transform-only. */
-.auth6-blob {
-  position: absolute; width: 480px; height: 480px; border-radius: 50%;
-  filter: blur(90px); opacity: .35; pointer-events: none;
+.auth6-home {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px;
+  border-radius: 999px; color: var(--a6-plum); text-decoration: none;
+  font: 700 15px 'Manrope', sans-serif;
+  transition: background var(--dur) ease;
 }
-.auth6-blob-a { background: oklch(84% .055 26); top: -140px; right: -100px; animation: auth6-drift 22s var(--a6-ease) infinite alternate; }
-.auth6-blob-b { background: oklch(88% .04 348); bottom: -160px; left: -120px; animation: auth6-drift 26s var(--a6-ease) infinite alternate-reverse; }
-@keyframes auth6-drift {
-  from { transform: translate(0, 0) scale(1); }
-  to   { transform: translate(-46px, 38px) scale(1.08); }
-}
+.auth6-home:hover { background: oklch(93% .022 30); }
+.auth6-home:focus-visible { outline: 3px solid var(--a6-rose); outline-offset: 2px; }
 
+/* ---- Card ------------------------------------------------------------------ */
 .auth6-card {
-  position: relative; z-index: 1;
   width: min(460px, 100%);
-  padding: clamp(26px, 5vw, 38px);
-  border: 1px solid var(--a6-line); border-radius: 24px;
-  background: oklch(100% 0 0 / .86);
-  backdrop-filter: blur(14px);
-  box-shadow: 0 24px 70px oklch(24% .035 350 / .12);
+  padding: clamp(28px, 5vw, 44px);
+  border-radius: 28px;
+  background: #fff;
 }
-.auth6-card > * { opacity: 0; transform: translateY(8px); animation: auth6-rise 420ms var(--a6-ease) forwards; }
+.auth6-card > * { opacity: 0; transform: translateY(10px); animation: auth6-rise 420ms var(--a6-ease) forwards; }
 .auth6-card > *:nth-child(1) { animation-delay: 0ms; }
-.auth6-card > *:nth-child(2) { animation-delay: 45ms; }
-.auth6-card > *:nth-child(3) { animation-delay: 90ms; }
-.auth6-card > *:nth-child(4) { animation-delay: 135ms; }
-.auth6-card > *:nth-child(5) { animation-delay: 180ms; }
+.auth6-card > *:nth-child(2) { animation-delay: 60ms; }
+.auth6-card > *:nth-child(3) { animation-delay: 120ms; }
+.auth6-card > *:nth-child(4) { animation-delay: 180ms; }
+.auth6-card > *:nth-child(5) { animation-delay: 240ms; }
 @keyframes auth6-rise { to { opacity: 1; transform: none; } }
 
-.auth6-logo {
-  width: 48px; height: 48px; display: grid; place-items: center; margin-bottom: 22px;
-  border-radius: 14px; background: var(--a6-plum);
-  box-shadow: 0 10px 24px oklch(24% .035 350 / .22);
-}
+.auth6-logo { width: 56px; height: 56px; margin-bottom: 24px; }
 
-.auth6-head { margin-bottom: 22px; }
+.auth6-head { margin-bottom: 28px; }
 .auth6-head h1 {
-  margin: 0 0 8px; font-family: 'Manrope', sans-serif;
-  font-size: clamp(25px, 3vw, 30px); line-height: 1.1; letter-spacing: -.03em; color: var(--a6-plum);
+  margin: 0 0 10px; font-family: 'Manrope', sans-serif;
+  font-size: clamp(30px, 3vw, 38px); line-height: 1.02; letter-spacing: -.045em; color: var(--a6-plum);
 }
-.auth6-head p { margin: 0; color: var(--a6-muted); font-size: 14px; line-height: 1.6; max-width: 44ch; }
+.auth6-head p { margin: 0; color: var(--a6-ink); font-size: 17px; line-height: 1.55; max-width: 40ch; }
 
 /* Tabs: sliding pill indicator (transform-only, interruptible) */
 .auth6-tabs {
   position: relative; display: grid; grid-template-columns: 1fr 1fr;
-  padding: 4px; margin-bottom: 22px;
-  border: 1px solid var(--a6-line); border-radius: 13px; background: var(--a6-cream);
+  padding: 4px; margin-bottom: 24px;
+  border-radius: 999px; background: var(--a6-cream);
 }
 .auth6-tab-pill {
   position: absolute; top: 4px; bottom: 4px; left: 4px; width: calc(50% - 4px);
-  border-radius: 10px; background: #fff;
-  box-shadow: 0 4px 14px oklch(24% .035 350 / .12);
+  border-radius: 999px; background: var(--a6-plum);
   transition: transform var(--dur) var(--a6-ease);
 }
 .auth6-tabs button {
-  position: relative; z-index: 1; min-height: 40px;
-  border: 0; border-radius: 10px; padding: 0 12px; cursor: pointer;
-  background: transparent; color: var(--a6-muted);
-  font: 800 12px 'Manrope', sans-serif;
+  position: relative; z-index: 1; min-height: 44px;
+  border: 0; border-radius: 999px; padding: 0 12px; cursor: pointer;
+  background: transparent; color: var(--a6-plum);
+  font: 700 15px 'Manrope', sans-serif;
   transition: color var(--dur) ease, transform var(--dur) ease-out;
 }
 .auth6-tabs button:active { transform: scale(0.97); }
-.auth6-tabs button.is-active { color: var(--a6-plum); }
+.auth6-tabs button.is-active { color: #fff; }
+.auth6-tabs button:focus-visible { outline: 3px solid var(--a6-rose); outline-offset: 2px; }
 
-.auth6-form { display: flex; flex-direction: column; gap: 16px; }
-.auth6-field { display: flex; flex-direction: column; gap: 7px; min-width: 0; }
-.auth6-label {
-  font: 800 11px/1.3 'Manrope', sans-serif; letter-spacing: .07em; text-transform: uppercase; color: var(--a6-plum);
-}
-.auth6-grid { display: grid; gap: 12px; }
+.auth6-form { display: flex; flex-direction: column; gap: 18px; }
+.auth6-field { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.auth6-label { font: 700 15px/1.3 'Manrope', sans-serif; color: var(--a6-plum); }
+.auth6-grid { display: grid; gap: 14px; }
 .auth6-grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .auth6-span-2 { grid-column: 1 / -1; }
 .auth6-input {
-  width: 100%; min-height: 48px; padding: 0 15px;
-  border: 1px solid var(--a6-line); border-radius: 12px;
+  width: 100%; min-height: 52px; padding: 0 16px;
+  border: 1px solid var(--a6-line); border-radius: 14px;
   background: #fff; color: var(--a6-dark);
-  font-family: inherit; font-size: 15px; outline: none; box-sizing: border-box;
+  font-family: inherit; font-size: 17px; outline: none; box-sizing: border-box;
   transition: border-color var(--dur-fast) ease, box-shadow var(--dur) var(--a6-ease);
 }
 select.auth6-input { appearance: auto; }
-.auth6-input:hover { border-color: oklch(78% .04 350); }
-.auth6-input:focus { border-color: var(--a6-rose); box-shadow: 0 0 0 4px oklch(66% .075 26 / .15); }
-.auth6-error { color: #C23F4A; font-size: 11.5px; margin: 0; animation: auth6-error-in 180ms ease-out both; }
-.auth6-hint { font-size: 11px; color: var(--a6-muted); margin: 4px 0 0 0; }
+.auth6-input:hover { border-color: oklch(76% .04 350); }
+.auth6-input:focus { border-color: var(--a6-rose); box-shadow: 0 0 0 4px oklch(66% .075 26 / .18); }
+.auth6-error { color: #B33A45; font-size: 15px; margin: 0; animation: auth6-error-in 180ms ease-out both; }
+.auth6-hint { font-size: 15px; color: var(--a6-muted); margin: 2px 0 0 0; }
 @keyframes auth6-error-in { from { opacity: 0; transform: translateY(-2px); } to { opacity: 1; transform: none; } }
 
 .auth6-submit {
   display: inline-flex; align-items: center; justify-content: center; gap: 9px;
-  margin-top: 6px; min-height: 50px; border: 0; border-radius: 13px; padding: 0 20px; cursor: pointer;
+  margin-top: 8px; min-height: 54px; border: 0; border-radius: 999px; padding: 0 24px; cursor: pointer;
   background: var(--a6-plum); color: #fff;
-  font: 800 13px 'Manrope', sans-serif; letter-spacing: .01em;
-  box-shadow: 0 14px 30px oklch(24% .035 350 / .18);
-  transition: background var(--dur) ease, transform var(--dur) ease-out, box-shadow var(--dur) ease;
+  font: 700 16px 'Manrope', sans-serif;
+  transition: background var(--dur) ease, transform var(--dur) ease-out;
 }
 @media (hover: hover) and (pointer: fine) {
-  .auth6-submit:hover:not(:disabled) { background: var(--a6-dark); transform: translateY(-1px); box-shadow: 0 18px 36px oklch(24% .035 350 / .22); }
+  .auth6-submit:hover:not(:disabled) { background: var(--a6-dark); }
 }
-.auth6-submit:active:not(:disabled) { transform: scale(0.97); }
+.auth6-submit:active:not(:disabled) { transform: scale(0.98); }
+.auth6-submit:focus-visible { outline: 3px solid var(--a6-rose); outline-offset: 3px; }
 .auth6-spinner {
-  width: 15px; height: 15px; flex: none; border-radius: 50%;
+  width: 16px; height: 16px; flex: none; border-radius: 50%;
   border: 2px solid oklch(100% 0 0 / .35); border-top-color: #fff;
   animation: auth6-spin 700ms linear infinite;
 }
 @keyframes auth6-spin { to { transform: rotate(360deg); } }
 
 .auth6-note {
-  margin-top: 22px; padding: 13px 15px;
-  border: 1px solid var(--a6-line); border-radius: 14px;
-  background: var(--a6-cream); color: var(--a6-muted); font-size: 12.5px; line-height: 1.6;
+  margin-top: 28px; padding: 18px 20px;
+  border-radius: 18px; background: var(--a6-cream);
+  color: var(--a6-ink); font-size: 15px; line-height: 1.55;
 }
 .auth6-note-toggle {
   border: 0; background: none; padding: 0; cursor: pointer;
-  /* 44px min tap height (was 24px) */
   min-height: 44px; display: inline-flex; align-items: center;
-  color: var(--a6-plum); font-weight: 800; font-size: 12.5px;
+  color: var(--a6-plum); font: 700 15px 'Source Sans 3', sans-serif;
   text-decoration: underline; text-underline-offset: 3px;
   transition: color var(--dur-fast) ease;
 }
 .auth6-note-toggle:hover { color: var(--a6-dark); }
-.auth6-note-link { margin-top: 10px; }
+.auth6-note-link { margin-top: 4px; }
 .auth6-note-link a {
-  color: var(--a6-plum); font-weight: 800; font-size: 12.5px;
-  /* 44px min tap height (was ~17px, measured) */
+  color: var(--a6-plum); font-weight: 700; font-size: 15px;
   min-height: 44px; display: inline-flex; align-items: center;
 }
 
 @media (max-width: 640px) {
-  .auth6 { padding: 14px; align-items: start; }
-  .auth6-card { padding: 22px 18px 26px; border-radius: 20px; }
-  .auth6-grid-2{ grid-template-columns: 1fr; }
-    .auth6-input, .auth6-card input, .auth6-card select { font-size: 16px; }
+  .auth6-grid-2 { grid-template-columns: 1fr; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .auth6-blob { animation: none; }
   .auth6-card > * { animation: fade-in-soft 200ms ease both; }
   .auth6-tab-pill, .auth6-input, .auth6-submit, .auth6-tabs button { transition-duration: .001ms; }
 }

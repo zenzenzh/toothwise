@@ -11,9 +11,8 @@ export default function ThankYou() {
         <div className="thank-you-card">
           <div className="thank-you-logo"><LogoMark size={64} alt="CodiSmile Dental Clinic" /></div>
           <CheckCircle2 size={52} className="thank-you-check" />
-          <p className="public-kicker">Request received</p>
-          <h1>Thank you.</h1>
-          <p>Your request has been received. The clinic can review it during its normal operating workflow.</p>
+          <h1>Request received.</h1>
+          <p>Thank you. The clinic will review your request during its normal operating workflow.</p>
           <Link to="/" className="public-button">Return to ToothWise <ArrowRight size={17} /></Link>
         </div>
       </main>

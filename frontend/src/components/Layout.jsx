@@ -220,8 +220,8 @@ export default function Layout() {
           <div className="tw-sb-brand">
             <div className="tw-sb-logo"><LogoMark size={38} alt="CodiSmile Dental Clinic" /></div>
             {!railCollapsed && <div>
-              <div className="tw-sb-brand-name">TOOTHWISE</div>
-              <div className="tw-sb-brand-sub">CODISMILE CLINIC</div>
+              <div className="tw-sb-brand-name">ToothWise</div>
+              <div className="tw-sb-brand-sub">CodiSmile Clinic</div>
             </div>}
           </div>
 

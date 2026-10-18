@@ -17,9 +17,6 @@ a { color:var(--tw-teal-dark); }
 /* Typography hierarchy */
 
 /* Shared controls */
-.public-button{ min-height:44px; border-radius:12px; padding:0 20px; background:var(--tw-navy); color:#fff; box-shadow:0 8px 22px rgba(53,33,38,.12); }
-.public-button:hover{ background:var(--tw-navy-dark); color:#fff; transform:translateY(-1px); }
-.public-button.secondary{ min-height:44px; border-radius:12px; border-color:var(--tw-border); background:#fff; color:var(--tw-navy); }
 .public-button svg{ transition:transform var(--dur) var(--tw-ease-out); }
 @media (hover:hover) and (pointer:fine) {
   .public-button:hover svg{ transform:translateX(3px); }
@@ -43,13 +40,6 @@ table { min-width:680px; }
 
 /* Chat: anchored, accessible, and intentionally quiet */
 .chat-widget-root { z-index:700; }
-.chat-fab { width:58px; height:58px; border-radius:18px; background:var(--tw-navy); box-shadow:0 16px 34px rgba(53,33,38,.22); }
-.chat-fab::after { content:''; position:absolute; inset:-4px; border:1px solid rgba(186,121,118,.26); border-radius:22px; pointer-events:none; }
-.chat-panel { transform-origin:bottom right; transition:transform var(--dur) var(--tw-ease-out), opacity var(--dur) ease-out, visibility 0s linear var(--dur); visibility:hidden; }
-.chat-panel-open { transition:transform var(--dur) var(--tw-ease-out), opacity var(--dur) ease-out, visibility 0s linear 0s; visibility:visible; }
-.chat-privacy-note { font-size:10px; }
-.chat-panel-input input { min-height:44px; }
-.chat-panel-footer button,.chat-panel-footer a { min-height:32px; }
 
 /* Reveal choreography: IntersectionObserver + transform/opacity only */
 .tw-reveal { opacity:0; transform:translateY(28px); transition:opacity var(--tw-duration-reveal) ease-out, transform var(--tw-duration-reveal) var(--tw-ease-spring); transition-delay:var(--reveal-delay,0ms); }
@@ -59,9 +49,6 @@ table { min-width:680px; }
 
 /* Motion rules */
 button:not(:disabled):hover { transform:none; }
-@media (hover:hover) and (pointer:fine) {
-    .chat-fab:hover { transform:translateY(-2px); }
-}
 @media (prefers-reduced-motion:reduce) {
   html { scroll-behavior:auto; }
   *,*::before,*::after { animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration: .001ms !important; scroll-behavior:auto !important; }

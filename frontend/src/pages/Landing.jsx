@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
-  ArrowRight, ArrowUpRight, CheckCircle2, ChevronDown, Clock3,
-  HeartPulse, MapPin, Navigation, Phone, ScanSearch, ShieldCheck,
-  Sparkles, Stethoscope, UsersRound, Activity, MessageCircle, LocateFixed
+  ArrowRight, ArrowUpRight, ChevronDown, ChevronLeft, ChevronRight, Clock3, MapPin, MessageCircle,
+  Navigation, Phone, ScanSearch, ShieldCheck, Stethoscope, UsersRound,
 } from 'lucide-react';
 import SEO from '../components/SEO';
 import ChatWidget from '../components/ChatWidget';
 import Reveal from '../components/Reveal';
+
 const CLINIC = {
   name: 'CodiSmile Dental Clinic',
   phone: '+63 956 196 5325',
@@ -15,17 +15,19 @@ const CLINIC = {
   mapQuery: 'CodiSmile Dental Clinic, NW Phase LRT Central Terminal Arroceros St., Ermita, Manila City',
 };
 
+// Service photos: Unsplash (free commercial licence), see
+// public/codismile/services-stock/CREDITS.txt.
 const SERVICES = [
-  { name: 'Oral Prophylaxis (Cleaning)', description: 'Professional cleaning that removes plaque, tartar, and surface stains to help keep gums and teeth healthy.', image: '/codismile/services/preventive-cleaning.jpg' },
-  { name: 'Tooth Restoration (Pasta)', description: 'Repairs teeth affected by cavities or damage using a tooth-colored filling material.', image: '/codismile/services/tooth-restoration.jpg' },
-  { name: 'Tooth Extraction (Bunot)', description: 'Removes a tooth that cannot be safely restored or needs to be taken out for dental treatment.', image: '/codismile/services/surgical-extraction.jpg' },
-  { name: 'Dentures (Pustiso)', description: 'Removable replacement teeth that help restore chewing, speaking, and the appearance of your smile.', image: '/codismile/services/dentures.jpg' },
-  { name: 'Fixed Bridge and Crowns', description: 'Restores missing or damaged teeth with fixed dental restorations designed to look and function naturally.', image: '/codismile/services/crowns-bridge.jpg' },
-  { name: 'Veneers', description: 'Thin coverings placed on the front of teeth to improve their shape, color, and overall appearance.', image: '/codismile/services/veneers.jpg' },
-  { name: 'Root Canal', description: 'Treats infection or inflammation inside a tooth so the natural tooth can be preserved.', image: '/codismile/services/root-canal.jpg' },
-  { name: 'Orthodontics (Braces & Retainers)', description: 'Guides teeth into a healthier alignment and helps maintain the result after orthodontic treatment.', image: '/codismile/services/orthodontics-braces.jpg' },
-  { name: 'Oral Surgery', description: 'Provides surgical dental care for conditions that need treatment beyond routine procedures.', image: '/codismile/services/surgical-extraction.jpg' },
-  { name: 'Teeth Whitening', description: 'Brightens natural teeth by reducing certain stains and discoloration for a lighter smile.', image: '/codismile/services/cosmetic-whitening.jpg' },
+  { name: 'Oral Prophylaxis', local: 'Cleaning', photo: 'cleaning', description: 'Professional cleaning that removes plaque, tartar, and surface stains to help keep gums and teeth healthy.' },
+  { name: 'Tooth Restoration', local: 'Pasta', photo: 'restoration', description: 'Repairs teeth affected by cavities or damage using a tooth-coloured filling material.' },
+  { name: 'Tooth Extraction', local: 'Bunot', photo: 'extraction', description: 'Removes a tooth that cannot be safely restored or needs to be taken out for dental treatment.' },
+  { name: 'Dentures', local: 'Pustiso', photo: 'dentures', description: 'Removable replacement teeth that help restore chewing, speaking, and the appearance of your smile.' },
+  { name: 'Fixed Bridge and Crowns', photo: 'crowns', description: 'Restores missing or damaged teeth with fixed restorations designed to look and work naturally.' },
+  { name: 'Veneers', photo: 'veneers', description: 'Thin coverings placed on the front of teeth to improve their shape, colour, and overall appearance.' },
+  { name: 'Root Canal', photo: 'root-canal', description: 'Treats infection or inflammation inside a tooth so the natural tooth can be kept.' },
+  { name: 'Orthodontics', local: 'Braces and retainers', photo: 'braces', description: 'Guides teeth into a healthier alignment and helps keep the result after treatment.' },
+  { name: 'Oral Surgery', photo: 'surgery', description: 'Surgical dental care for conditions that need treatment beyond routine procedures.' },
+  { name: 'Teeth Whitening', photo: 'whitening', description: 'Brightens natural teeth by reducing certain stains and discolouration.' },
 ];
 
 const FAQS = [
@@ -36,11 +38,11 @@ const FAQS = [
   ['What are the clinic hours?', 'CodiSmile is open Monday–Saturday, 9:00 AM–5:00 PM, and Sunday, 9:00 AM–2:00 PM.'],
 ];
 
-const HIGHLIGHTS = [
-  { icon: Activity, title: 'One workspace', text: 'Clinic operations and patient access in one system.' },
-  { icon: ScanSearch, title: 'Assistive AI', text: 'Screening findings are for professional review.' },
-  { icon: ShieldCheck, title: 'Role-based access', text: 'Patient and staff workspaces remain separated.' },
-  { icon: MessageCircle, title: 'AI assistant', text: 'General clinic and dental-care guidance.' },
+const FACTS = [
+  { title: 'Open seven days', text: 'Mon–Sat 9 AM–5 PM, Sun 9 AM–2 PM' },
+  { title: 'Beside the LRT', text: 'Central Terminal, Arroceros St., Ermita' },
+  { title: 'Ten treatments', text: 'From cleaning to braces and dentures' },
+  { title: 'Results online', text: 'Screenings and advice in your portal' },
 ];
 
 const STEPS = [
@@ -49,119 +51,124 @@ const STEPS = [
   { icon: Stethoscope, title: 'Review', text: 'A dental professional interprets findings and guides the next step.' },
 ];
 
+// Instagram-style carousel: swipe (touch / trackpad), drag with a mouse,
+// arrow buttons, arrow keys or the dots. Native scroll-snap does the
+// snapping, so it still scrolls without JS; nothing auto-advances.
+function ServiceCarousel({ services, phoneHref }) {
+  const trackRef = useRef(null);
+  const drag = useRef(null);
+  const [index, setIndex] = useState(0);
+  const [atEnd, setAtEnd] = useState(false);
+  const total = services.length;
+
+  function cardStep() {
+    const track = trackRef.current;
+    const card = track?.children[0];
+    if (!card) return 1;
+    const gap = parseFloat(getComputedStyle(track).columnGap) || 0;
+    return card.getBoundingClientRect().width + gap;
+  }
+
+  function goTo(i) {
+    const track = trackRef.current;
+    if (!track) return;
+    const next = Math.max(0, Math.min(total - 1, i));
+    const smooth = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    track.scrollTo({ left: next * cardStep(), behavior: smooth ? 'smooth' : 'auto' });
+  }
+
+  function onScroll() {
+    const track = trackRef.current;
+    if (!track) return;
+    setIndex(Math.min(total - 1, Math.round(track.scrollLeft / cardStep())));
+    setAtEnd(track.scrollLeft + track.clientWidth >= track.scrollWidth - 4);
+  }
+
+  function onKeyDown(event) {
+    if (event.key === 'ArrowRight') { event.preventDefault(); goTo(index + 1); }
+    if (event.key === 'ArrowLeft') { event.preventDefault(); goTo(index - 1); }
+  }
+
+  // Mouse drag; touch and trackpads already swipe natively.
+  function onPointerDown(event) {
+    if (event.pointerType !== 'mouse' || event.button !== 0) return;
+    drag.current = { x: event.clientX, left: trackRef.current.scrollLeft };
+    trackRef.current.classList.add('is-dragging');
+  }
+  function onPointerMove(event) {
+    if (!drag.current) return;
+    trackRef.current.scrollLeft = drag.current.left - (event.clientX - drag.current.x);
+  }
+  function endDrag() {
+    if (!drag.current) return;
+    const track = trackRef.current;
+    track.classList.remove('is-dragging');
+    drag.current = null;
+    goTo(Math.round(track.scrollLeft / cardStep()));
+  }
+
+  return (
+    <div className="tw6-ig" role="region" aria-roledescription="carousel" aria-label="Dental services">
+      <ul
+        className="tw6-ig-track"
+        ref={trackRef}
+        tabIndex={0}
+        aria-label="Swipe, drag or use the arrow keys to see more services"
+        onScroll={onScroll}
+        onKeyDown={onKeyDown}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={endDrag}
+        onPointerLeave={endDrag}
+        onDragStart={(event) => event.preventDefault()}
+      >
+        {services.map((service, i) => (
+          <li key={service.name} className="tw6-ig-card" aria-roledescription="slide" aria-label={`${i + 1} of ${total}: ${service.name}`}>
+            <div className="tw6-ig-media">
+              <picture>
+                <source
+                  type="image/webp"
+                  srcSet={`/codismile/services-stock/${service.photo}-600.webp 600w, /codismile/services-stock/${service.photo}.webp 1200w`}
+                  sizes="(max-width: 768px) 84vw, 400px"
+                />
+                <img
+                  src={`/codismile/services-stock/${service.photo}.jpg`}
+                  width="1200"
+                  height="900"
+                  loading={i < 3 ? 'eager' : 'lazy'}
+                  decoding="async"
+                  alt=""
+                />
+              </picture>
+              <span className="tw6-ig-count" aria-hidden="true">{i + 1}/{total}</span>
+            </div>
+            <div className="tw6-ig-body">
+              <h3>{service.name}</h3>
+              {service.local && <p className="tw6-ig-local">{service.local}</p>}
+              <p>{service.description}</p>
+              <a className="tw6-ig-ask" href={phoneHref}><Phone size={15} aria-hidden="true" /> Ask about this<span className="sr-only">: {service.name}</span></a>
+            </div>
+          </li>
+        ))}
+      </ul>
+      <button type="button" className="tw6-ig-nav tw6-ig-prev" onClick={() => goTo(index - 1)} disabled={index === 0} aria-label="Previous service"><ChevronLeft size={22} /></button>
+      <button type="button" className="tw6-ig-nav tw6-ig-next" onClick={() => goTo(index + 1)} disabled={atEnd} aria-label="Next service"><ChevronRight size={22} /></button>
+      <div className="tw6-ig-dots">
+        {services.map((service, i) => (
+          <button key={service.name} type="button" className={i === index ? 'is-active' : ''} aria-label={`Show ${service.name}`} aria-current={i === index ? 'true' : undefined} onClick={() => goTo(i)} />
+        ))}
+      </div>
+      <p className="sr-only" aria-live="polite">Showing {services[index]?.name}, {index + 1} of {total}</p>
+    </div>
+  );
+}
+
 function FAQItem({ question, answer }) {
   return (
     <details className="tw6-faq-item">
       <summary>{question}<ChevronDown size={18} /></summary>
       <p>{answer}</p>
     </details>
-  );
-}
-
-function ServiceCarousel({ services, onAskAbout }) {
-  const trackRef = useRef(null);
-  const timerRef = useRef(null);
-  const [activeIndex, setActiveIndex] = useState(0);
-  const total = services.length;
-
-  function scrollToIndex(index) {
-    const track = trackRef.current;
-    if (!track) return;
-    const card = track.children[index];
-    if (!card) return;
-    const offset = card.getBoundingClientRect().left - track.getBoundingClientRect().left + track.scrollLeft;
-    track.scrollTo({ left: offset, behavior: 'smooth' });
-    setActiveIndex(index);
-  }
-
-  useEffect(() => {
-    timerRef.current = window.setInterval(() => {
-      setActiveIndex((current) => {
-        const next = (current + 1) % total;
-        const track = trackRef.current;
-        const card = track?.children[next];
-        if (track && card) {
-          const offset = card.getBoundingClientRect().left - track.getBoundingClientRect().left + track.scrollLeft;
-          track.scrollTo({ left: offset, behavior: 'smooth' });
-        }
-        return next;
-      });
-    }, 4000);
-    return () => window.clearInterval(timerRef.current);
-  }, [total]);
-
-  function pauseAutoplay() {
-    window.clearInterval(timerRef.current);
-  }
-
-  // Keep the dots in sync when the person swipes the track manually
-  // (rather than only updating on button/dot-driven scrolls).
-  function handleTrackScroll() {
-    const track = trackRef.current;
-    if (!track) return;
-    window.clearTimeout(track.__snapTimer);
-    track.__snapTimer = window.setTimeout(() => {
-      const trackRect = track.getBoundingClientRect();
-      let closest = 0;
-      let closestDist = Infinity;
-      Array.from(track.children).forEach((card, index) => {
-        const dist = Math.abs(card.getBoundingClientRect().left - trackRect.left);
-        if (dist < closestDist) { closestDist = dist; closest = index; }
-      });
-      setActiveIndex(closest);
-    }, 80);
-  }
-
-  return (
-    <div
-      className="tw6-carousel"
-      aria-label="Dental services"
-      onMouseEnter={pauseAutoplay}
-      onTouchStart={pauseAutoplay}
-    >
-      <div className="tw6-carousel-track" ref={trackRef} onScroll={handleTrackScroll}>
-        {services.map((service, index) => (
-          <div key={service.name} className={`tw6-carousel-card${index === activeIndex ? ' is-active' : ''}`}>
-            <div className="tw6-carousel-card-image">
-              <picture>
-                <source
-                  type="image/webp"
-                  srcSet={`${service.image.replace('.jpg', '-480.webp')} 480w, ${service.image.replace('.jpg', '.webp')} 720w`}
-                  sizes="(max-width: 760px) 82vw, 360px"
-                />
-                <img
-                  src={service.image}
-                  srcSet={`${service.image.replace('.jpg', '-480.jpg')} 480w, ${service.image} 720w`}
-                  sizes="(max-width: 760px) 82vw, 360px"
-                  loading="lazy"
-                  alt={`${service.name} - CodiSmile Dental Clinic`}
-                />
-              </picture>
-            </div>
-            <div className="tw6-carousel-card-body">
-              <strong>{service.name}</strong>
-              <p>{service.description}</p>
-            </div>
-          </div>
-        ))}
-      </div>
-      <div className="tw6-carousel-dots" role="tablist" aria-label="Service slides">
-        {services.map((service, index) => (
-          <button
-            key={service.name}
-            type="button"
-            role="tab"
-            aria-selected={index === activeIndex}
-            className={index === activeIndex ? 'is-active' : ''}
-            aria-label={`Go to ${service.name}`}
-            onClick={() => { pauseAutoplay(); scrollToIndex(index); }}
-          />
-        ))}
-      </div>
-      <button type="button" className="tw6-carousel-cta" onClick={onAskAbout}>
-        Ask about any service <ArrowUpRight size={14} />
-      </button>
-    </div>
   );
 }
 
@@ -175,10 +182,7 @@ export default function Landing() {
     if (event) event.preventDefault();
     setMobileNavOpen(false);
 
-    const target = id === 'top'
-      ? document.getElementById('top')
-      : document.getElementById(id);
-
+    const target = document.getElementById(id);
     if (!target) return;
 
     const offset = (navRef.current?.getBoundingClientRect().height || 68) + 16;
@@ -255,7 +259,7 @@ export default function Landing() {
         <div className="tw6-nav-inner">
           <a href="#top" className="tw6-brand" aria-label="CodiSmile Dental Clinic" onClick={(event) => scrollToSection(event, 'top')}>
             <picture><source type="image/webp" srcSet="/codismile/codismile-logo-96.webp 1x, /codismile/codismile-logo-192.webp 2x" /><img src="/codismile/codismile-logo-96.png" srcSet="/codismile/codismile-logo-96.png 1x, /codismile/codismile-logo-192.png 2x" width="42" height="42" alt="" /></picture>
-            <span><strong>CodiSmile</strong>{' '}<small>DENTAL CLINIC</small></span>
+            <span><strong>CodiSmile</strong>{' '}<small>Dental Clinic</small></span>
           </a>
           <button
             type="button"
@@ -280,93 +284,48 @@ export default function Landing() {
       <main id="top" className="tw6-main">
         <section className="tw6-hero">
           <div className="tw6-hero-copy">
-            <h1>A calmer way to stay on top of your dental care.</h1>
-            <p>One connected space for patient access, AI-assisted screening, and prevention guidance — designed to support the clinic, not replace the dentist.</p>
+            <h1>Dental care in Ermita, Manila.</h1>
+            <p>CodiSmile Dental Clinic sits beside LRT Central Terminal. Through ToothWise, our patient portal, you can see your AI-assisted screenings and your dentist’s advice between visits.</p>
             <div className="tw6-actions">
               <button className="tw6-btn tw6-btn-primary" onClick={() => navigate('/patient-portal')}>Open Patient Portal <ArrowRight size={17} /></button>
               <a className="tw6-btn tw6-btn-ghost" href={phoneHref}><Phone size={16} /> Call the clinic</a>
             </div>
-            <div className="tw6-proof"><CheckCircle2 size={15} /> Secure role-based access <span /> <HeartPulse size={15} /> AI stays assistive</div>
+            <p className="tw6-hours"><Clock3 size={16} aria-hidden="true" /> <span>Open every day</span> <span>Mon–Sat 9 AM–5 PM</span> <span>Sun 9 AM–2 PM</span></p>
           </div>
           <figure className="tw6-hero-media">
             <picture>
-              <source
-                type="image/webp"
-                srcSet="/codismile/hero-720.webp 720w, /codismile/hero.webp 1080w"
-                sizes="(max-width: 1024px) 100vw, 50vw"
-              />
-              {/* The hero photo is the LCP element: fetch it first. */}
-              <img
-                src="/codismile/hero.jpg"
-                srcSet="/codismile/hero-720.jpg 720w, /codismile/hero.jpg 1080w"
-                sizes="(max-width: 1024px) 100vw, 50vw"
-                width="1080"
-                height="1080"
-                fetchpriority="high"
-                alt="CodiSmile Dental Clinic treatment room"
-              />
+              <source type="image/webp" srcSet="/codismile/codismile-logo-hero.webp" />
+              <img className="tw6-hero-logo" src="/codismile/codismile-logo-transparent.png" width="734" height="767" fetchpriority="high" alt="CodiSmile Dental Clinic logo" />
             </picture>
-            <figcaption className="tw6-hero-chip">
-              <span className="tw6-chip-icon"><Activity size={16} /></span>
-              <span><strong>From screening to recommendation</strong><small>Organized around the clinic workflow.</small></span>
-            </figcaption>
           </figure>
         </section>
 
-        <section className="tw6-highlights" aria-label="ToothWise highlights">
-          <div className="tw6-highlights-inner">
-            {HIGHLIGHTS.map(({ icon: Icon, title, text }) => (
-              <div key={title} className="tw6-highlight">
-                <Icon size={19} />
+        <section className="tw6-highlights" aria-label="Clinic at a glance">
+          <ul className="tw6-highlights-inner">
+            {FACTS.map(({ title, text }) => (
+              <li key={title} className="tw6-highlight">
                 <strong>{title}</strong>
                 <span>{text}</span>
-              </div>
+              </li>
             ))}
-          </div>
+          </ul>
         </section>
 
         <Reveal as="section" className="tw6-story" id="toothwise">
-          <div className="tw6-story-media">
-            <picture>
-              <source
-                type="image/webp"
-                srcSet="/codismile/location-720.webp 720w, /codismile/location.webp 1080w"
-                sizes="(max-width: 1024px) 100vw, 50vw"
-              />
-              <img
-                src="/codismile/location.jpg"
-                srcSet="/codismile/location-720.jpg 720w, /codismile/location.jpg 1080w"
-                sizes="(max-width: 1024px) 100vw, 50vw"
-                width="1080"
-                height="1080"
-                loading="lazy"
-                decoding="async"
-                alt="CodiSmile Dental Clinic storefront"
-              />
-            </picture>
-            <div className="tw6-photo-note"><MapPin size={14} /><span>Ermita, Manila City</span></div>
-          </div>
           <div className="tw6-story-copy">
-            <h2>Digital tools should make care feel more connected.</h2>
-            <p>ToothWise connects patient access with the clinic’s operational workflow. The result is a clearer path from scheduling and screening to professional review and prevention guidance.</p>
+            <h2>One portal for every visit.</h2>
+            <p>ToothWise connects patient access with the clinic’s own workflow, so the path from screening to professional review and prevention advice is easy to follow.</p>
             <ul className="tw6-checks">
-              <li><UsersRound size={18} /><span><strong>Patient-first access</strong><small>Patients get their own secure portal rather than sharing the staff workspace.</small></span></li>
-              <li><ScanSearch size={18} /><span><strong>AI-assisted screening</strong><small>Dental image findings can support a professional review workflow.</small></span></li>
-              <li><Stethoscope size={18} /><span><strong>Professional judgment</strong><small>The system does not replace a qualified dental professional.</small></span></li>
+              <li><UsersRound size={20} /><span><strong>Patient-first access</strong><small>Patients get their own secure portal rather than sharing the staff workspace.</small></span></li>
+              <li><ScanSearch size={20} /><span><strong>AI-assisted screening</strong><small>Dental image findings support a professional review, never replace it.</small></span></li>
+              <li><Stethoscope size={20} /><span><strong>Professional judgment</strong><small>A qualified dentist makes every clinical decision.</small></span></li>
             </ul>
             <button className="tw6-btn tw6-btn-primary" onClick={() => navigate('/patient-portal')}>Explore ToothWise <ArrowRight size={16} /></button>
           </div>
-        </Reveal>
-
-        <Reveal as="section" className="tw6-flow">
-          <div className="tw6-section-head">
-            <h2>A clear path from your first visit to the next step.</h2>
-            <p>ToothWise keeps the digital side of care organized so patients can focus on the visit and the clinic can focus on care.</p>
-          </div>
-          <ol className="tw6-steps">
+          <ol className="tw6-steps" aria-label="How ToothWise works">
             {STEPS.map(({ icon: Icon, title, text }) => (
               <li key={title}>
-                <span className="tw6-step-dot"><Icon size={17} /></span>
+                <Icon size={22} aria-hidden="true" />
                 <h3>{title}</h3>
                 <p>{text}</p>
               </li>
@@ -375,28 +334,26 @@ export default function Landing() {
         </Reveal>
 
         <Reveal as="section" className="tw6-services" id="services">
-          <div className="tw6-section-head tw6-section-head-center">
-            <h2>A broad range of dental services, clearly presented.</h2>
-            <p>Swipe or tap through the services below, and contact the clinic when you are ready.</p>
+          <div className="tw6-section-head">
+            <h2>Ten treatments under one roof.</h2>
+            <p>Swipe through them, then call the clinic to ask which one suits you.</p>
           </div>
-          <div className="tw6-services-layout">
-            <ServiceCarousel services={SERVICES} onAskAbout={(event) => scrollToSection(event, 'find-us')} />
-          </div>
+          <ServiceCarousel services={SERVICES} phoneHref={phoneHref} />
+          <a className="tw6-btn tw6-btn-ghost tw6-services-call" href={phoneHref}><Phone size={16} /> Ask about a treatment</a>
         </Reveal>
 
         <Reveal as="section" className="tw6-prevention">
           <div className="tw6-prevention-inner">
-            <span className="tw6-prevention-mark"><Sparkles size={22} /></span>
-            <h2>Keep your next dental-care step easy to find.</h2>
-            <p>Use ToothWise for patient access and screening support, while routine prevention and treatment remain guided by dental professionals.</p>
-            <button className="tw6-btn tw6-btn-light" onClick={() => navigate('/patient-portal')}>Get started <ArrowRight size={17} /></button>
+            <h2>See your results from home.</h2>
+            <p>Your screenings and your dentist’s recommendations stay in the Patient Portal, while prevention and treatment remain guided by the clinic.</p>
+            <button className="tw6-btn tw6-btn-light" onClick={() => navigate('/patient-portal')}>Open Patient Portal <ArrowRight size={17} /></button>
           </div>
         </Reveal>
 
         <Reveal as="section" className="tw6-faq-wrap" id="faq">
           <div className="tw6-faq-head">
-            <h2>Know what to expect before using ToothWise.</h2>
-            <p>For general questions, the AI assistant is available from the corner of the page. Patient-specific information stays inside the secure portal.</p>
+            <h2>Questions before your visit.</h2>
+            <p>For general questions, the AI assistant is in the corner of the page. Patient-specific information stays inside the secure portal.</p>
             <button className="tw6-btn tw6-btn-ghost" onClick={() => document.querySelector('.chat-fab')?.click()}><MessageCircle size={16} /> Ask the assistant</button>
           </div>
           <div className="tw6-faq-list">{FAQS.map(([question, answer]) => <FAQItem key={question} question={question} answer={answer} />)}</div>
@@ -404,8 +361,8 @@ export default function Landing() {
 
         <Reveal as="section" className="tw6-find" id="find-us">
           <div className="tw6-find-copy">
-            <h2>Come in, ask questions, and keep your care moving.</h2>
-            <p>Visit the clinic in Ermita, Manila, or contact the team directly for appointment and service information.</p>
+            <h2>Find us at Central Terminal.</h2>
+            <p>Visit the clinic in Ermita, Manila, or call the team for appointments and service information.</p>
             <ul className="tw6-contact-list">
               <li><MapPin size={18} /><span>{CLINIC.address}</span></li>
               <li><Phone size={18} /><a href={phoneHref}>{CLINIC.phone}</a></li>
@@ -417,46 +374,37 @@ export default function Landing() {
             </div>
           </div>
           <div className="tw6-map-card">
-            <div className="tw6-map-head"><div><strong>CodiSmile Dental Clinic</strong><span>Clinic location</span></div><a href={directionsUrl} target="_blank" rel="noreferrer" aria-label="Open CodiSmile in Google Maps"><LocateFixed size={18} /></a></div>
             <div className="tw6-map-frame">
               <iframe title="CodiSmile Dental Clinic map" src={mapEmbed} loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
             </div>
-            <a className="tw6-map-open" href={directionsUrl} target="_blank" rel="noreferrer">Open in Google Maps <ArrowUpRight size={15} /></a>
+            <a className="tw6-map-open" href={directionsUrl} target="_blank" rel="noreferrer">Open in Google Maps <ArrowUpRight size={16} /></a>
           </div>
         </Reveal>
       </main>
 
       <footer className="tw6-footer">
         <div className="tw6-footer-top">
-          <div className="tw6-footer-brand">
-            <picture><source type="image/webp" srcSet="/codismile/codismile-logo-96.webp 1x, /codismile/codismile-logo-192.webp 2x" /><img src="/codismile/codismile-logo-96.png" srcSet="/codismile/codismile-logo-96.png 1x, /codismile/codismile-logo-192.png 2x" width="40" height="40" alt="" /></picture>
-            <div>
-              <strong>ToothWise</strong>
-              <span>AI-assisted dental screening and patient workflow for {CLINIC.name}.</span>
-            </div>
-          </div>
+          <p className="tw6-footer-name">CodiSmile Dental Clinic</p>
           <button type="button" className="tw6-footer-cta" onClick={() => navigate('/patient-portal')}>
-            Open Patient Portal <ArrowRight size={15} />
+            Open Patient Portal <ArrowRight size={16} />
           </button>
         </div>
 
         <div className="tw6-footer-grid">
           <div className="tw6-footer-col">
-            <span>Visit</span>
+            <h2>Visit</h2>
             <p>{CLINIC.address}</p>
-            <a target="_blank" rel="noreferrer" href={directionsUrl}>Get directions <ArrowUpRight size={12} /></a>
+            <a target="_blank" rel="noreferrer" href={directionsUrl}>Get directions <ArrowUpRight size={14} /></a>
           </div>
           <div className="tw6-footer-col">
-            <span>Contact</span>
+            <h2>Contact</h2>
             <a href={phoneHref}>{CLINIC.phone}</a>
             <p>Mon–Sat 9:00 AM–5:00 PM<br />Sun 9:00 AM–2:00 PM</p>
           </div>
           <div className="tw6-footer-col tw6-footer-nav">
-            <span>Explore</span>
-            <button type="button" onClick={(event) => scrollToSection(event, 'toothwise')}>ToothWise</button>
-            <button type="button" onClick={(event) => scrollToSection(event, 'services')}>Services</button>
-            <button type="button" onClick={(event) => scrollToSection(event, 'faq')}>FAQ</button>
-            <button type="button" onClick={(event) => scrollToSection(event, 'find-us')}>Find us</button>
+            <h2>ToothWise</h2>
+            <p>AI-assisted dental screening and patient workflow for {CLINIC.name}.</p>
+            <button type="button" onClick={(event) => scrollToSection(event, 'faq')}>Read the FAQ</button>
           </div>
         </div>
 

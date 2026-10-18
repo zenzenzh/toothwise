@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MessageCircle, Phone, Send, Sparkles, X } from 'lucide-react';
+import { ArrowUpRight, MessageCircle, Phone, Send, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { chatbotAPI, patientScreeningsAPI } from '../api';
 import LogoMark from './LogoMark';
@@ -130,19 +130,13 @@ export default function ChatWidget({ patient } = {}) {
       >
         <div className="chat-panel-header">
           <div className="chat-brand-row">
-            <div className="chat-avatar"><img src="/codismile/codismile-logo-96.png" srcSet="/codismile/codismile-logo-96.png 1x, /codismile/codismile-logo-192.png 2x" alt="" width="40" height="40" /></div>
+            <div className="chat-avatar"><img src="/codismile/codismile-logo-96.png" srcSet="/codismile/codismile-logo-96.png 1x, /codismile/codismile-logo-192.png 2x" alt="" width="42" height="42" /></div>
             <div>
-              <strong>ToothWise AI Assistant</strong>
-              <span><span className="chat-status-dot" /> Online · {patient ? 'your screenings + general info' : 'general information'}</span>
+              <strong>ToothWise Assistant</strong>
+              <span className="chat-status"><span className="chat-status-dot" aria-hidden="true" /> Online · {patient ? 'your screenings and general info' : 'general clinic questions'}</span>
             </div>
           </div>
-          <button aria-label="Close chat" onClick={() => setOpen(false)}><X size={18} /></button>
-        </div>
-
-        <div className="chat-privacy-note">
-          <Sparkles size={13} /> {patient
-            ? 'Questions about your own screenings are answered on this device only, never sent to the AI provider.'
-            : 'Please don’t share passwords, patient IDs, records, or private health information.'}
+          <button className="chat-close" aria-label="Close chat" onClick={() => setOpen(false)}><X size={18} /></button>
         </div>
 
         <div className="chat-panel-body" ref={scrollRef} aria-live="polite" aria-label="Conversation">
@@ -155,7 +149,7 @@ export default function ChatWidget({ patient } = {}) {
           {messages.length === 1 && !typing && (
             <div className="chat-quick-prompts">
               {quickPrompts.map(prompt => (
-                <button key={prompt} onClick={() => sendMessage(prompt)}>{prompt}</button>
+                <button key={prompt} onClick={() => sendMessage(prompt)}>{prompt}<ArrowUpRight size={16} aria-hidden="true" /></button>
               ))}
             </div>
           )}
@@ -167,34 +161,37 @@ export default function ChatWidget({ patient } = {}) {
           )}
         </div>
 
-        <form className="chat-panel-input" onSubmit={send}>
-          <input
-            ref={inputRef}
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            placeholder={patient ? 'Ask about your screenings…' : 'Ask a general question…'}
-            maxLength={1200}
-            aria-label="Type a message"
-           
-          />
-          <button type="submit" aria-label="Send message" disabled={!input.trim() || typing}>
-            <Send size={16} />
-          </button>
-        </form>
-
-        <div className="chat-panel-footer">
-          <a href={`tel:${CLINIC_PHONE.replace(/\s/g, '')}`}><Phone size={12} /> Call CodiSmile</a>
-          {!patient && <button onClick={() => navigate('/patient-portal')}>Patient Portal</button>}
+        <div className="chat-composer">
+          <form className="chat-panel-input" onSubmit={send}>
+            <input
+              ref={inputRef}
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              placeholder={patient ? 'Ask about your screenings…' : 'Ask a question…'}
+              maxLength={1200}
+              aria-label="Type a message"
+            />
+            <button type="submit" aria-label="Send message" disabled={!input.trim() || typing}>
+              <Send size={17} />
+            </button>
+          </form>
+          <p className="chat-privacy-note">{patient
+            ? 'Questions about your own screenings are answered on this device only, never sent to the AI provider.'
+            : 'Please don’t share passwords, patient IDs, records, or private health information.'}</p>
+          <div className="chat-panel-footer">
+            <a href={`tel:${CLINIC_PHONE.replace(/\s/g, '')}`}><Phone size={15} /> Call CodiSmile</a>
+            {!patient && <button onClick={() => navigate('/patient-portal')}>Patient Portal <ArrowUpRight size={15} /></button>}
+          </div>
         </div>
       </div>}
 
       <button
-        className="chat-fab"
+        className={open ? 'chat-fab is-open' : 'chat-fab'}
         onClick={() => setOpen(value => !value)}
         aria-label={open ? 'Close AI assistant' : 'Open AI assistant'}
         aria-expanded={open}
       >
-        {open ? <X size={22} /> : <MessageCircle size={22} />}
+        {open ? <X size={22} /> : <><MessageCircle size={22} /><span className="chat-fab-label">Ask ToothWise</span></>}
         {!open && <span className="chat-fab-ping" aria-hidden="true" />}
       </button>
     </div>

@@ -34,7 +34,6 @@
     border: 1px solid var(--tw-border);
     border-radius: var(--r-lg);
     background: var(--tw-surface);
-    box-shadow: var(--shadow-md);
   }
   .tw-responsive-table .tw-data-table tr:hover td { background: transparent; }
   .tw-responsive-table .tw-data-table td {
@@ -57,8 +56,6 @@
     color: var(--tw-muted);
     font-size: .64rem;
     font-weight: 900;
-    letter-spacing: .1em;
-    text-transform: uppercase;
     text-align: left;
   }
   .tw-responsive-table .tw-data-table td > div,

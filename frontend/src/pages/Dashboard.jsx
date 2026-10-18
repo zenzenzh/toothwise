@@ -10,7 +10,8 @@ import EmptyState from '../components/ui/EmptyState';
 import Button from '../components/ui/Button';
 import T from '../tokens';
 
-const PIE_COLORS = [T.accent, T.text, T.success, T.warning, T.indigo];
+// Brand ramp (rose, plum/ink, muted), not a rainbow; follows the theme.
+const PIE_COLORS = [T.accent, T.text, T.muted, T.accentStrong, T.warning];
 
 const TOOLTIP_STYLE = {
   background: T.surface,
@@ -129,7 +130,7 @@ export default function Dashboard() {
               <XAxis dataKey="month" tick={AXIS_TICK} axisLine={false} tickLine={false} />
               <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false} allowDecimals={false} width={32} />
               <Tooltip contentStyle={TOOLTIP_STYLE} cursor={{ fill: T.surfaceAlt }} />
-              <Bar dataKey="count" name="Screenings" fill="url(#dash6-bar-grad)" radius={[6, 6, 0, 0]} />
+              <Bar dataKey="count" name="Screenings" fill={T.accent} radius={[6, 6, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </section>

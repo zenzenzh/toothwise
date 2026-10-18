@@ -18,9 +18,9 @@ h1,h2,h3 { font-family: 'Manrope', system-ui, -apple-system, 'Segoe UI', sans-se
 button, a, .nav-link, .tw-icon-button { transition: color var(--dur) ease, background-color var(--dur) ease, border-color var(--dur) ease; }
 
 .auth6-alert {
-  padding: 10px 14px; border-radius: var(--r-md);
-  border: 1px solid var(--tw-danger-border); background: var(--tw-danger-bg); color: var(--tw-danger);
-  font-size: var(--fs-sm); line-height: 1.5;
+  padding: 14px 18px; border-radius: var(--r-lg);
+  background: var(--tw-danger-bg); color: var(--tw-danger);
+  font-size: 15px; line-height: 1.5;
 }
 
 /* ── Top-bar breadcrumbs (Layout) ────────────────────────────────── */
@@ -59,10 +59,10 @@ body.dark-mode {
   --sb-active-bg: rgba(255, 255, 255, .12);
   --sb-shadow: 10px 0 34px rgba(0, 0, 0, .35);
 }
-.tw-sidebar { background: var(--sb-bg); color: var(--sb-text); box-shadow: var(--sb-shadow); transition: width var(--dur) ease; }
+.tw-sidebar { background: var(--sb-bg); color: var(--sb-text); transition: width var(--dur) ease; }
 .tw-sb-link { color: var(--sb-text); background: transparent; border: 1px solid transparent; transition: background var(--dur-fast) ease, color var(--dur-fast) ease; }
 .tw-sb-link:hover { background: var(--sb-hover); color: var(--sb-text-strong); }
-.tw-sb-link.active { color: var(--sb-text-strong); background: var(--sb-active-bg); border-color: var(--sb-active-border); }
+.tw-sb-link.active { color: var(--sb-text-strong); background: var(--sb-active-bg); }
 .tw-sb-brand-name { color: var(--sb-text-strong); }
 .tw-sb-brand-sub { color: var(--sb-sub); }
 .tw-sb-collapse { background: transparent; color: var(--sb-text); }
@@ -88,19 +88,19 @@ body.dark-mode {
 }
 .tw-sb-brand { display: flex; align-items: center; justify-content: flex-start; gap: 12px; min-height: 52px; padding: 2px 10px; }
 .tw-sb-logo { width: 44px; height: 44px; flex-shrink: 0; display: grid; place-items: center; border-radius: 14px; background: #FFFFFF; box-shadow: none; }
-.tw-sb-brand-name { font-size: 14px; font-weight: 900; letter-spacing: .12em; }
-.tw-sb-brand-sub { margin-top: 3px; font-size: 9px; font-weight: 800; letter-spacing: .1em; }
+.tw-sb-brand-name { font-size: 17px; font-weight: 800; letter-spacing: -.01em; }
+.tw-sb-brand-sub { margin-top: 2px; font-size: 14px; font-weight: 600; }
 .tw-sb-nav { display: flex; flex-direction: column; gap: 6px; margin-top: 18px; padding: 0 4px; }
-.tw-sb-link { display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 13px; border-radius: 12px; font-size: 13px; font-weight: 700; text-decoration: none; }
+.tw-sb-link { display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 13px; border-radius: 12px; font-size: 15px; font-weight: 700; text-decoration: none; }
 .tw-sb-bottom { display: flex; flex-direction: column; gap: 9px; }
-.tw-sb-collapse { width: 100%; display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 10px 13px; border: 0; border-radius: 10px; font-size: 11px; font-weight: 700; cursor: pointer; }
+.tw-sb-collapse { width: 100%; display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 10px 13px; border: 0; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; }
 .tw-sb-collapse-icon { transition: transform var(--dur) ease; }
 .tw-sb-user { display: flex; align-items: center; gap: 10px; padding: 12px 8px; }
 .tw-sb-avatar { width: 38px; height: 38px; flex-shrink: 0; display: grid; place-items: center; border-radius: 12px; font-size: 13px; font-weight: 900; }
 .tw-sb-user-text { min-width: 0; }
-.tw-sb-user-name { max-width: 160px; font-size: 12px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.tw-sb-user-role { margin-top: 2px; font-size: 10px; text-transform: capitalize; }
-.tw-sb-logout { display: flex; align-items: center; justify-content: flex-start; gap: 11px; padding: 10px 12px; border-radius: 11px; font-size: 12px; font-weight: 700; cursor: pointer; }
+.tw-sb-user-name { max-width: 160px; font-size: 13px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tw-sb-user-role { margin-top: 2px; font-size: 13px; text-transform: capitalize; }
+.tw-sb-logout { display: flex; align-items: center; justify-content: flex-start; gap: 11px; padding: 10px 12px; border-radius: 11px; font-size: 13px; font-weight: 700; cursor: pointer; }
 /* Collapsed rail: centre everything, flip the chevron. */
 .tw-sidebar.collapsed .tw-sb-brand,
 .tw-sidebar.collapsed .tw-sb-link,
@@ -166,7 +166,7 @@ input:focus, textarea:focus, select:focus {
 ::-webkit-scrollbar-thumb:hover { background: #8EAEB5; }
 
 table { width: 100%; border-collapse: collapse; }
-th { text-align:left; color:#8C7078; font-size:11px; text-transform:uppercase; letter-spacing:.07em; font-weight:800; background:#FBF6F4; }
+th { text-align:left; color:#8C7078; font-size:13px; text-transform:uppercase; letter-spacing:.07em; font-weight:800; background:#FBF6F4; }
 td { color:var(--tw-text); border-bottom:1px solid var(--tw-border); }
 tr:hover td { background:var(--tw-surface-alt); }
 
@@ -195,7 +195,7 @@ body.dark-mode .skeleton, body.dark-mode .pp-thumb--skeleton { background:linear
 .auth-panel { padding:54px; }
 .tw-input { width:100%; height:48px; border:1px solid var(--tw-border); background:#FFFFFF; border-radius:12px; padding:0 15px; color:var(--tw-text); }
 .tw-field { display:flex; flex-direction:column; gap:7px; }
-.tw-label { font-size:12px; font-weight:800; color:var(--tw-navy); letter-spacing:.02em; }
+.tw-label { font-size:13px; font-weight:800; color:var(--tw-navy); letter-spacing:.02em; }
 
 @media (max-width: 900px) {
   .tw-sidebar { width:270px; transform:translateX(-100%); }

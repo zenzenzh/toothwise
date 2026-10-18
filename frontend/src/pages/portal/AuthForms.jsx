@@ -157,7 +157,7 @@ function LoginForm() {
 }
 
 function RegisterForm() {
-  const [form, setForm] = useState({ first_name: '', middle_name: '', last_name: '', email: '', password: '', confirm_password: '', contact_number: '', birthdate: '', gender: '', address: '' });
+  const [form, setForm] = useState({ first_name: '', middle_name: '', last_name: '', email: '', password: '', confirm_password: '', contact_number: '', birthdate: '', gender: '' });
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const { register, loading } = usePatientAuth();
@@ -179,7 +179,6 @@ function RegisterForm() {
     const emailCheck = validateEmail(form.email);
     const phoneCheck = validatePHMobile(form.contact_number, { required: true });
     const passwordCheck = validatePassword(form.password);
-    const addressCheck = form.address ? validateRequiredText(form.address, 'Address') : { valid: true, value: '' };
     const age = calculateAge(form.birthdate);
 
     const nextErrors = {};
@@ -192,7 +191,6 @@ function RegisterForm() {
     else if (new Date(`${form.birthdate}T00:00:00`) > new Date()) nextErrors.birthdate = 'Birthdate cannot be in the future.';
     else if (age === '') nextErrors.birthdate = 'Enter a valid birthdate.';
     if (!passwordCheck.valid) nextErrors.password = passwordCheck.message;
-    if (!addressCheck.valid) nextErrors.address = addressCheck.message;
     if (form.password !== form.confirm_password) nextErrors.confirm_password = 'Passwords do not match.';
 
     if (Object.keys(nextErrors).length > 0) {
@@ -213,7 +211,6 @@ function RegisterForm() {
         contact_number: phoneCheck.value,
         birthdate: form.birthdate,
         gender: form.gender || null,
-        address: form.address ? addressCheck.value : null,
       });
       toast.success('Account created!');
     } catch (err) {
@@ -258,7 +255,6 @@ function RegisterForm() {
         </div>
         <TextField id="reg-birthdate" field="birthdate" label="Birthdate" type="date" max={getLocalDateString()} value={form.birthdate} onChange={e => set('birthdate', e.target.value)} autoComplete="bday" required error={errors.birthdate} />
       </div>
-      <TextField id="reg-address" field="address" label="Address" value={form.address} onChange={e => set('address', e.target.value)} maxLength={LIMITS.ADDRESS_MAX} autoComplete="street-address" error={errors.address} />
       <PasswordField
         value={form.password}
         onChange={v => set('password', v)}
