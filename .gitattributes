@@ -1,0 +1,13 @@
+# Keep binary documents and images byte-for-byte (no line-ending conversion).
+*.pdf  binary
+*.docx binary
+*.doc  binary
+*.xlsx binary
+*.pptx binary
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.webp binary
+*.gif  binary
+*.ico  binary
+*.pt   binary
