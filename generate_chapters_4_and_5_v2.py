@@ -564,22 +564,32 @@ def ens_vs_best():
 def per_class_discussion(doc):
     order, a8, a12 = class_rank()
     tc = SH["targets_per_class"]
-    best, worst = order[0], order[-1]
-    p(doc, f"Performance differed strongly between classes. Both models detected "
-           f"{CLASS_NAMES[best].lower()} best (mAP@50 of {pct(a8[best])} for YOLOv8 and {pct(a12[best])} for "
-           f"YOLOv12) and {CLASS_NAMES[worst].lower()} worst ({pct(a8[worst])} and {pct(a12[worst])}). In "
-           f"descending order of mean mAP@50, the classes ranked as follows: "
-           + ", ".join(CLASS_NAMES[c].lower() for c in order) + ".")
-    p(doc, "The per-class results show that the moderate overall scores are driven mainly by the weaker "
-           "classes rather than by uniformly weak detection. Classes with distinct, well-bounded visual "
-           "features are detected far more reliably than classes that appear as thin, low-contrast films or "
-           "diffuse discoloration along the gum line, whose boundaries are hard to annotate consistently and "
-           "therefore hard to match at an IoU of 0.50. Class frequency also matters: the test split contains "
-           f"{tc[worst]:,} {CLASS_NAMES[worst].lower()} instances against {max(tc):,} "
-           f"{CLASS_NAMES[tc.index(max(tc))].lower()} instances, and each class comes from only some of the "
-           "four source datasets, so the models may partly learn the photographic style of a source rather "
-           "than the condition itself. These are the same difficulties that the first problem of the study "
-           "identifies in visual-only screening.")
+    r8, r12 = by_class(OFF8, "r"), by_class(OFF12, "r")
+    # A class with very few test labels gives an unstable score, so lead with
+    # the best class that has enough labels and caveat the small one.
+    solid = [c for c in order if tc[c] >= 100]
+    small = [c for c in order if tc[c] < 100]
+    best, worst = solid[0], order[-1]
+    p(doc, f"Performance differed strongly between classes. Among the well-represented classes, both models "
+           f"detected {CLASS_NAMES[best].lower()} best (mAP@50 of {pct(a8[best])} for YOLOv8 and "
+           f"{pct(a12[best])} for YOLOv12, from {tc[best]:,} labeled instances) and "
+           f"{CLASS_NAMES[worst].lower()} worst ({pct(a8[worst])} and {pct(a12[worst])}). In descending order "
+           f"of mean mAP@50, the classes ranked as follows: "
+           + ", ".join(CLASS_NAMES[c].lower() for c in order) + "."
+           + "".join(f" The {CLASS_NAMES[c].lower()} class scored {pct(a8[c])} and {pct(a12[c])}, but the "
+                     f"test split contains only {tc[c]:,} labeled {CLASS_NAMES[c].lower()} instances in "
+                     f"{TEST_IMAGES_PER_CLASS[c]:,} images, so this result is less certain than the others."
+                     for c in small))
+    p(doc, f"The weakest class, {CLASS_NAMES[worst].lower()}, is the main limitation of the trained models. Of "
+           f"the {tc[worst]:,} labeled {CLASS_NAMES[worst].lower()} instances in the test split, YOLOv8 found "
+           f"{pct(r8[worst])} and YOLOv12 {pct(r12[worst])} at the confidence that gives each model its best "
+           f"F1-score. Plaque appears as a thin, low-contrast film that is hard to separate from the tooth "
+           f"surface and from tartar in an ordinary photograph, and its boundaries are hard to annotate "
+           f"consistently, which makes an overlap of 0.50 with the labeled box difficult to reach. In addition, "
+           f"the plaque labels come from only one of the four source datasets. Class frequency also matters: "
+           f"the test split contains {tc[worst]:,} {CLASS_NAMES[worst].lower()} instances against "
+           f"{max(tc):,} {CLASS_NAMES[tc.index(max(tc))].lower()} instances. These are the same difficulties "
+           f"that the first problem of the study identifies in visual-only screening.")
 
 
 def accuracy_discussion(doc):
@@ -606,6 +616,19 @@ def accuracy_discussion(doc):
            + (f" The most frequent confusion between two conditions was a true "
               f"{CLASS_NAMES[pair[1]].lower()} labeled as {CLASS_NAMES[pair[0]].lower()}."
               if pair else ""))
+    if ae["accuracy"] < ACC[best]["accuracy"]:
+        p(doc, f"The fused ensemble had a slightly lower detection accuracy than {name[best]} even though its "
+               f"mAP@50 was higher (Section 4.1.7). The ensemble keeps a finding reported by either model, so "
+               f"it missed fewer findings ({int(ae['fn']):,} against {int(ACC[best]['fn']):,}) but raised more "
+               f"false alarms ({int(ae['fp']):,} against {int(ACC[best]['fp']):,}). Detection accuracy weighs "
+               f"both errors equally, whereas mAP rewards ranking correct findings above false ones across all "
+               f"confidence levels.")
+    p(doc, "Two cautions apply to these counts. First, the four source datasets were not all annotated for "
+           "the same conditions; for example, a photograph from a source without a gum inflammation class may "
+           "show inflamed gums that were never labeled. A correct detection on such an image is counted as a "
+           "false alarm, so the false-alarm counts, and therefore the accuracy, are conservative. Second, the "
+           "counts depend on the confidence threshold: a lower threshold finds more findings but raises more "
+           "false alarms.")
     p(doc, "For a screening support tool, missed findings are the more serious error because a false alarm is "
            "reviewed and dismissed by the dentist, whereas a missed finding may not be examined. This supports "
            "keeping the dentist's visual examination as the reference and presenting the detections as "
@@ -616,10 +639,19 @@ def ensemble_discussion(doc):
     best, gain = ens_vs_best()
     e = SH["Ensemble"]
     b = SH[best]
+    ab, ae = ACC[best], ACC["Ensemble"]
+    better = [CLASS_NAMES[c].lower() for c in range(5)
+              if by_class(e, "ap50")[c] is not None and by_class(b, "ap50")[c] is not None
+              and by_class(e, "ap50")[c] > by_class(b, "ap50")[c]]
     p(doc, f"The fused ensemble obtained an mAP@50 of {pct(e['map50'])}, against {pct(b['map50'])} for the "
            f"better single model ({best}) in the same evaluation, a difference of {gain * 100:+.2f} percentage "
-           f"points. Its recall was {pct(e['recall'])} against {pct(b['recall'])}, and its precision "
-           f"{pct(e['precision'])} against {pct(b['precision'])}.")
+           f"points, and it scored higher than {best} on "
+           f"{'all five classes' if len(better) == 5 else f'{len(better)} of the five classes'}. Its recall was "
+           f"{pct(e['recall'])} against {pct(b['recall'])}, and its precision {pct(e['precision'])} against "
+           f"{pct(b['precision'])}. At the deployed confidence threshold, the ensemble missed "
+           f"{int(ae['fn']):,} findings against {int(ab['fn']):,} for {best}, but raised "
+           f"{int(ae['fp']):,} false alarms against {int(ab['fp']):,}, because a box from either model is "
+           f"kept.")
     if gain > 0.005:
         p(doc, "Fusion therefore improved on both single models: findings that one model misses are often "
                "detected by the other, and agreement between the two raises the confidence of the findings "
@@ -639,6 +671,8 @@ def ensemble_discussion(doc):
 def model_summary(doc):
     best_t = "YOLOv8" if OFF8["map50"] >= OFF12["map50"] else "YOLOv12"
     order, _, _ = class_rank()
+    tc = SH["targets_per_class"]
+    order = [c for c in order if tc[c] >= 100]  # leave out classes with too few test labels to judge
     b = CPU_BENCH
     p(doc, f"In answer to the first problem, both models learned to detect the five target classes. On the "
            f"held-out test split, {best_t} obtained the higher mAP@50 (YOLOv8 {pct(OFF8['map50'])}, YOLOv12 "

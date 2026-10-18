@@ -173,7 +173,8 @@ def confusion_figure(ev):
     from matplotlib.colors import LinearSegmentedColormap
     cmap = LinearSegmentedColormap.from_list("blue", ["#ffffff", "#cde2fb", "#6da7ec", "#2a78d6", "#104281"])
     ticks = ["Healthy", "Cavity", "Gum infl.", "Plaque", "Tartar", "Background"]
-    fig, axes = plt.subplots(1, 3, figsize=(10, 3.9), dpi=200, facecolor=SURFACE)
+    # Drawn at its printed size (6.3 in wide) so the cell labels stay legible.
+    fig, axes = plt.subplots(1, 3, figsize=(6.3, 2.75), dpi=300, facecolor=SURFACE)
     for ax, name in zip(axes, ("YOLOv8", "YOLOv12", "Ensemble")):
         m = np.array(ev["shared"][name]["confusion_matrix"])  # rows predicted, columns true
         col = m.sum(0, keepdims=True)
@@ -186,18 +187,18 @@ def confusion_figure(ev):
                     continue
                 v = norm[r, c] if c < 5 else m[r, c]
                 txt = f"{v:.2f}" if c < 5 else f"{int(v)}"
-                ax.text(c, r, txt, ha="center", va="center", fontsize=6,
+                ax.text(c, r, txt, ha="center", va="center", fontsize=5,
                         color="#ffffff" if (c < 5 and v > 0.55) else INK, fontfamily=FONT)
         ax.set_xticks(range(6)); ax.set_yticks(range(6))
-        ax.set_xticklabels(ticks, rotation=45, ha="right", fontsize=6.5, fontfamily=FONT, color=INK2)
-        ax.set_yticklabels(ticks, fontsize=6.5, fontfamily=FONT, color=INK2)
-        ax.set_title(name, fontsize=10, color=INK, fontfamily=FONT)
-        ax.set_xlabel("True class", fontsize=7.5, color=INK2, fontfamily=FONT)
+        ax.set_xticklabels(ticks, rotation=45, ha="right", fontsize=5.5, fontfamily=FONT, color=INK2)
+        ax.set_yticklabels(ticks if name == "YOLOv8" else [], fontsize=5.5, fontfamily=FONT, color=INK2)
+        ax.set_title(name, fontsize=8, color=INK, fontfamily=FONT)
+        ax.set_xlabel("True class", fontsize=6, color=INK2, fontfamily=FONT)
         ax.tick_params(length=0)
         for sp in ax.spines.values():
             sp.set_visible(False)
-    axes[0].set_ylabel("Predicted class", fontsize=7.5, color=INK2, fontfamily=FONT)
-    fig.tight_layout()
+    axes[0].set_ylabel("Predicted class", fontsize=6, color=INK2, fontfamily=FONT)
+    fig.tight_layout(w_pad=0.6)
     fig.savefig(OUT / "fig_confusion_matrices.png", facecolor=SURFACE)
     plt.close(fig)
 
