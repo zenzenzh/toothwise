@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
-  ArrowRight, ArrowUpRight, ChevronDown, ChevronLeft, ChevronRight, Clock3, MapPin, MessageCircle,
-  Navigation, Phone, ScanSearch, ShieldCheck, Stethoscope, UsersRound,
+  ArrowRight, ArrowUpRight, Check, ChevronDown, ChevronLeft, ChevronRight, Clock3, MapPin, MessageCircle,
+  Navigation, Phone, ScanSearch, Stethoscope, TrainFront, UsersRound,
 } from 'lucide-react';
 import SEO from '../components/SEO';
 import ChatWidget from '../components/ChatWidget';
@@ -39,17 +39,34 @@ const FAQS = [
 ];
 
 const FACTS = [
-  { title: 'Open seven days', text: 'Mon–Sat 9 AM–5 PM, Sun 9 AM–2 PM' },
-  { title: 'Beside the LRT', text: 'Central Terminal, Arroceros St., Ermita' },
-  { title: 'Ten treatments', text: 'From cleaning to braces and dentures' },
-  { title: 'Results online', text: 'Screenings and advice in your portal' },
+  { value: '7 days', text: 'a week, Sundays included' },
+  { value: '10', text: 'treatments under one roof' },
+  { value: 'LRT', text: 'beside Central Terminal' },
+  { value: '24/7', text: 'online access to your results' },
+];
+
+const BENEFITS = [
+  { icon: UsersRound, title: 'Your own secure portal', text: 'Sign in to see your screenings and your dentist’s advice — no paperwork, no calling to ask.' },
+  { icon: ScanSearch, title: 'AI that spots issues early', text: 'Dental images are screened by AI so possible problems are flagged for your dentist sooner.' },
+  { icon: Stethoscope, title: 'A dentist makes every call', text: 'AI assists; a qualified dentist reviews every finding and decides your treatment.' },
 ];
 
 const STEPS = [
-  { icon: ShieldCheck, title: 'Access', text: 'Patients and staff enter separate role-based workspaces.' },
-  { icon: ScanSearch, title: 'Screen', text: 'Dental images can be processed through the AI-assisted screening workflow.' },
-  { icon: Stethoscope, title: 'Review', text: 'A dental professional interprets findings and guides the next step.' },
+  { title: 'Visit the clinic', text: 'Call to book, then come in for your check-up beside LRT Central.' },
+  { title: 'Get screened', text: 'Your dental images go through ToothWise’s AI-assisted screening.' },
+  { title: 'Follow your plan', text: 'Your dentist’s findings and prevention tips wait for you in the portal.' },
 ];
+
+// Clinic hours in Manila time: Mon–Sat 9–17, Sun 9–14.
+function clinicStatus(now = new Date()) {
+  const parts = new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Manila', weekday: 'short', hour: 'numeric', hourCycle: 'h23' }).formatToParts(now);
+  const day = parts.find((p) => p.type === 'weekday')?.value;
+  const hour = Number(parts.find((p) => p.type === 'hour')?.value);
+  const close = day === 'Sun' ? 14 : 17;
+  const closeLabel = day === 'Sun' ? '2 PM' : '5 PM';
+  if (hour >= 9 && hour < close) return { open: true, label: `Open now · until ${closeLabel}` };
+  return { open: false, label: hour < 9 ? 'Opens today at 9 AM' : 'Opens tomorrow at 9 AM' };
+}
 
 // Instagram-style carousel: swipe (touch / trackpad), drag with a mouse,
 // arrow buttons, arrow keys or the dots. Native scroll-snap does the
@@ -176,7 +193,10 @@ export default function Landing() {
   const navigate = useNavigate();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('');
+  const [showStickyCta, setShowStickyCta] = useState(false);
+  const [status] = useState(() => clinicStatus());
   const navRef = useRef(null);
+  const heroRef = useRef(null);
 
   function scrollToSection(event, id) {
     if (event) event.preventDefault();
@@ -224,6 +244,15 @@ export default function Landing() {
     return () => observer.disconnect();
   }, []);
 
+  // Mobile call bar appears once the hero's own buttons scroll out of view.
+  useEffect(() => {
+    const hero = heroRef.current;
+    if (!hero || typeof IntersectionObserver === 'undefined') return undefined;
+    const observer = new IntersectionObserver(([entry]) => setShowStickyCta(!entry.isIntersecting), { threshold: 0 });
+    observer.observe(hero);
+    return () => observer.disconnect();
+  }, []);
+
   useEffect(() => {
     const old = document.getElementById('tw-local-business-schema');
     if (old) old.remove();
@@ -247,11 +276,13 @@ export default function Landing() {
   const phoneHref = `tel:${CLINIC.phone.replace(/\s/g, '')}`;
   const mapEmbed = `https://www.google.com/maps?q=${encodeURIComponent(CLINIC.mapQuery)}&output=embed`;
 
+  const openPortal = () => { setMobileNavOpen(false); navigate('/patient-portal'); };
+
   return (
     <div className="tw6">
       <SEO
         title="CodiSmile Dental Clinic | ToothWise"
-        description="CodiSmile Dental Clinic and ToothWise: patient access, AI-assisted dental screening, prevention guidance, and clinic information."
+        description="Dental care beside LRT Central Terminal, Ermita, Manila. Ten treatments, open seven days, with AI-assisted screening and your results online through ToothWise."
         structuredData={{ '@context': 'https://schema.org', '@type': 'WebSite', name: 'ToothWise', url: window.location.origin }}
       />
 
@@ -272,97 +303,130 @@ export default function Landing() {
             <span className="tw6-hamburger" aria-hidden="true"><i /><i /><i /></span>
           </button>
           <nav id="tw6-public-nav" className={mobileNavOpen ? 'is-open' : ''} aria-label="Public navigation">
-            <button type="button" className={activeSection === 'toothwise' ? 'is-active' : ''} onClick={(event) => scrollToSection(event, 'toothwise')}>ToothWise</button>
             <button type="button" className={activeSection === 'services' ? 'is-active' : ''} onClick={(event) => scrollToSection(event, 'services')}>Services</button>
+            <button type="button" className={activeSection === 'toothwise' ? 'is-active' : ''} onClick={(event) => scrollToSection(event, 'toothwise')}>ToothWise</button>
             <button type="button" className={activeSection === 'faq' ? 'is-active' : ''} onClick={(event) => scrollToSection(event, 'faq')}>FAQ</button>
             <button type="button" className={activeSection === 'find-us' ? 'is-active' : ''} onClick={(event) => scrollToSection(event, 'find-us')}>Find us</button>
-            <button className="tw6-nav-cta" onClick={() => { setMobileNavOpen(false); navigate('/patient-portal'); }}>Patient Portal <ArrowRight size={15} /></button>
+            <a className="tw6-nav-phone" href={phoneHref}><Phone size={15} aria-hidden="true" /> {CLINIC.phone}</a>
+            <button type="button" className="tw6-nav-cta" onClick={openPortal}>Patient Portal <ArrowRight size={15} /></button>
           </nav>
         </div>
       </header>
 
       <main id="top" className="tw6-main">
-        <section className="tw6-hero">
+        <section className="tw6-hero" ref={heroRef}>
           <div className="tw6-hero-copy">
-            <h1>Dental care in Ermita, Manila.</h1>
-            <p>CodiSmile Dental Clinic sits beside LRT Central Terminal. Through ToothWise, our patient portal, you can see your AI-assisted screenings and your dentist’s advice between visits.</p>
+            <p className={`tw6-status${status.open ? ' is-open' : ''}`}><span className="tw6-status-dot" aria-hidden="true" />{status.label}<span className="tw6-status-sep" aria-hidden="true">·</span>Ermita, Manila</p>
+            <h1>A healthier smile, right beside the LRT.</h1>
+            <p className="tw6-lede">Ten dental treatments, seven days a week, at LRT Central Terminal. And with ToothWise, your screenings and your dentist’s advice follow you home.</p>
             <div className="tw6-actions">
-              <button className="tw6-btn tw6-btn-primary" onClick={() => navigate('/patient-portal')}>Open Patient Portal <ArrowRight size={17} /></button>
-              <a className="tw6-btn tw6-btn-ghost" href={phoneHref}><Phone size={16} /> Call the clinic</a>
+              <a className="tw6-btn tw6-btn-primary tw6-btn-lg" href={phoneHref}><Phone size={18} aria-hidden="true" /> Call to book a visit</a>
+              <button type="button" className="tw6-btn tw6-btn-ghost tw6-btn-lg" onClick={openPortal}>Open Patient Portal <ArrowRight size={17} /></button>
             </div>
-            <p className="tw6-hours"><Clock3 size={16} aria-hidden="true" /> <span>Open every day</span> <span>Mon–Sat 9 AM–5 PM</span> <span>Sun 9 AM–2 PM</span></p>
+            <ul className="tw6-trust">
+              <li><Check size={16} aria-hidden="true" /> Open Sundays</li>
+              <li><Check size={16} aria-hidden="true" /> Cleanings to braces</li>
+              <li><Check size={16} aria-hidden="true" /> Dentist-reviewed AI screening</li>
+            </ul>
           </div>
           <figure className="tw6-hero-media">
-            <picture>
-              <source type="image/webp" srcSet="/codismile/codismile-logo-hero.webp" />
-              <img className="tw6-hero-logo" src="/codismile/codismile-logo-transparent.png" width="734" height="767" fetchpriority="high" alt="CodiSmile Dental Clinic logo" />
-            </picture>
+            <div className="tw6-hero-disc">
+              <picture>
+                <source type="image/webp" srcSet="/codismile/codismile-logo-hero.webp" />
+                <img className="tw6-hero-logo" src="/codismile/codismile-logo-transparent.png" width="734" height="767" fetchpriority="high" alt="CodiSmile Dental Clinic logo" />
+              </picture>
+            </div>
+            <div className="tw6-float tw6-float-a" aria-hidden="true">
+              <span className="tw6-float-icon"><TrainFront size={18} /></span>
+              <span><strong>Beside LRT Central</strong><small>Arroceros St., Ermita</small></span>
+            </div>
+            <div className="tw6-float tw6-float-b" aria-hidden="true">
+              <span className="tw6-float-icon"><ScanSearch size={18} /></span>
+              <span><strong>Results online</strong><small>Reviewed by your dentist</small></span>
+            </div>
           </figure>
         </section>
 
         <section className="tw6-highlights" aria-label="Clinic at a glance">
           <ul className="tw6-highlights-inner">
-            {FACTS.map(({ title, text }) => (
-              <li key={title} className="tw6-highlight">
-                <strong>{title}</strong>
+            {FACTS.map(({ value, text }) => (
+              <li key={value} className="tw6-highlight">
+                <strong>{value}</strong>
                 <span>{text}</span>
               </li>
             ))}
           </ul>
         </section>
 
-        <Reveal as="section" className="tw6-story" id="toothwise">
-          <div className="tw6-story-copy">
-            <h2>One portal for every visit.</h2>
-            <p>ToothWise connects patient access with the clinic’s own workflow, so the path from screening to professional review and prevention advice is easy to follow.</p>
-            <ul className="tw6-checks">
-              <li><UsersRound size={20} /><span><strong>Patient-first access</strong><small>Patients get their own secure portal rather than sharing the staff workspace.</small></span></li>
-              <li><ScanSearch size={20} /><span><strong>AI-assisted screening</strong><small>Dental image findings support a professional review, never replace it.</small></span></li>
-              <li><Stethoscope size={20} /><span><strong>Professional judgment</strong><small>A qualified dentist makes every clinical decision.</small></span></li>
-            </ul>
-            <button className="tw6-btn tw6-btn-primary" onClick={() => navigate('/patient-portal')}>Explore ToothWise <ArrowRight size={16} /></button>
+        <Reveal as="section" className="tw6-services" id="services">
+          <div className="tw6-section-head">
+            <p className="tw6-eyebrow">Services</p>
+            <h2>Everything your smile needs, under one roof.</h2>
+            <p>From a routine cleaning to braces, crowns and whitening — no referrals across the city, no second clinic.</p>
           </div>
-          <ol className="tw6-steps" aria-label="How ToothWise works">
-            {STEPS.map(({ icon: Icon, title, text }) => (
+          <ServiceCarousel services={SERVICES} phoneHref={phoneHref} />
+          <div className="tw6-services-cta">
+            <p><strong>Not sure what you need?</strong> Call us and we’ll point you to the right treatment.</p>
+            <a className="tw6-btn tw6-btn-primary" href={phoneHref}><Phone size={16} aria-hidden="true" /> Call {CLINIC.phone}</a>
+          </div>
+        </Reveal>
+
+        <Reveal as="section" className="tw6-story" id="toothwise">
+          <div className="tw6-section-head tw6-section-head-center">
+            <p className="tw6-eyebrow">ToothWise patient portal</p>
+            <h2>Your dental care doesn’t stop at the door.</h2>
+            <p>ToothWise is CodiSmile’s own portal. See what your dentist found, what to do next, and how to prevent problems — anytime, from your phone.</p>
+          </div>
+          <ul className="tw6-benefits">
+            {BENEFITS.map(({ icon: Icon, title, text }) => (
               <li key={title}>
-                <Icon size={22} aria-hidden="true" />
+                <span className="tw6-benefit-icon"><Icon size={22} aria-hidden="true" /></span>
                 <h3>{title}</h3>
                 <p>{text}</p>
               </li>
             ))}
-          </ol>
-        </Reveal>
-
-        <Reveal as="section" className="tw6-services" id="services">
-          <div className="tw6-section-head">
-            <h2>Ten treatments under one roof.</h2>
-            <p>Swipe through them, then call the clinic to ask which one suits you.</p>
+          </ul>
+          <div className="tw6-how">
+            <h3 className="tw6-how-title">How it works</h3>
+            <ol className="tw6-steps">
+              {STEPS.map(({ title, text }, i) => (
+                <li key={title}>
+                  <span className="tw6-step-num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+                  <h4>{title}</h4>
+                  <p>{text}</p>
+                </li>
+              ))}
+            </ol>
+            <button type="button" className="tw6-btn tw6-btn-primary" onClick={openPortal}>Explore ToothWise <ArrowRight size={16} /></button>
           </div>
-          <ServiceCarousel services={SERVICES} phoneHref={phoneHref} />
-          <a className="tw6-btn tw6-btn-ghost tw6-services-call" href={phoneHref}><Phone size={16} /> Ask about a treatment</a>
         </Reveal>
 
         <Reveal as="section" className="tw6-prevention">
           <div className="tw6-prevention-inner">
-            <h2>See your results from home.</h2>
-            <p>Your screenings and your dentist’s recommendations stay in the Patient Portal, while prevention and treatment remain guided by the clinic.</p>
-            <button className="tw6-btn tw6-btn-light" onClick={() => navigate('/patient-portal')}>Open Patient Portal <ArrowRight size={17} /></button>
+            <h2>Your next check‑up is one call away.</h2>
+            <p>Open every day beside LRT Central Terminal. Call the clinic to book, then follow your results online.</p>
+            <div className="tw6-actions tw6-actions-center">
+              <a className="tw6-btn tw6-btn-light tw6-btn-lg" href={phoneHref}><Phone size={18} aria-hidden="true" /> Call {CLINIC.phone}</a>
+              <button type="button" className="tw6-btn tw6-btn-outline-light tw6-btn-lg" onClick={openPortal}>Open Patient Portal <ArrowRight size={17} /></button>
+            </div>
           </div>
         </Reveal>
 
         <Reveal as="section" className="tw6-faq-wrap" id="faq">
           <div className="tw6-faq-head">
-            <h2>Questions before your visit.</h2>
-            <p>For general questions, the AI assistant is in the corner of the page. Patient-specific information stays inside the secure portal.</p>
-            <button className="tw6-btn tw6-btn-ghost" onClick={() => document.querySelector('.chat-fab')?.click()}><MessageCircle size={16} /> Ask the assistant</button>
+            <p className="tw6-eyebrow">FAQ</p>
+            <h2>Answers before you visit.</h2>
+            <p>Have a general question? Our AI assistant can help any time. Anything about your own records stays in the secure portal.</p>
+            <button type="button" className="tw6-btn tw6-btn-ghost" onClick={() => document.querySelector('.chat-fab')?.click()}><MessageCircle size={16} /> Ask the assistant</button>
           </div>
           <div className="tw6-faq-list">{FAQS.map(([question, answer]) => <FAQItem key={question} question={question} answer={answer} />)}</div>
         </Reveal>
 
         <Reveal as="section" className="tw6-find" id="find-us">
           <div className="tw6-find-copy">
-            <h2>Find us at Central Terminal.</h2>
-            <p>Visit the clinic in Ermita, Manila, or call the team for appointments and service information.</p>
+            <p className="tw6-eyebrow">Find us</p>
+            <h2>Steps from LRT Central Terminal.</h2>
+            <p>Hop off the train and you’re here. Call ahead to book your slot, or tap below for directions.</p>
             <ul className="tw6-contact-list">
               <li><MapPin size={18} /><span>{CLINIC.address}</span></li>
               <li><Phone size={18} /><a href={phoneHref}>{CLINIC.phone}</a></li>
@@ -370,7 +434,7 @@ export default function Landing() {
             </ul>
             <div className="tw6-actions">
               <a className="tw6-btn tw6-btn-primary" target="_blank" rel="noreferrer" href={directionsUrl}><Navigation size={16} /> Get directions</a>
-              <a className="tw6-btn tw6-btn-ghost" href={phoneHref}><Phone size={16} /> Call clinic</a>
+              <a className="tw6-btn tw6-btn-light" href={phoneHref}><Phone size={16} /> Call clinic</a>
             </div>
           </div>
           <div className="tw6-map-card">
@@ -384,10 +448,13 @@ export default function Landing() {
 
       <footer className="tw6-footer">
         <div className="tw6-footer-top">
-          <p className="tw6-footer-name">CodiSmile Dental Clinic</p>
-          <button type="button" className="tw6-footer-cta" onClick={() => navigate('/patient-portal')}>
-            Open Patient Portal <ArrowRight size={16} />
-          </button>
+          <p className="tw6-footer-name">Smile brighter with CodiSmile.</p>
+          <div className="tw6-footer-actions">
+            <a className="tw6-footer-cta" href={phoneHref}><Phone size={16} aria-hidden="true" /> Call to book</a>
+            <button type="button" className="tw6-footer-cta tw6-footer-cta-alt" onClick={openPortal}>
+              Patient Portal <ArrowRight size={16} />
+            </button>
+          </div>
         </div>
 
         <div className="tw6-footer-grid">
@@ -410,9 +477,14 @@ export default function Landing() {
 
         <div className="tw6-footer-bottom">
           <span>© {new Date().getFullYear()} {CLINIC.name}</span>
-          <div className="tw6-footer-links"><Link to="/privacy">Privacy</Link><Link to="/thank-you">Thank You</Link><button onClick={() => navigate('/login')}>Staff Login</button></div>
+          <div className="tw6-footer-links"><Link to="/privacy">Privacy</Link><Link to="/thank-you">Thank You</Link><button type="button" onClick={() => navigate('/login')}>Staff Login</button></div>
         </div>
       </footer>
+
+      <div className={`tw6-sticky-cta${showStickyCta ? ' is-visible' : ''}`} aria-hidden={!showStickyCta}>
+        <a className="tw6-btn tw6-btn-primary" href={phoneHref} tabIndex={showStickyCta ? 0 : -1}><Phone size={16} aria-hidden="true" /> Call to book</a>
+        <button type="button" className="tw6-btn tw6-btn-ghost" onClick={openPortal} tabIndex={showStickyCta ? 0 : -1}>Portal</button>
+      </div>
 
       <ChatWidget />
     </div>
