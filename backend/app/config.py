@@ -45,6 +45,10 @@ class Settings(BaseSettings):
 
     # --- Uploads ---
     UPLOAD_DIR: str = "uploads"
+    # Also keep a copy of every uploaded screening photo in the database, so
+    # photos survive hosts whose local disk is wiped on restart (Hugging
+    # Face Spaces, Render free). Leave off when UPLOAD_DIR is persistent.
+    STORE_IMAGES_IN_DB: bool = False
     MAX_UPLOAD_MB: int = 15
 
     # --- ML models ---

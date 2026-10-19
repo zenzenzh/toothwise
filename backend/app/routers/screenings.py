@@ -57,6 +57,26 @@ def _resolve_image_path(image_path: str) -> Path:
     return candidate
 
 
+def _restore_image_if_missing(screening: models.Screening) -> None:
+    """If the photo is gone from disk (e.g. a host that wipes local storage
+    on restart) but a database copy exists, write it back under UPLOAD_DIR.
+    Same traversal guard as _resolve_image_path."""
+    upload_root = Path(settings.UPLOAD_DIR).resolve()
+    target = (upload_root / screening.image_path).resolve()
+    if upload_root not in target.parents or target.is_file():
+        return
+    stored = screening.stored_image
+    if stored is None:
+        return
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_bytes(stored.data)
+
+
+def _image_file(screening: models.Screening) -> Path:
+    _restore_image_if_missing(screening)
+    return _resolve_image_path(screening.image_path)
+
+
 @router.get("/screenings/mine", response_model=list[schemas.PatientScreeningOut])
 def list_my_screenings(
     db: Session = Depends(get_db),
@@ -106,7 +126,7 @@ def get_my_screening_image(
     screening = db.get(models.Screening, screening_id)
     if not screening or screening.patient_id != current_patient.id:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Screening not found.")
-    return FileResponse(_resolve_image_path(screening.image_path))
+    return FileResponse(_image_file(screening))
 
 
 
@@ -158,6 +178,12 @@ def create_screening(
     )
     db.add(screening)
     db.flush()  # get screening.id before adding children
+
+    if settings.STORE_IMAGES_IN_DB:
+        db.add(models.ScreeningImage(
+            screening_id=screening.id,
+            data=(Path(settings.UPLOAD_DIR) / image_path).read_bytes(),
+        ))
 
     # Store all three detection sets - fused (drives the clinical result)
     # plus each model's raw, unfused output - so the app can render a
@@ -253,7 +279,7 @@ def get_screening_image(
     screening = db.get(models.Screening, screening_id)
     if not screening:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Screening not found.")
-    return FileResponse(_resolve_image_path(screening.image_path))
+    return FileResponse(_image_file(screening))
 
 
 @router.delete("/screenings/{screening_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -366,6 +392,7 @@ def download_screening_report(
     if not screening:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Screening not found.")
 
+    _restore_image_if_missing(screening)
     pdf_path = generate_screening_report_pdf(screening)
     log_action(db, current, "screening.report_pdf", "screening", screening.id)
     db.commit()

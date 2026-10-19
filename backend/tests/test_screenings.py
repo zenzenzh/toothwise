@@ -95,3 +95,58 @@ class TestScreeningSecurity:
         )
         assert resp.status_code == 404
 
+
+
+class TestImageStoredInDatabase:
+    """STORE_IMAGES_IN_DB: photos survive a host that wipes the local disk."""
+
+    def _upload(self, client, admin_headers, seed_patient):
+        resp = client.post(
+            f"/api/patients/{seed_patient['id']}/screening",
+            files={"file": ("test.png", io.BytesIO(_make_test_png()), "image/png")},
+            headers=admin_headers,
+        )
+        assert resp.status_code == 201, resp.text
+        return resp.json()
+
+    def test_missing_file_is_restored_from_database(self, client, admin_headers, seed_patient, monkeypatch):
+        from pathlib import Path
+        from app.config import get_settings
+        from app.routers import screenings as screenings_router
+        monkeypatch.setattr(screenings_router.settings, "STORE_IMAGES_IN_DB", True)
+
+        screening = self._upload(client, admin_headers, seed_patient)
+        original = client.get(f"/api/screenings/{screening['id']}/image", headers=admin_headers)
+        assert original.status_code == 200
+
+        # Simulate a restart that wiped the upload folder.
+        path = Path(get_settings().UPLOAD_DIR) / screening["image_path"]
+        path.unlink()
+
+        restored = client.get(f"/api/screenings/{screening['id']}/image", headers=admin_headers)
+        assert restored.status_code == 200
+        assert restored.content == original.content
+        assert path.is_file()
+
+    def test_without_database_copy_missing_file_is_404(self, client, admin_headers, seed_patient, monkeypatch):
+        from pathlib import Path
+        from app.config import get_settings
+        from app.routers import screenings as screenings_router
+        monkeypatch.setattr(screenings_router.settings, "STORE_IMAGES_IN_DB", False)
+
+        screening = self._upload(client, admin_headers, seed_patient)
+        (Path(get_settings().UPLOAD_DIR) / screening["image_path"]).unlink()
+        resp = client.get(f"/api/screenings/{screening['id']}/image", headers=admin_headers)
+        assert resp.status_code == 404
+
+    def test_deleting_screening_removes_database_copy(self, client, admin_headers, seed_patient, db, monkeypatch):
+        from app import models
+        from app.routers import screenings as screenings_router
+        monkeypatch.setattr(screenings_router.settings, "STORE_IMAGES_IN_DB", True)
+
+        screening = self._upload(client, admin_headers, seed_patient)
+        assert db.get(models.ScreeningImage, screening["id"]) is not None
+        resp = client.delete(f"/api/screenings/{screening['id']}", headers=admin_headers)
+        assert resp.status_code == 204
+        db.expire_all()
+        assert db.get(models.ScreeningImage, screening["id"]) is None

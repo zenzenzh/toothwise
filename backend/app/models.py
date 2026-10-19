@@ -3,7 +3,7 @@ from datetime import datetime, date, timezone
 
 from sqlalchemy import (
     Column, Integer, String, Float, Boolean, DateTime, Date, Text,
-    ForeignKey, Enum as SAEnum,
+    ForeignKey, Enum as SAEnum, LargeBinary,
 )
 from sqlalchemy.orm import relationship
 
@@ -128,6 +128,22 @@ class Screening(Base):
     notes = relationship(
         "ClinicalNote", back_populates="screening", cascade="all, delete-orphan"
     )
+    # Database copy of the uploaded photo (STORE_IMAGES_IN_DB). Hosts like
+    # Hugging Face Spaces wipe the local disk on restart; the image routes
+    # restore the file from this row when it is missing.
+    stored_image = relationship(
+        "ScreeningImage", uselist=False, cascade="all, delete-orphan"
+    )
+
+
+class ScreeningImage(Base):
+    __tablename__ = "screening_images"
+
+    screening_id = Column(
+        Integer, ForeignKey("screenings.id", ondelete="CASCADE"), primary_key=True
+    )
+    data = Column(LargeBinary, nullable=False)
+    created_at = Column(DateTime, default=_utcnow)
 
 
 class Detection(Base):
