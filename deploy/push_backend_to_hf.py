@@ -25,6 +25,7 @@ IGNORE = [
     "app/ml/artifacts/*", ".venv/*", "venv/*", "*__pycache__*", "*.pyc",
     ".pytest_cache/*", "training/*", "tests/*", "load_test.py",
     "reset_test_data.py", "test_reset_roundtrip.py", "README.md",
+    "models_weights/*.onnx*", "requirements-prod.txt",
 ]
 
 

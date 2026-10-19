@@ -1,0 +1,32 @@
+# Render Blueprint: ToothWise backend on the free plan (512 MB).
+# Runs the ONNX models (no PyTorch). Secrets marked sync:false are entered
+# in the Render dashboard, never committed. See docs/DEPLOYMENT.md.
+services:
+  - type: web
+    name: toothwise-api
+    runtime: python
+    plan: free
+    region: singapore
+    rootDir: backend
+    buildCommand: pip install -r requirements-prod.txt && python -m app.ml.prepare_onnx
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT --proxy-headers --forwarded-allow-ips='*'
+    healthCheckPath: /api/health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: ENV
+        value: production
+      - key: YOLO_BACKEND
+        value: onnx
+      - key: STORE_IMAGES_IN_DB
+        value: "true"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false
+      - key: CORS_ORIGIN_REGEX
+        value: ^https://toothwise[a-z0-9-]*\.vercel\.app$

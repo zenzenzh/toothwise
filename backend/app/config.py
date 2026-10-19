@@ -49,6 +49,16 @@ class Settings(BaseSettings):
     # photos survive hosts whose local disk is wiped on restart (Hugging
     # Face Spaces, Render free). Leave off when UPLOAD_DIR is persistent.
     STORE_IMAGES_IN_DB: bool = False
+
+    # Inference backend: "torch" runs the .pt checkpoints with Ultralytics;
+    # "onnx" runs the exported .onnx models with onnxruntime only (no
+    # PyTorch, ~4x less memory) for small hosts. Both give identical boxes.
+    YOLO_BACKEND: str = "torch"
+    # Built by `python -m app.ml.prepare_onnx` from the .onnx.part* files.
+    YOLOV8_ONNX_PATH: str = "models_weights/yolov8_dental.opt.onnx"
+    YOLOV12_ONNX_PATH: str = "models_weights/yolov12_dental.opt.onnx"
+    # False: load each ONNX model only while it runs (fits 512 MB hosts).
+    ONNX_KEEP_LOADED: bool = False
     MAX_UPLOAD_MB: int = 15
 
     # --- ML models ---

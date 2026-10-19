@@ -11,3 +11,5 @@
 *.gif  binary
 *.ico  binary
 *.pt   binary
+*.onnx binary
+*.onnx.part* binary

@@ -1,40 +1,38 @@
-# Deploying ToothWise
+# Deploying ToothWise (free, no payment card)
 
-| Part | Host | Cost |
+| Part | Host | Free tier |
 |---|---|---|
-| Frontend (React + `/api/chatbot` function) | Vercel | Free (Hobby) |
-| Backend (FastAPI + YOLOv8/YOLOv12 + KNN) | Hugging Face Space, Docker | Free (CPU basic, 16 GB RAM) |
-| Database (PostgreSQL) | Neon | Free |
+| Frontend (React + `/api/chatbot` function) | Vercel (Hobby) | Yes, no card |
+| Backend (FastAPI + YOLOv8/YOLOv12 + KNN) | Render (Free web service) | Yes, no card, 512 MB |
+| Database (PostgreSQL) | Neon | Yes, no card |
 
-Screening photos are copied into the database (`STORE_IMAGES_IN_DB=true`)
-because a free Space wipes its disk on every restart.
+**How the backend fits in 512 MB.** On Render it runs with `YOLO_BACKEND=onnx`:
+both YOLO models run through onnxruntime instead of PyTorch, loaded one at a
+time per screening. Detections are identical to the `.pt` models (verified on
+22 images: same boxes, labels and confidences). Measured: ~210 MB at rest,
+~400 MB peak, ~3–4 s per screening with both models. Screening photos are also
+copied into the database (`STORE_IMAGES_IN_DB=true`) because Render's disk is
+wiped when the service sleeps or restarts.
 
 > **Before you start**
-> - A free Space must be **public**, so its source code and the two YOLO
->   weight files can be browsed and downloaded. Patient data is not in the
->   Space (it lives in Neon, behind login). If the code or weights must stay
->   private, use a paid host instead (Railway, Render, ~$7–25/month). The same
->   `backend/Dockerfile` works there; skip step 3 and point that host at it.
-> - Use test accounts and sample photos until the clinic approves real patient
->   data online (Data Privacy Act of 2012).
 > - `backend/.env` was committed to GitHub in the past. **Do not reuse any
 >   value from it.** Create a new Gemini key and delete the old one in
->   [Google AI Studio](https://aistudio.google.com/apikey), and generate a new
->   `SECRET_KEY` and admin password below.
-
-Generate a secret key (copy the output):
-
-```bash
-python -c "import secrets; print(secrets.token_hex(32))"
-```
+>   [Google AI Studio](https://aistudio.google.com/apikey), and use a new admin
+>   password in step 3. Render generates `SECRET_KEY` for you.
+> - Use test accounts and sample photos until the clinic approves real patient
+>   data online (Data Privacy Act of 2012).
+> - Your Render service, Vercel project and Neon database can be private to
+>   your account; only the website and API URLs are public (everything
+>   patient-related needs a login).
 
 ---
 
 ## 1. Database (Neon)
 
-1. Sign in at [neon.tech](https://neon.tech) and create a project (region:
-   Singapore is closest to Manila).
-2. Copy the connection string and change the start to `postgresql+psycopg://`:
+1. Sign up at [neon.tech](https://neon.tech) (GitHub or Google sign-in, no card)
+   and create a project. Region: **AWS Asia Pacific (Singapore)**.
+2. On the project dashboard choose **Connect**, copy the connection string, and
+   change its start from `postgresql://` to `postgresql+psycopg://`:
 
    ```
    postgresql+psycopg://USER:PASSWORD@HOST/neondb?sslmode=require
@@ -42,99 +40,75 @@ python -c "import secrets; print(secrets.token_hex(32))"
 
    This is your `DATABASE_URL`. The backend creates the tables on first start.
 
-## 2. Backend Space (Hugging Face)
+## 2. Backend (Render)
 
-1. Sign in at [huggingface.co](https://huggingface.co) and choose
-   **New Space**: name `toothwise-api`, SDK **Docker**, template **Blank**,
-   hardware **CPU basic (free)**, visibility **Public**.
-2. In the Space, open **Settings → Variables and secrets** and add these as
-   **Secrets**:
+1. Sign up at [render.com](https://render.com) with **GitHub** (no card) and
+   allow access to the `toothwise` repository.
+2. **New → Blueprint**, pick the `toothwise` repo. Render reads `render.yaml`
+   from the repo and shows a service called **toothwise-api** (Free plan).
+3. It asks for the three values marked secret:
 
    | Name | Value |
    |---|---|
-   | `ENV` | `production` |
-   | `SECRET_KEY` | the value you generated |
    | `DATABASE_URL` | from step 1 |
    | `GEMINI_API_KEY` | your **new** Gemini key |
-   | `STORE_IMAGES_IN_DB` | `true` |
-   | `CORS_ORIGINS` | `https://YOUR-APP.vercel.app` (fill in after step 5) |
-   | `CORS_ORIGIN_REGEX` | `^https://toothwise[a-z0-9-]*\.vercel\.app$` |
+   | `CORS_ORIGINS` | `https://toothwise.vercel.app` for now (fix in step 5) |
 
-   `CORS_ORIGIN_REGEX` replaces the development default (any localhost port)
-   and also allows Vercel preview URLs. Adjust it if your Vercel project name
-   doesn't start with `toothwise`.
+4. **Apply**. The first build takes about 5–10 minutes (installs packages, then
+   rebuilds the ONNX models from the `.part` files with
+   `python -m app.ml.prepare_onnx`). When it shows **Live**, open:
 
-## 3. Upload the backend
+   ```
+   https://toothwise-api.onrender.com/api/health
+   ```
 
-From the repository root, once:
+   (Use the URL Render shows if the name was taken.) It should return
+   `"status":"ok"` and `"database":"connected"`.
 
-```bash
-backend/.venv/Scripts/python.exe -m pip install huggingface_hub
-backend/.venv/Scripts/huggingface-cli.exe login
-```
+Every push to `master` redeploys automatically.
 
-`login` asks for an access token: create one at
-[huggingface.co/settings/tokens](https://huggingface.co/settings/tokens)
-with **Write** access and paste it there (it is stored on your computer, not
-in the repo).
+## 3. Create the first staff account
 
-Check what will be uploaded (no secrets, uploads, backups or test data):
-
-```bash
-backend/.venv/Scripts/python.exe deploy/push_backend_to_hf.py YOUR-HF-USERNAME/toothwise-api --dry-run
-```
-
-Then upload:
-
-```bash
-backend/.venv/Scripts/python.exe deploy/push_backend_to_hf.py YOUR-HF-USERNAME/toothwise-api
-```
-
-The Space builds the image (about 5–10 minutes the first time). When it shows
-**Running**, open:
-
-```
-https://YOUR-HF-USERNAME-toothwise-api.hf.space/api/health
-```
-
-It should return `"status":"ok"` and `"database":"connected"`.
-
-Run the same upload command again whenever the backend changes.
-
-## 4. Create the first staff account
-
-From the `backend` folder, point the seed script at Neon with a **new**
-password (Git Bash):
+From the `backend` folder on your computer, point the seed script at Neon with
+a **new** password (Git Bash):
 
 ```bash
 cd backend
 DATABASE_URL="postgresql+psycopg://...neon...?sslmode=require" \
-SEED_ADMIN_EMAIL="admin@codismile.example" \
+SEED_ADMIN_EMAIL="admin@codismile.com" \
 SEED_ADMIN_PASSWORD="a-new-strong-password" \
 SEED_ADMIN_NAME="Clinic Administrator" \
 SEED_ADMIN_LICENSE="PRC-0000000" \
 .venv/Scripts/python.exe seed_accounts.py
 ```
 
-Values set on the command line override `backend/.env`.
+Values on the command line override `backend/.env`. Use a real-looking email
+domain; reserved ones such as `.test` or `.local` are rejected at login.
 
-## 5. Frontend (Vercel)
+## 4. Frontend (Vercel)
 
-1. Sign in at [vercel.com](https://vercel.com) with GitHub and
-   **Add New → Project → Import** the `toothwise` repository.
-2. **Root Directory:** `frontend`. Framework preset: **Create React App**
-   (detected automatically).
+1. Sign up at [vercel.com](https://vercel.com) with **GitHub** (Hobby, no card)
+   and **Add New → Project → Import** the `toothwise` repository.
+2. **Root Directory:** `frontend`. Framework preset: **Create React App**.
 3. **Environment Variables:**
 
    | Name | Value |
    |---|---|
-   | `REACT_APP_API_URL` | `https://YOUR-HF-USERNAME-toothwise-api.hf.space` |
+   | `REACT_APP_API_URL` | `https://toothwise-api.onrender.com` (your Render URL) |
    | `GEMINI_API_KEY` | your new Gemini key (used by `frontend/api/chatbot.js`) |
    | `GEMINI_MODEL` | `gemini-3.6-flash` |
 
-4. **Deploy.** Every push to `master` redeploys automatically afterwards.
-5. Copy the production URL (e.g. `https://toothwise.vercel.app`) into the
-   Space secret `CORS_ORIGINS`, then **Restart** the Space.
+4. **Deploy.** Pushes to `master` redeploy automatically afterwards.
+
+## 5. Connect the two
+
+Copy your Vercel production URL (for example `https://toothwise.vercel.app`).
+In Render, open **toothwise-api → Environment**, set `CORS_ORIGINS` to that URL
+and save (the service restarts).
+
+`CORS_ORIGIN_REGEX` in `render.yaml` also allows Vercel preview URLs whose name
+starts with `toothwise`. If your Vercel project has a different name, change it
+in Render's Environment tab.
 
 ## 6. Check it works
 
@@ -144,18 +118,29 @@ Values set on the command line override `backend/.env`.
 - [ ] Register a test patient, upload a sample photo, see detections and the
       prevention plan.
 - [ ] Download the PDF report.
-- [ ] Restart the Space (Settings → Restart), then open the same screening:
-      the photo still shows (restored from the database).
+- [ ] In Render, **Manual Deploy → Restart service**, then open the same
+      screening again: the photo still shows (restored from the database).
 - [ ] Patient portal: sign up, sign in.
 
 ## Good to know
 
-- **Sleep:** a free Space sleeps after 48 hours without visits. The next
-  visit wakes it, which takes 1–2 minutes (the first request may time out;
-  refresh).
+- **Sleep:** the free service sleeps after 15 minutes without requests. The
+  next request wakes it, which takes about a minute, so the first login or
+  page load after a quiet period is slow. Open the health URL a minute before
+  a demo to wake it.
+- **Monthly hours:** Render gives 750 free hours a month, enough for one
+  service running all month. Without a payment method, Render pauses free
+  services if a workspace runs out, until the next month.
 - **Clinician tier confirmations** (`labeled_cases.jsonl`, used to retrain the
-  KNN) are written to the Space's disk and reset on restart. The model itself
-  retrains from its built-in data on every start, so screenings keep working.
+  KNN) are written to the service's disk and reset on restart. The KNN model
+  itself retrains from its built-in data on every start.
 - **Gemini free quota** is shared by the website chatbot. When it runs out,
   clinic questions (hours, location, services, prices) are still answered from
   verified facts; other questions show a "temporarily unavailable" message.
+- **Retraining the YOLO models:** after replacing the `.pt` files, run
+  `deploy/export_onnx.py` (see its header) and commit the new `.onnx.part*`
+  and `.onnx.sha256` files.
+- **Other hosts:** `backend/Dockerfile` runs the PyTorch build (about 1.5 GB of
+  memory) on hosts with more RAM, such as a Hugging Face Docker Space (needs
+  PRO) or a paid Render or Railway plan. `deploy/push_backend_to_hf.py`
+  uploads the backend to a Space.

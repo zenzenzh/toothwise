@@ -1,4 +1,15 @@
-import torch
+from app.config import get_settings as _get_settings
+
+if _get_settings().YOLO_BACKEND != "onnx":
+    # Loaded first on purpose: on Windows, PyTorch's DLLs can fail to
+    # initialise if other native libraries load before it. Skipped in ONNX
+    # mode, where torch is not installed (512 MB production hosts).
+    import torch  # noqa: F401
+else:
+    # Same idea for ONNX mode: onnxruntime must load its native runtime
+    # before scikit-learn's, or training the KNN first and then opening an
+    # ONNX session segfaults (two OpenMP runtimes; seen on Windows).
+    import onnxruntime  # noqa: F401
 import logging
 from contextlib import asynccontextmanager
 from pathlib import Path

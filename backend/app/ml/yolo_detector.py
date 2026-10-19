@@ -184,8 +184,11 @@ class DualYoloDetector:
         # USE_MOCK_MODEL=true still force-mocks everything regardless of
         # what weight files are present, as an explicit override/demo switch.
         force_mock = settings.USE_MOCK_MODEL
-        v8_weights_exist = Path(settings.YOLOV8_WEIGHTS_PATH).exists()
-        v12_weights_exist = Path(settings.YOLOV12_WEIGHTS_PATH).exists()
+        self.onnx = settings.YOLO_BACKEND == "onnx"
+        v8_path = settings.YOLOV8_ONNX_PATH if self.onnx else settings.YOLOV8_WEIGHTS_PATH
+        v12_path = settings.YOLOV12_ONNX_PATH if self.onnx else settings.YOLOV12_WEIGHTS_PATH
+        v8_weights_exist = Path(v8_path).exists()
+        v12_weights_exist = Path(v12_path).exists()
 
         self.v8_mock = force_mock or not v8_weights_exist
         self.v12_mock = force_mock or not v12_weights_exist or not settings.USE_YOLOV12
@@ -194,6 +197,9 @@ class DualYoloDetector:
 
         if self.v8_mock:
             self.model_v8 = _MockYoloModel("yolov8")
+        elif self.onnx:
+            from app.ml.onnx_yolo import OnnxYolo
+            self.model_v8 = OnnxYolo(v8_path, keep_loaded=settings.ONNX_KEEP_LOADED)
         else:
             from ultralytics import YOLO  # imported lazily - heavy dependency
             with _trusted_torch_load():
@@ -201,6 +207,9 @@ class DualYoloDetector:
 
         if self.v12_mock:
             self.model_v12 = _MockYoloModel("yolov12")
+        elif self.onnx:
+            from app.ml.onnx_yolo import OnnxYolo
+            self.model_v12 = OnnxYolo(v12_path, keep_loaded=settings.ONNX_KEEP_LOADED)
         else:
             from ultralytics import YOLO  # imported lazily - heavy dependency
             with _trusted_torch_load():
@@ -212,6 +221,19 @@ class DualYoloDetector:
         if isinstance(source, (str, Path)):
             source = Path(settings.UPLOAD_DIR) / source
         start = time.perf_counter()
+        if self.onnx:
+            with _predict_lock():
+                boxes, (h, w) = model.predict(source, settings.DETECTION_CONF_THRESHOLD)
+            elapsed_ms = (time.perf_counter() - start) * 1000
+            dets = []
+            for cls_id, conf, x1, y1, x2, y2 in boxes:
+                raw_label = model.names.get(cls_id, LABELS[cls_id % len(LABELS)])
+                dets.append(RawDetection(
+                    label=normalize_label(raw_label), confidence=round(conf, 3),
+                    x1=x1 / w, y1=y1 / h, x2=x2 / w, y2=y2 / h,
+                    source_model=tag,
+                ))
+            return dets, elapsed_ms
         # Ultralytics' predictor keeps mutable per-call state (results, batch
         # bookkeeping) on the model object, so two threads calling predict()
         # on the same instance can return each other's results. That would

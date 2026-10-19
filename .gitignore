@@ -55,3 +55,7 @@ Thumbs.db
 # Patient-data backups written by backend/reset_test_data.py. These are rows
 # of real screenings/detections - never commit them.
 backend/backups/
+
+# ONNX models: only the .part* slices + .sha256 are tracked; the joined
+# .onnx and optimized .opt.onnx are rebuilt by app/ml/prepare_onnx.py.
+backend/models_weights/*.onnx
