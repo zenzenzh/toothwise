@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowUpRight, MessageCircle, Phone, Send, X } from 'lucide-react';
-import toast from 'react-hot-toast';
 import { chatbotAPI, patientScreeningsAPI } from '../api';
 import LogoMark from './LogoMark';
 import { answerPatientQuestion } from '../utils/screeningAssistant';
@@ -22,6 +21,41 @@ const INITIAL_MESSAGE = {
   from: 'bot',
   text: 'Hi! I’m the ToothWise AI Assistant. I can answer general questions about CodiSmile, dental care, and how ToothWise works.',
 };
+
+// Gemini answers in light markdown (**bold**, "* " / "- " bullets, "1. "
+// lists). Render just those as React elements; never inject HTML.
+function inline(text, keyBase) {
+  return text.split(/(\*\*[^*]+\*\*)/g).filter(Boolean).map((part, i) => (
+    part.startsWith('**') && part.endsWith('**')
+      ? <strong key={`${keyBase}-${i}`}>{part.slice(2, -2)}</strong>
+      : part.replace(/(^|\s)\*(?=\S)|(?<=\S)\*(?=\s|$)/g, '$1')
+  ));
+}
+
+function FormattedReply({ text }) {
+  const blocks = [];
+  let list = null;
+  text.split('\n').forEach((raw, i) => {
+    const line = raw.trim();
+    const bullet = line.match(/^(?:[*•-]|\d+[.)])\s+(.*)$/);
+    if (bullet) {
+      if (!list) { list = { ordered: /^\d/.test(line), items: [] }; blocks.push(list); }
+      list.items.push(inline(bullet[1], `li-${i}`));
+      return;
+    }
+    list = null;
+    if (!line) return;
+    const heading = line.match(/^#{1,4}\s+(.*)$/);
+    blocks.push({ p: inline(heading ? heading[1] : line, `p-${i}`), strong: !!heading });
+  });
+  return blocks.map((block, i) => {
+    if (block.items) {
+      const List = block.ordered ? 'ol' : 'ul';
+      return <List key={i}>{block.items.map((item, j) => <li key={j}>{item}</li>)}</List>;
+    }
+    return <p key={i}>{block.strong ? <strong>{block.p}</strong> : block.p}</p>;
+  });
+}
 
 /**
  * `patient` (optional): when the logged-in patient is passed in, this
@@ -107,7 +141,6 @@ export default function ChatWidget({ patient } = {}) {
         ? 'The free AI quota is temporarily busy. Please try again shortly or call the clinic.'
         : detail || 'I’m having trouble connecting right now. You can call CodiSmile directly for help.';
       setMessages(current => [...current, { from: 'bot', text: fallback }]);
-      if (status !== 429) toast.error('AI assistant is temporarily unavailable.');
     } finally {
       setTyping(false);
     }
@@ -143,7 +176,7 @@ export default function ChatWidget({ patient } = {}) {
           {messages.map((message, index) => (
             <div key={`${message.from}-${index}`} className={`chat-message chat-message-${message.from}`}>
               {message.from === 'bot' && <div className="chat-message-icon"><LogoMark size={18} /></div>}
-              <div className="chat-bubble">{message.text}</div>
+              <div className="chat-bubble">{message.from === 'bot' ? <FormattedReply text={message.text} /> : message.text}</div>
             </div>
           ))}
           {messages.length === 1 && !typing && (

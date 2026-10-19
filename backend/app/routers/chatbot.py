@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import re
 from typing import Any
@@ -249,6 +250,65 @@ def _looks_private_or_record_specific(text: str) -> bool:
     return any(marker in lower for marker in private_markers)
 
 
+# Gemini statuses worth retrying: rate limit and transient server/overload
+# errors (the preview flash models return 500/503 under load fairly often).
+RETRYABLE_STATUSES = {429, 500, 502, 503, 504}
+RETRY_DELAYS = (0.8, 2.0)  # seconds before attempt 2 and attempt 3
+
+CLINIC_HOURS = "Monday-Saturday 9:00 AM-5:00 PM and Sunday 9:00 AM-2:00 PM"
+CLINIC_ADDRESS = "NW Phase LRT Central Terminal Arroceros St., Brgy. 659-A, Ermita, Manila City"
+CLINIC_PHONE = "+63 956 196 5325"
+
+# Answers built only from the verified clinic facts in SYSTEM_PROMPT. Used
+# when Gemini is unreachable so the common questions still get a real reply
+# instead of an error. Checked in order; first keyword match wins.
+FAQ_FALLBACKS: list[tuple[tuple[str, ...], str]] = [
+    (("price", "cost", "how much", "magkano", "fee"),
+     "I can't confirm prices here, because they depend on the treatment your "
+     f"dentist recommends. Please call CodiSmile at {CLINIC_PHONE} for current rates."),
+    (("hour", "open on", "opening", "are you open", "what time", "closing", "schedule", "sunday", "saturday"),
+     f"CodiSmile Dental Clinic is open {CLINIC_HOURS}. You can call {CLINIC_PHONE} "
+     "before your visit."),
+    (("where is", "where are", "address", "location", "located", "direction", "find you", "how to get"),
+     f"CodiSmile Dental Clinic is at {CLINIC_ADDRESS}, beside LRT Central Terminal. "
+     f"It's open {CLINIC_HOURS}."),
+    (("phone", "contact", "call the clinic", "book", "appointment", "reach you"),
+     f"You can reach CodiSmile Dental Clinic at {CLINIC_PHONE} to book a visit or "
+     f"ask a question. The clinic is open {CLINIC_HOURS}."),
+    (("services", "do you offer", "what treatments", "what procedures"),
+     "CodiSmile offers oral prophylaxis (cleaning), tooth restoration (pasta), "
+     "extraction (bunot), dentures (pustiso), fixed bridges and crowns, veneers, "
+     "root canal, orthodontics (braces and retainers), oral surgery and teeth "
+     f"whitening. Call {CLINIC_PHONE} to ask which one suits you."),
+    (("toothwise", "ai screening", "screening work", "how does the ai"),
+     "ToothWise is CodiSmile's patient portal and AI-assisted screening system. "
+     "A dental photo is checked by the AI for signs such as cavities, plaque, "
+     "tartar and gum inflammation, and a qualified dentist then reviews the "
+     "findings and makes every clinical decision. The AI does not diagnose on its own."),
+]
+
+
+def _trim_to_last_sentence(text: str) -> str:
+    """Gemini stopped at the token limit: drop the unfinished last sentence."""
+    text = text.rstrip()
+    if text.endswith((".", "!", "?")):
+        return text
+    ends = [m.end() for m in re.finditer(r"[.!?](?=\s)", text)]
+    # Keep the cut only if it leaves most of the answer; otherwise the
+    # partial reply is more useful than a one-line stub.
+    if ends and ends[-1] > len(text) * 0.4:
+        return text[:ends[-1]]
+    return text
+
+
+def _faq_fallback(message: str) -> str | None:
+    lower = message.lower()
+    for keywords, answer in FAQ_FALLBACKS:
+        if any(k in lower for k in keywords):
+            return answer
+    return None
+
+
 class ChatMessage(BaseModel):
     role: str = Field(pattern="^(user|model)$")
     content: str = Field(min_length=1, max_length=1200)
@@ -295,7 +355,7 @@ async def chat(request: Request, payload: ChatRequest):
         "system_instruction": {"parts": [{"text": SYSTEM_PROMPT}]},
         "contents": contents,
         "generationConfig": {
-            "maxOutputTokens": 600,
+            "maxOutputTokens": 2048,
         },
     }
 
@@ -309,62 +369,75 @@ async def chat(request: Request, payload: ChatRequest):
         f"{settings.GEMINI_MODEL}:generateContent"
     )
 
-    try:
-        async with httpx.AsyncClient(timeout=settings.GEMINI_TIMEOUT_SECONDS) as client:
-            response = await client.post(
-                url,
-                headers=headers,
-                json=body,
-            )
-        if response.status_code == 429:
-            logger.warning("Gemini rate-limited the request (429).")
-            raise HTTPException(
-                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-                detail="The free AI quota is temporarily busy. Please try again shortly or call the clinic.",
-            )
-        if response.status_code >= 400:
-            # Log the real status + body server-side for debugging, but
-            # never forward Google's raw error payload (which can include
-            # request-specific detail) to the browser.
-            logger.error(
-                "Gemini request failed: status=%s body=%s",
-                response.status_code,
-                response.text[:500],
-            )
-            raise HTTPException(
-                status_code=status.HTTP_502_BAD_GATEWAY,
-                detail="The AI assistant is temporarily unavailable. Please try again or contact the clinic.",
-            )
+    # Retry transient failures (overload, rate limit, timeout, empty reply)
+    # a couple of times, within an overall time budget so the visitor is
+    # never left waiting much longer than one slow call.
+    loop = asyncio.get_running_loop()
+    deadline = loop.time() + settings.GEMINI_TIMEOUT_SECONDS * 1.6
+    last_failure = "unknown"
+    async with httpx.AsyncClient(timeout=settings.GEMINI_TIMEOUT_SECONDS) as client:
+        for attempt in range(len(RETRY_DELAYS) + 1):
+            if attempt:
+                delay = RETRY_DELAYS[attempt - 1]
+                if loop.time() + delay >= deadline:
+                    break
+                await asyncio.sleep(delay)
+            try:
+                response = await client.post(url, headers=headers, json=body)
+            except httpx.TimeoutException:
+                last_failure = "timeout"
+                logger.warning("Gemini timed out (attempt %s).", attempt + 1)
+                continue
+            except httpx.HTTPError as exc:
+                last_failure = "network"
+                logger.warning("Gemini network error (attempt %s): %s", attempt + 1, exc)
+                continue
 
-        data = response.json()
-        candidates = data.get("candidates") or []
-        if not candidates:
-            logger.error("Gemini returned no candidates: %s", str(data)[:500])
-            raise HTTPException(
-                status_code=status.HTTP_502_BAD_GATEWAY,
-                detail="The AI assistant returned no answer. Please try again.",
-            )
+            if response.status_code >= 400:
+                # Log the real status + body server-side for debugging, but
+                # never forward Google's raw error payload to the browser.
+                last_failure = str(response.status_code)
+                logger.warning(
+                    "Gemini request failed (attempt %s): status=%s body=%s",
+                    attempt + 1, response.status_code, response.text[:500],
+                )
+                if response.status_code in RETRYABLE_STATUSES:
+                    continue
+                break  # 400/401/403/404: retrying will not help
 
-        parts = candidates[0].get("content", {}).get("parts", [])
-        reply = "".join(part.get("text", "") for part in parts if part.get("text"))
-        reply = reply.strip()
-        if not reply:
-            logger.error("Gemini returned an empty reply: %s", str(data)[:500])
-            raise HTTPException(
-                status_code=status.HTTP_502_BAD_GATEWAY,
-                detail="The AI assistant returned an empty answer. Please try again.",
-            )
-        return ChatResponse(reply=reply[:2000], model=settings.GEMINI_MODEL)
-    except HTTPException:
-        raise
-    except httpx.TimeoutException:
+            try:
+                data = response.json()
+            except ValueError:
+                last_failure = "bad-json"
+                continue
+            candidates = data.get("candidates") or []
+            parts = (candidates[0].get("content", {}).get("parts", []) if candidates else [])
+            reply = "".join(part.get("text", "") for part in parts if part.get("text")).strip()
+            if reply:
+                if candidates[0].get("finishReason") == "MAX_TOKENS":
+                    reply = _trim_to_last_sentence(reply)
+                return ChatResponse(reply=reply[:2000], model=settings.GEMINI_MODEL)
+            last_failure = "empty"
+            logger.warning("Gemini returned no text (attempt %s): %s", attempt + 1, str(data)[:300])
+
+    logger.error("Gemini unavailable after retries (last failure: %s).", last_failure)
+
+    # Common clinic questions still get a correct answer from verified facts.
+    fallback = _faq_fallback(payload.message)
+    if fallback:
+        return ChatResponse(reply=fallback, model="clinic-faq")
+
+    if last_failure == "429":
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="The free AI quota is temporarily busy. Please try again shortly or call the clinic.",
+        )
+    if last_failure == "timeout":
         raise HTTPException(
             status_code=status.HTTP_504_GATEWAY_TIMEOUT,
             detail="The AI assistant took too long to respond. Please try again.",
         )
-    except (httpx.HTTPError, ValueError, KeyError) as exc:
-        logger.error("Unexpected error calling Gemini: %s", exc)
-        raise HTTPException(
-            status_code=status.HTTP_502_BAD_GATEWAY,
-            detail="The AI assistant is temporarily unavailable. Please try again or contact the clinic.",
-        )
+    raise HTTPException(
+        status_code=status.HTTP_502_BAD_GATEWAY,
+        detail="The AI assistant is temporarily unavailable. Please try again or contact the clinic.",
+    )

@@ -153,3 +153,12 @@
 /* The composer draws its own focus ring on the pill; cancel the global
    input:focus border/ring (01-base, !important) on the bare input inside it. */
 .chat-panel-input input:focus { border-color: transparent !important; box-shadow: none !important; }
+
+/* Formatted bot replies (paragraphs, bold, bullet and numbered lists). */
+.chat-message-bot .chat-bubble { white-space: normal; }
+.chat-bubble p { margin: 0; }
+.chat-bubble p + p, .chat-bubble p + ul, .chat-bubble p + ol,
+.chat-bubble ul + p, .chat-bubble ol + p { margin-top: 8px; }
+.chat-bubble ul, .chat-bubble ol { margin: 6px 0 0; padding-left: 20px; }
+.chat-bubble li + li { margin-top: 4px; }
+.chat-bubble strong { font-weight: 700; color: var(--tw-navy); }

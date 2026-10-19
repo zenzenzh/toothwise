@@ -213,6 +213,44 @@ const EMAIL_RE = /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/gi;
 const PHONE_RE = /(?<!\d)(?:\+?63|0)\s*\d{3}[\s-]?\d{3}[\s-]?\d{4}(?!\d)/g;
 const PRIVATE_RE = /\b(?:patient|record|screening|appointment|account|id)[\s:#-]*[A-Z0-9-]{6,}\b/gi;
 
+const RETRYABLE_STATUSES = new Set([429, 500, 502, 503, 504]);
+const RETRY_DELAYS = [800, 2000];
+
+const HOURS = 'Monday-Saturday 9:00 AM-5:00 PM and Sunday 9:00 AM-2:00 PM';
+const ADDRESS = 'NW Phase LRT Central Terminal Arroceros St., Brgy. 659-A, Ermita, Manila City';
+const PHONE = '+63 956 196 5325';
+
+// Verified-facts answers for when Gemini is unreachable (same list as the
+// FastAPI backend). First keyword match wins.
+const FAQ_FALLBACKS = [
+  [['price', 'cost', 'how much', 'magkano', 'fee'],
+    `I can't confirm prices here, because they depend on the treatment your dentist recommends. Please call CodiSmile at ${PHONE} for current rates.`],
+  [['hour', 'open on', 'opening', 'are you open', 'what time', 'closing', 'schedule', 'sunday', 'saturday'],
+    `CodiSmile Dental Clinic is open ${HOURS}. You can call ${PHONE} before your visit.`],
+  [['where is', 'where are', 'address', 'location', 'located', 'direction', 'find you', 'how to get'],
+    `CodiSmile Dental Clinic is at ${ADDRESS}, beside LRT Central Terminal. It's open ${HOURS}.`],
+  [['phone', 'contact', 'call the clinic', 'book', 'appointment', 'reach you'],
+    `You can reach CodiSmile Dental Clinic at ${PHONE} to book a visit or ask a question. The clinic is open ${HOURS}.`],
+  [['services', 'do you offer', 'what treatments', 'what procedures'],
+    `CodiSmile offers oral prophylaxis (cleaning), tooth restoration (pasta), extraction (bunot), dentures (pustiso), fixed bridges and crowns, veneers, root canal, orthodontics (braces and retainers), oral surgery and teeth whitening. Call ${PHONE} to ask which one suits you.`],
+  [['toothwise', 'ai screening', 'screening work', 'how does the ai'],
+    "ToothWise is CodiSmile's patient portal and AI-assisted screening system. A dental photo is checked by the AI for signs such as cavities, plaque, tartar and gum inflammation, and a qualified dentist then reviews the findings and makes every clinical decision. The AI does not diagnose on its own."],
+];
+
+// Gemini stopped at the token limit: drop the unfinished last sentence.
+function trimToLastSentence(text) {
+  if (/[.!?]$/.test(text)) return text;
+  const ends = [...text.matchAll(/[.!?](?=\s)/g)].map(m => m.index + 1);
+  const last = ends[ends.length - 1];
+  return last && last > text.length * 0.4 ? text.slice(0, last) : text;
+}
+
+function faqFallback(text) {
+  const lower = text.toLowerCase();
+  const hit = FAQ_FALLBACKS.find(([keywords]) => keywords.some(k => lower.includes(k)));
+  return hit ? hit[1] : null;
+}
+
 const requestLog = new Map();
 const WINDOW_MS = 60_000;
 const MAX_REQUESTS = 12;
@@ -281,36 +319,45 @@ export default async function handler(req, res) {
   const payload = {
     system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
     contents: [...safeHistory, { role: 'user', parts: [{ text: redact(message) }] }],
-    generationConfig: { maxOutputTokens: 600 },
+    generationConfig: { maxOutputTokens: 2048 },
   };
 
-  try {
-    const model = process.env.GEMINI_MODEL || 'gemini-3.6-flash';
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-goog-api-key': apiKey,
-      },
-      body: JSON.stringify(payload),
-    });
-
-    if (response.status === 429) return res.status(429).json({ detail: 'The free AI quota is temporarily busy. Please try again shortly or call the clinic.' });
-    if (!response.ok) {
-      // Log the real status + body server-side for debugging - never
-      // forward Google's raw error payload to the browser.
-      const errorBody = await response.text().catch(() => '');
-      console.error('Gemini request failed:', response.status, errorBody.slice(0, 500));
-      return res.status(502).json({ detail: 'The AI assistant is temporarily unavailable. Please try again.' });
+  // Retry transient failures (overload, rate limit, network, empty reply),
+  // mirroring backend/app/routers/chatbot.py.
+  const model = process.env.GEMINI_MODEL || 'gemini-3.6-flash';
+  let lastFailure = 'unknown';
+  for (let attempt = 0; attempt <= RETRY_DELAYS.length; attempt++) {
+    if (attempt) await new Promise(resolve => setTimeout(resolve, RETRY_DELAYS[attempt - 1]));
+    try {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
+        body: JSON.stringify(payload),
+        signal: AbortSignal.timeout(18_000),
+      });
+      if (!response.ok) {
+        // Log the real status + body server-side for debugging - never
+        // forward Google's raw error payload to the browser.
+        lastFailure = String(response.status);
+        const errorBody = await response.text().catch(() => '');
+        console.error('Gemini request failed:', response.status, errorBody.slice(0, 500));
+        if (RETRYABLE_STATUSES.has(response.status)) continue;
+        break;
+      }
+      const data = await response.json();
+      const candidate = data.candidates?.[0];
+      let reply = (candidate?.content?.parts || []).map(part => part.text || '').join('').trim();
+      if (reply && candidate?.finishReason === 'MAX_TOKENS') reply = trimToLastSentence(reply);
+      if (reply) return res.status(200).json({ reply: reply.slice(0, 2000), model });
+      lastFailure = 'empty';
+    } catch (error) {
+      lastFailure = 'network';
+      console.error('Gemini chatbot error:', error instanceof Error ? error.message : 'unknown error');
     }
-
-    const data = await response.json();
-    const reply = (data.candidates?.[0]?.content?.parts || []).map(part => part.text || '').join('').trim();
-    if (!reply) return res.status(502).json({ detail: 'The AI assistant returned no answer. Please try again.' });
-
-    return res.status(200).json({ reply: reply.slice(0, 2000), model });
-  } catch (error) {
-    console.error('Gemini chatbot error:', error instanceof Error ? error.message : 'unknown error');
-    return res.status(502).json({ detail: 'The AI assistant is temporarily unavailable. Please try again.' });
   }
+
+  const fallback = faqFallback(message);
+  if (fallback) return res.status(200).json({ reply: fallback, model: 'clinic-faq' });
+  if (lastFailure === '429') return res.status(429).json({ detail: 'The free AI quota is temporarily busy. Please try again shortly or call the clinic.' });
+  return res.status(502).json({ detail: 'The AI assistant is temporarily unavailable. Please try again.' });
 }

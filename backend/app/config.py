@@ -38,6 +38,10 @@ class Settings(BaseSettings):
 
     # --- CORS ---
     CORS_ORIGINS: str = "http://localhost:3000,http://127.0.0.1:3000,http://localhost:3001,http://127.0.0.1:3001"
+    # Also allow any localhost / 127.0.0.1 port, so a dev server that moves
+    # to another port (3001, 3002...) is not silently blocked. Set to an
+    # empty string in production to allow only CORS_ORIGINS.
+    CORS_ORIGIN_REGEX: str = r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$"
 
     # --- Uploads ---
     UPLOAD_DIR: str = "uploads"

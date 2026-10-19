@@ -110,3 +110,71 @@ GENERAL_RECOMMENDATIONS = [
     "Floss daily to remove plaque between teeth.",
     "Visit your dentist for a routine checkup every 6 months.",
 ]
+
+# Follow-up guidance for the severity tier the KNN predicts (recommender.py).
+# HIGH already gets the urgent banner, so its line covers what to do until
+# the visit instead of repeating "come in now".
+TIER_FOLLOW_UP: dict[str, str] = {
+    "LOW": "Low risk: keep your current routine and book your regular "
+           "checkup and cleaning in about 6 months.",
+    "MEDIUM": "Moderate risk: book a dental visit within the next 2 to 4 "
+              "weeks so these findings can be treated early, before they "
+              "become painful or harder to fix.",
+    "HIGH": "Until your visit, chew on the unaffected side and avoid very "
+            "hot, cold, hard or sweet food and drinks. Seek care right away "
+            "if you develop swelling, fever or severe pain.",
+}
+
+# Home-care steps per finding, layered after the clinical advice so the
+# patient knows what to do between visits. Two short, concrete steps each.
+LABEL_HOME_CARE: dict[str, list[str]] = {
+    "cavity": [
+        "Cut back on sweets, soft drinks and sticky snacks, and rinse with "
+        "water after having them.",
+        "Spit out fluoride toothpaste after brushing instead of rinsing, so "
+        "the fluoride keeps protecting your enamel.",
+    ],
+    "gum_inflammation": [
+        "Brush gently along the gumline with a soft-bristled toothbrush, "
+        "angled toward the gums.",
+        "Rinse with warm salt water once a day; if your gums still bleed "
+        "after two weeks, have them checked.",
+    ],
+    "plaque": [
+        "Brush for a full two minutes, making sure to reach the back teeth "
+        "and the gumline.",
+        "Clean between your teeth every day with floss or an interdental "
+        "brush.",
+    ],
+    "tartar": [
+        "Switch to a tartar-control toothpaste to slow down new buildup.",
+        "Tartar cannot be brushed off at home, so keep a professional "
+        "cleaning every 6 months.",
+    ],
+}
+
+# Age-specific advice (patient age in years). Wording avoids naming a
+# condition the screening did not find.
+AGE_ADVICE: list[tuple[int, int, list[str]]] = [
+    (0, 12, [
+        "For children: an adult should help with brushing until about age "
+        "8, using a pea-sized amount of fluoride toothpaste.",
+        "Ask the dentist about sealants, a protective coating for the "
+        "chewing surfaces of the back teeth.",
+    ]),
+    (60, 200, [
+        "For older adults: sip water often if your mouth feels dry, since a "
+        "dry mouth makes tooth decay more likely.",
+        "If you wear dentures, take them out to clean them every day and "
+        "leave them out overnight.",
+    ]),
+]
+
+
+def age_advice(age: int | None) -> list[str]:
+    if age is None:
+        return []
+    for low, high, tips in AGE_ADVICE:
+        if low <= age <= high:
+            return tips
+    return []

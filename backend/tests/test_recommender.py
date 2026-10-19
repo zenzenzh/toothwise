@@ -83,6 +83,42 @@ def test_prevention_plan_orders_by_severity(tmp_path):
         texts.index(next(t for t in texts if "plaque" in t.lower()))
 
 
+def test_prevention_plan_adds_tier_follow_up_and_home_care(tmp_path):
+    from app.ml.labels import LABEL_HOME_CARE, TIER_FOLLOW_UP
+    detections = [{"label": "gum_inflammation", "confidence": 0.8}]
+    plan = recommender.generate_prevention_plan(detections, 30)
+    texts = [r["text"] for r in plan]
+    tier = recommender.predict_tier(detections, 30)
+    assert TIER_FOLLOW_UP[tier] in texts
+    for tip in LABEL_HOME_CARE["gum_inflammation"]:
+        assert tip in texts
+    # Clinical advice comes before the home-care steps.
+    assert any("gum" in t.lower() for t in texts[:2])
+
+
+def test_prevention_plan_age_specific_advice(tmp_path):
+    healthy = [{"label": "healthy_tooth", "confidence": 0.9}]
+    child = " ".join(r["text"] for r in recommender.generate_prevention_plan(healthy, 7))
+    adult = " ".join(r["text"] for r in recommender.generate_prevention_plan(healthy, 30))
+    senior = " ".join(r["text"] for r in recommender.generate_prevention_plan(healthy, 70))
+    assert "children" in child.lower()
+    assert "older adults" in senior.lower()
+    assert "children" not in adult.lower() and "older adults" not in adult.lower()
+
+
+def test_prevention_plan_has_no_duplicates_and_sequential_order(tmp_path):
+    plan = recommender.generate_prevention_plan([
+        {"label": "plaque", "confidence": 0.9},
+        {"label": "tartar", "confidence": 0.9},
+        {"label": "plaque", "confidence": 0.7},
+    ], 45)
+    texts = [r["text"] for r in plan]
+    assert len(texts) == len(set(texts))
+    assert [r["order_index"] for r in plan] == list(range(len(plan)))
+    # Plaque home care already covers flossing, so the general tip is dropped.
+    assert not any(t.startswith("Floss daily") for t in texts)
+
+
 # ---------- labeled-case journal + retrain loop ----------
 
 def test_append_and_load_labeled_cases(tmp_path):
