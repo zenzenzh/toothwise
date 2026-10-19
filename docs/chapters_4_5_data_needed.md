@@ -13,6 +13,9 @@ To rebuild after the data changes:
 1. Run `backend\venv\Scripts\python.exe extract_training_metrics.py [eval_out folder]`. This reads the training metrics from the `.pt` files. If you pass an evaluation output folder, it also copies that folder's `job_b_test.json` into `chapter4_figures/eval_results.json`. Then it redraws all the figures.
 2. Run `python generate_chapters_4_and_5_v2.py --paper` to build the paper-style Chapter 4. Run it without `--paper` to build the Chapters 4 and 5 file.
 3. Run `python build_chapters_1_4_pdf.py`. This needs PyMuPDF and Microsoft Word.
+4. For the full paper with Chapter 5, run `python generate_chapters_4_and_5_v2.py --paper --with-ch5` and then `python build_chapters_1_5_pdf.py`.
+   - This writes `ToothWise_Chapters_1-5.pdf`, with Chapter 4 on pages 61–83, Chapter 5 on pages 84–87 and the References from page 88.
+   - It also writes a lossless `ToothWise_Chapters_1-5_compressed.pdf` of about 4 MB and checks every page of it against the full PDF.
 
 ## Already filled with real numbers
 

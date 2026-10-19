@@ -39,8 +39,8 @@ TEMPLATE_PAGE = 22                             # page 23: plain text, no figures
 LAST_CH3_PAGE = 59                             # page 60: end of Chapter III + start of References
 TOC_PAGE = 2                                   # page 3: second table-of-contents page
 
-CH4_TOC = [  # (text, heading text to find in Chapter IV, bold, indent)
-    ("CHAPTER IV: RESULTS AND DISCUSSION", "RESULTS AND DISCUSSION", True, 124.8),
+CH4_TOC = [  # (text, heading text to find in the inserted chapters, bold, indent)
+    ("CHAPTER IV: RESULTS AND DISCUSSION", "CHAPTER IV", True, 124.8),
     ("4.1 Results of the Trained Datasets", "4.1 Results of the Trained Datasets", False, 129.4),
     ("4.2 Specialization and Technical Results", "4.2 Specialization and Technical Results", False, 129.4),
     ("4.3 Software Quality Evaluation Based on ISO/IEC 25010",
@@ -100,14 +100,54 @@ def leader_line(page, y, x, text, number, bold, right=540.0, size=12.0):
     dots = int((right - num_w - start) / dot_w)
     page.insert_text((x, y), text + " ", fontname=name, fontsize=size)
     page.insert_font(fontname="TNR", fontfile=TIMES)
-    page.insert_text((start, y), "." * dots, fontname="TNR", fontsize=size)
+    # Right-align the leader so it ends at the number; any slack goes after the title.
+    page.insert_text((right - num_w - dots * dot_w, y), "." * dots, fontname="TNR", fontsize=size)
     page.insert_text((right - num_w, y), str(number), fontname="TNR", fontsize=size)
 
 
-def main():
-    docx_to_pdf(CH4_DOCX, CH4_PDF)
+def rewrite_toc_page(page, new_entries, refs_no):
+    """Redraw the whole second contents page with even spacing.
+
+    Used when the inserted chapters add more lines than fit below the old
+    References entry: the existing Chapter III lines are read back and written
+    again together with the new ones, spaced to fill the page.
+    """
+    old = []
+    for b in page.get_text("dict")["blocks"]:
+        for line in b.get("lines", []):
+            t = "".join(s["text"] for s in line["spans"]).replace(" ", " ").strip()
+            if not t or "Universidad" in t or "References" in t or not pymupdf.Rect(line["bbox"]).intersects(BODY):
+                continue
+            title, _, num = t.rpartition(" ")
+            title = title.rstrip(". ").strip()
+            depth = title.split(" ")[0].count(".")
+            old.append((title, int(num.strip(".")), False, 165.4 if depth >= 2 else 129.4))
+    old.sort(key=lambda e: [int(x) for x in e[0].split(" ")[0].split(".")])
+    blank(page, [BODY])
+    rows = []
+    for text, number, bold, x in old + new_entries + [("References", refs_no, False, 129.4)]:
+        font = pymupdf.Font(fontfile=TIMES_BOLD if bold else TIMES)
+        # Wrap a heading that would run past the frame onto a second line.
+        if number is None and font.text_length(text, 12) > 540 - x:
+            words = text.split(" ")
+            cut = max(i for i in range(1, len(words))
+                      if font.text_length(" ".join(words[:i]), 12) <= 540 - x)
+            rows.append((" ".join(words[:cut]), None, bold, x))
+            rows.append((" ".join(words[cut:]), None, bold, x))
+            continue
+        rows.append((text, number, bold, x))
+    top, bottom = 131.0, 704.0                    # first and last baselines inside the frame
+    pitch = min(34.5, (bottom - top) / (len(rows) - 1))
+    y = top
+    for text, number, bold, x in rows:
+        leader_line(page, y, x, text, number, bold)
+        y += pitch
+
+
+def main(docx=CH4_DOCX, pdf=CH4_PDF, dst=DST, toc_entries=CH4_TOC, label="Chapter IV"):
+    docx_to_pdf(docx, pdf)
     src = pymupdf.open(SRC)
-    ch4 = pymupdf.open(CH4_PDF)
+    ch4 = pymupdf.open(pdf)
     n4 = len(ch4)
     ref_span = page_number_span(src[LAST_CH3_PAGE])
 
@@ -153,6 +193,20 @@ def main():
         blank(pg, [pymupdf.Rect(span["bbox"]) + (-2, -2, 6, 2)])
         put_number(pg, refs_no + (i - LAST_CH3_PAGE), span)
 
+    heading_pages = {}
+    for k in range(n4):
+        text = ch4[k].get_text()
+        for _, find, _, _ in toc_entries:
+            if find in text and find not in heading_pages:
+                heading_pages[find] = first_ch4 + k
+    if toc_entries is not CH4_TOC:
+        entries = [(t, None if b else heading_pages[f], b, x) for t, f, b, x in toc_entries]
+        rewrite_toc_page(out[TOC_PAGE], entries, refs_no)
+        out.save(dst, garbage=3, deflate=True)
+        print(f"Wrote {dst.name}: {len(out)} pages; {label} on pages {first_ch4}-{first_ch4 + n4 - 1}, "
+              f"References from page {refs_no}")
+        return {"pages": len(out), "first": first_ch4, "refs": refs_no, "heading_pages": heading_pages}
+
     # Table of contents: replace the old "References .... 60" line.
     toc = out[TOC_PAGE]
     old = None
@@ -162,12 +216,6 @@ def main():
             if "References" in t:
                 old = line
     blank(toc, [pymupdf.Rect(old["bbox"]) + (-2, -1, 4, 1)])
-    heading_pages = {}
-    for k in range(n4):
-        text = ch4[k].get_text()
-        for _, find, _, _ in CH4_TOC:
-            if find in text and find not in heading_pages:
-                heading_pages[find] = first_ch4 + k
     y = old["spans"][0]["origin"][1]
     pitch = 32.0  # a little tighter than the 34.5 pt above, so References stays inside the frame
     for text, find, bold, x in CH4_TOC:
@@ -175,9 +223,10 @@ def main():
         y += pitch
     leader_line(toc, y, 129.4, "References", refs_no, False)
 
-    out.save(DST, garbage=3, deflate=True)
-    print(f"Wrote {DST.name}: {len(out)} pages; Chapter IV on pages {first_ch4}-{first_ch4 + n4 - 1}, "
+    out.save(dst, garbage=3, deflate=True)
+    print(f"Wrote {dst.name}: {len(out)} pages; {label} on pages {first_ch4}-{first_ch4 + n4 - 1}, "
           f"References from page {refs_no}")
+    return {"pages": len(out), "first": first_ch4, "refs": refs_no, "heading_pages": heading_pages}
 
 
 if __name__ == "__main__":

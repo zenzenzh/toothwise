@@ -32,8 +32,11 @@ FIG = ROOT / "chapter4_figures"
 # --paper: Chapter IV only, typeset to match the Chapters 1-3 paper (Times New
 # Roman 12, black headings, plain grid tables, body area that fits inside the
 # UDM letterhead frame) for build_chapters_1_4_pdf.py to merge into the PDF.
+# --paper --with-ch5: Chapters IV and V in that style, for build_chapters_1_5.
 PAPER = "--paper" in sys.argv
-OUT = ROOT / ("ToothWise_Chapter_4_paper.docx" if PAPER else "ToothWise_Chapters_4_and_5_v2.docx")
+WITH_CH5 = "--with-ch5" in sys.argv
+OUT = ROOT / ("ToothWise_Chapters_4_5_paper.docx" if PAPER and WITH_CH5 else
+              "ToothWise_Chapter_4_paper.docx" if PAPER else "ToothWise_Chapters_4_and_5_v2.docx")
 
 BODY_FONT = "Times New Roman" if PAPER else "Book Antiqua"
 HEAD_FONT = "Times New Roman" if PAPER else "Tahoma"
@@ -958,7 +961,11 @@ def chapter_5(doc):
     p(doc, "The findings are summarized according to the five problems stated in Chapter I.")
     restart_numbering()
     order, a8, a12 = class_rank()
-    best_c, worst_c = CLASS_NAMES[order[0]].lower(), CLASS_NAMES[order[-1]].lower()
+    tc = SH["targets_per_class"]
+    solid = [c for c in order if tc[c] >= 100]  # classes with enough test labels to judge
+    best_c, worst_c = CLASS_NAMES[solid[0]].lower(), CLASS_NAMES[order[-1]].lower()
+    worst_r = max(by_class(OFF8, "r")[order[-1]], by_class(OFF12, "r")[order[-1]])
+    ens_acc, b_acc = ACC["Ensemble"], ACC["YOLOv8" if OFF8["map50"] >= OFF12["map50"] else "YOLOv12"]
     numbered(doc, f"Detection of the five classes (Problem 1). Two detection models were trained on 40,271 "
                   f"images merged from four public datasets and evaluated on a held-out test split of 2,930 "
                   f"images. On the test split, YOLOv8 obtained a precision of {pct(OFF8['precision'])}, a recall "
@@ -968,8 +975,9 @@ def chapter_5(doc):
                   f"The detection accuracy at the deployed threshold was {pct(ACC['YOLOv8']['accuracy'])} for "
                   f"YOLOv8, {pct(ACC['YOLOv12']['accuracy'])} for YOLOv12, and "
                   f"{pct(ACC['Ensemble']['accuracy'])} for the fused ensemble, whose mAP@50 was "
-                  f"{pct(SH['Ensemble']['map50'])}. Across classes, {best_c} was detected best and {worst_c} "
-                  f"worst. On CPU, the models analyzed an image in {CPU_BENCH['YOLOv8'][0]:.0f} ms and "
+                  f"{pct(SH['Ensemble']['map50'])}, the highest of the three. Among the well-represented classes, "
+                  f"{best_c} was detected best; {worst_c} was detected worst, with at most {pct(worst_r)} of "
+                  f"its {tc[order[-1]]:,} test instances found. On CPU, the models analyzed an image in {CPU_BENCH['YOLOv8'][0]:.0f} ms and "
                   f"{CPU_BENCH['YOLOv12'][0]:.0f} ms, and both together in about {CPU_BENCH['both'][0]:.0f} ms.")
     numbered(doc, "Recording and access to findings (Problem 2). Every screening is stored as a standardized "
                   "visual record with the photograph, labeled bounding boxes, risk result, prevention plan, and "
@@ -994,8 +1002,9 @@ def chapter_5(doc):
     top = max(OFF8["map50"], OFF12["map50"])
     best, gain = ens_vs_best()
     numbered(doc, f"YOLO-based detection on ordinary intraoral photographs can locate and label tartar, plaque, "
-                  f"cavity, gum inflammation, and healthy tooth, but with an mAP@50 of {pct(top)} at best on "
-                  f"unseen images, and with large differences between classes ({best_c} reliable, {worst_c} "
+                  f"cavity, gum inflammation, and healthy tooth, but with an mAP@50 on unseen images of {pct(top)} "
+                  f"for the better single model and {pct(SH['Ensemble']['map50'])} for the fused ensemble, and "
+                  f"with large differences between classes ({best_c} reliable, {worst_c} "
                   f"weak), it is suitable as a screening aid that directs the dentist's attention, not as an "
                   f"independent diagnosis. This confirms the delimitation set in Chapter I.")
     numbered(doc, "The difference between YOLOv8 and YOLOv12 on this dataset is small compared with the "
@@ -1032,12 +1041,21 @@ def chapter_5(doc):
     bullet(doc, "Collect and annotate photographs from CodiSmile Dental Clinic, with labels reviewed by the "
                 "clinic's dentist, and fine-tune both models on them; this is expected to give the largest "
                 "accuracy gain because the current models learned only from public datasets.")
-    bullet(doc, "Review and harmonize annotations across the merged sources, in particular the healthy tooth and "
-                "gum inflammation classes, which each come from a single source.")
-    bullet(doc, "Balance the classes through targeted data collection or augmentation, guided by the per-class "
-                f"results in Table {R('perclass_v8')}.")
-    bullet(doc, "Evaluate both models and the fused ensemble on the held-out test split, and tune the confidence "
-                "and IoU thresholds of the ensemble on the validation split.")
+    bullet(doc, f"Give priority to {worst_c}, the weakest class (Tables {R('perclass_v8')} and "
+                f"{R('perclass_v12')}): collect close-up photographs in which it is clearly visible, label it "
+                f"with tight, consistent boxes, and consider a higher input resolution so that thin deposits "
+                f"remain visible to the model.")
+    bullet(doc, "Re-annotate the merged sources so that every image is labeled for all five conditions. The "
+                "healthy tooth, gum inflammation, and plaque labels each come from a single source, so other "
+                "images may show these conditions without a label, which both confuses training and inflates "
+                "the false-alarm counts in evaluation.")
+    bullet(doc, f"Enlarge the healthy tooth test set; with only {tc[0]:,} labeled instances its high score "
+                f"cannot yet be relied upon.")
+    bullet(doc, f"Tune the confidence threshold and fusion settings of the ensemble on the validation split. "
+                f"The ensemble missed fewer findings than the better single model ({int(ens_acc['fn']):,} against "
+                f"{int(b_acc['fn']):,}) but raised more false alarms ({int(ens_acc['fp']):,} against "
+                f"{int(b_acc['fp']):,}); a slightly higher threshold for findings reported by only one model "
+                f"may keep most of the gain with fewer false alarms.")
     bullet(doc, "Experiment with larger model variants, higher input resolution for small findings, and longer "
                 "training only after the data improvements above, since validation accuracy had levelled off "
                 "after about 25 epochs.")
@@ -1066,7 +1084,7 @@ def build():
     if not PAPER:  # the paper's letterhead pages carry their own page numbers
         add_page_numbers(doc)
     chapter_4(doc)
-    if not PAPER:
+    if not PAPER or WITH_CH5:
         chapter_5(doc)
     return doc
 
