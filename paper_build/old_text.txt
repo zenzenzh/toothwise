@@ -1,0 +1,1062 @@
+H CHAPTER I
+H INTRODUCTION
+H 1.1 Background of the Study
+P CodiSmile Dental Clinic currently relies on manual visual examination and professional judgment to identify dental caries and other visible dental conditions from patient examinations and intraoral images. Although this approach is essential to dental practice, manually reviewing images may be time-consuming and can result in variations in assessment and documentation. To support the existing process, the proponents propose Toothwise: A YOLO-Based Multi-Condition Dental Screening System with KNN-Based Recommendation for CodiSmile Dental Clinic, an AI-assisted system that analyzes intraoral images and detects possible dental conditions — tartar, plaque, cavity, gum inflammation, and healthy tooth — using the YOLOv12 and YOLOv8 object detection models. The system provides visual detection results, condition labels, descriptions, a computed risk classification, and preventive recommendations to assist dentists and improve patient understanding. Toothwise is intended to serve as a supplementary screening and documentation tool, while final interpretation and clinical decisions remain the responsibility of licensed dental professionals.
+P Dental caries, commonly referred to as tooth decay or cavities, remains one of the most prevalent non-communicable diseases in the world. The World Health Organization (2024) estimates that oral diseases affect nearly 3.7 billion people globally, with untreated dental caries in permanent teeth identified as the single most widespread health condition based on Global Burden of Disease 2021 data. Despite its prevalence, a significant portion of the population, particularly those in geographically isolated or economically disadvantaged communities, continues to face substantial barriers in accessing timely and adequate dental care. The financial cost of consultations, the distance to dental facilities, and low oral health literacy frequently result in delayed care-seeking, by which point cavities have often advanced beyond their most treatable stages. According to Qari et al. (2023), untreated dental caries does not just cause physical pain, it also affects a person's confidence and overall quality of life.
+P A critical dimension of the current dental care challenge lies in the inconsistency of manual cavity screening practices. Wang et al. (2026), in a review on the clinical translation of AI-based caries diagnosis, noted that traditional diagnostic methods suffer from limited sensitivity and high variability between examiners, particularly for early-stage lesions. This inter-examiner variability is particularly problematic in high-volume clinic settings where practitioner fatigue and time pressure can further compromise screening reliability. Research has shown that deep learning models are capable of detecting dental cavities with accuracy that is on par with, or sometimes even better than, trained clinicians, as confirmed by systematic reviews from Schwendicke et al. (2021) and Mohammad Rahimi et al. (2022). This makes AI a genuinely useful tool for supplementing human judgment during screenings.
+P Standard digital cameras and smartphone cameras have also changed the way dental screening can be supported outside specialized clinical equipment. Instead of relying purely on what a dentist can see with a mirror and a light, or requiring dedicated intraoral camera hardware, clear intraoral photographs can now be captured using widely available consumer devices. Studies such as those by Moharrami et al. (2025) and Askar et al. (2021) show that RGB photographs captured under ordinary imaging conditions are detailed enough to support reliable artificial intelligence-based detection of dental conditions. It is this still-image, standard-camera modality that serves as the primary data source for Toothwise during patient screenings at CodiSmile Dental Clinic, since the system is designed to work from uploaded or device-captured photographs rather than requiring a dedicated intraoral camera.
+P The AI model powering the primary detection module of this system is YOLOv12, which was introduced by Tian et al. (2025) as an attention-centric object detection framework. Compared to previous versions in the YOLO family, YOLOv12 uses area attention mechanisms that help it focus selectively on spatially relevant regions, something that happens regularly in dental images where carious lesions appear as small, low-contrast areas across multiple tooth surfaces simultaneously. Its combination of speed and accuracy makes it well-suited for efficient use during clinical consultations, where screening results need to be generated quickly enough to fit within a standard patient visit.
+P To evaluate whether YOLOv12's architectural improvements translate into meaningful gains for this specific screening task, this study also trains and evaluates YOLOv8, an earlier and widely adopted model in the YOLO family (Ultralytics, 2023). YOLOv8 has been applied in several prior dental imaging studies with strong results; de Brito et al. (2025) used YOLOv8 together with EfficientNet-B0 to diagnose caries in interproximal radiographic images of young permanent molars, and other work has applied YOLOv8's anchor-free detection mechanism to interproximal caries detection with improved accuracy and speed over earlier YOLO versions. This makes it a stable, well-benchmarked baseline for object detection tasks. While YOLOv12 and YOLOv8 are formally compared against each other using precision, recall, mAP, and inference speed on a held-out labeled test set, both models are also deployed together in the operational system, where their independent detection outputs are fused into a single clinical detection set. This dual approach allows the study to identify which architecture performs better on this specific task while still taking advantage of both models' detections in the deployed screening workflow.
+P Beyond detection, Toothwise also generates a personalized prevention plan for each patient based on their screening results. This is done using the K-Nearest Neighbors (KNN) algorithm, a supervised learning method originally introduced by Cover and Hart (1967), which classifies a new case by comparing it against the most similar cases in a reference dataset. In this study, KNN classifies each screening into a risk tier (low, medium, or high) based on the patient's detected findings — condition type, number of affected areas, and severity indicators derived from the detection output — and this risk classification, together with condition-specific rules, is used to compose an ordered, patient-friendly prevention plan, while the 0–100 risk score itself comes from a separate rule-based formula. Since no dentist-labeled cases exist before deployment, the KNN is first trained on synthetic cases derived from the clinical severity rule, and each tier the dentist confirms or corrects is added as a real case for retraining.
+P While AI-assisted dental screening has grown internationally, its application in the Philippine setting remains an emerging area of research. Wu et al. (2025), in collaboration with Ateneo de Manila University's Laboratory for Intelligent Visual Environments, applied a deep learning model to identify tooth and sinus structures in dental panoramic radiographs, illustrating the early but growing interest in AI-assisted dental diagnostics locally. This study seeks to build on that emerging interest by applying AI-assisted screening directly within a clinic setting through Toothwise.
+P This project was created in partnership with CodiSmile Dental Clinic, which serves as the deployment site and clinical reference point throughout the study. The goal is not to take the place of the dentist but to give them a more efficient and objective tool to work with. With Toothwise integrated into the clinic's workflow, screenings can be documented more consistently, and patients can walk away with a clearer understanding of their oral health through the system's risk classification and personalized prevention plan features.
+H 1.2 Statement of the Problem
+P Dental screening at CodiSmile Dental Clinic relies on visual inspection. Early-stage tartar, plaque, cavity, and gum inflammation are small, look similar to one another, and vary with lighting, angle, and stage, so visual assessment is subjective and findings can differ between examinations. The clinic has no standardized visual record of findings to compare across visits, and patients are rarely given finding-specific preventive guidance. Undetected conditions can progress to pain, tooth loss, and costlier treatment, which makes consistent early screening a challenge of the method itself. This study seeks to answer the following: 1. What limitations of visual-only screening make early-stage tartar, plaque, cavity, and gum inflammation and healthy tooth, as well as their relative severity, difficult to detect and distinguish consistently at CodiSmile Dental Clinic? 2. What gaps exist in how screening findings are recorded and made accessible to dentists and patients, given the absence of a standardized visual record and a way for patients to review their own history? 3. What barriers prevent patients from receiving timely, finding-specific preventive guidance after screening? 4. What is the level of acceptability of the Toothwise system in terms of the six quality characteristics of ISO/IEC 25010 (security, privacy, usability, reliability, performance efficiency, and data protection), as evaluated by IT experts and clinical end users? 5. What is the difference on the use of Toothwise to improve screening consistency and reduce screening time compared with the current manual process?
+H 1.3 Objectives of the Study
+H 1.3.1 General Objective:
+P To design, develop, and evaluate Toothwise, a dental screening support system that uses YOLO-based detection on still intraoral photographs, a KNN-based risk classification and recommendation feature, to provide consistent and accessible screening support for licensed dentists and patients at CodiSmile Dental Clinic.
+H 1.3.2 Specific Objectives:
+PN 1. To train YOLOv12 and YOLOv8 on annotated still intraoral images to detect tartar,
+P plaque, cavity, gum inflammation, and healthy tooth and compute an associated
+P risk score and risk classification (low, medium, high) from the detected findings,
+P and compare the two models by precision, recall, mAP, and inference speed. 2. To develop a results interface showing bounding boxes, condition labels, plain-
+P language descriptions, and risk classification, with a per-patient record of findings
+P across visits accessible to dentists and, through a self-service patient portal, to
+P patients themselves. 3. To develop a KNN-based feature that generates a personalized prevention plan
+P from the detected findings and computed risk classification. 4. To evaluate Toothwise using the six ISO/IEC 25010 characteristics with IT experts
+P and clinical end users. 5. To measure changes in screening consistency and time with Toothwise versus the
+P manual process, using the dentist's findings as the reference.
+H 1.4 Scope, Delimitation and Limitation of the Study
+H Scope
+P This study covers the design, development, training, and evaluation of Toothwise, an AI-assisted dental screening support system for CodiSmile Dental Clinic. Using still images captured through a standard device camera, such as a smartphone or webcam, and uploaded to the system, Toothwise analyzes the patient's teeth and gums to detect five classes: tartar, plaque, cavity, gum inflammation, and healthy tooth. YOLOv12 and YOLOv8 models are trained on publicly available annotated dental image datasets and compared in terms of precision, recall, mean average precision (mAP), and inference speed; both models are also used together in the deployed system, with their outputs fused into a single clinical detection set. After training, the system is tested at CodiSmile Dental Clinic to assess how it performs in an actual clinical environment. Detection results are displayed through a results interface that shows bounding boxes, condition labels, plain-language descriptions, and a computed risk classification for licensed dentists, and findings are saved in a per-patient record that can be reviewed across visits. Based on the detected findings, a recommendation feature that uses the K-Nearest Neighbors (KNN) algorithm classifies the screening into a risk tier and generates a personalized prevention plan for each patient. The system also generates a downloadable PDF screening report for clinical recordkeeping and maintains an audit log of sensitive staff actions for administrative review. The intended users are licensed dentists and clinic personnel at CodiSmile Dental Clinic; in addition, patients may register for a self-service portal to view their own screening history and past findings. The system is evaluated by IT experts and clinical end users using the six quality characteristics of ISO/IEC 25010, and its effect on screening consistency and screening time is compared with the current manual process, using the dentist's findings as the reference.
+H Delimitations
+P Toothwise is a support tool and not a replacement for a licensed dentist. The dentist at CodiSmile Dental Clinic always has the final say on any diagnosis or treatment decision. The prevention plan is meant to guide the patient and is not a formal medical prescription, so it does not include medication, treatment procedures, or dosages. The system works only with still photographic images captured through a standard device camera or uploaded from an existing file, and does not process X-rays or any other radiographic input, nor does it require specialized intraoral camera hardware. It is limited to the five classes named above and does not detect oral cancer, bone loss, impacted teeth, orthodontic issues, or other conditions that surface-level visual detection cannot reliably identify. The comparison of detection models is limited to YOLOv12 and YOLOv8 and does not include other detection architectures. The system is developed and tested only at CodiSmile Dental Clinic and does not integrate with billing or appointment scheduling systems. The evaluation covers software performance, quality, and acceptability, and does not measure long-term clinical outcomes such as changes in caries rates over time.
+H Limitations
+P The accuracy of the detection models depends on image quality, lighting, camera positioning, and the patient's cooperation during capture, and may vary more than it would with specialized intraoral camera hardware since a standard device camera is used instead. Because the models are trained on public datasets, performance in the clinic may differ from training results if the clinic's captured images look different from the dataset images. The quality of the KNN-generated risk classification and recommendations depends on its reference data, which starts as synthetic cases and grows as the dentist confirms tiers. Findings may not generalize to other clinics, camera devices, or patient populations.
+H 1.5 Significance of the Study
+PN This study is expected to benefit the following groups:
+P **Patients.** Patients of CodiSmile Dental Clinic may benefit from a more consistent screening experience, in which findings such as tartar, plaque, cavities, gum inflammation, and healthy tooth are shown visually, explained in plain language, and accompanied by a risk classification. The personalized prevention plan gives them specific guidance based on their own findings, which can support earlier preventive action and better awareness of their oral health, and the patient portal allows them to review their own screening history at any time.
+P **Dentists and CodiSmile Dental Clinic.** Toothwise serves as a screening support tool that gives licensed dentists a consistent, image-based reference during consultations, while diagnosis and treatment decisions remain with them. The per-patient record of images, findings, and risk classifications gives the clinic a standardized documentation of screenings that can be reviewed and compared across visits, which the clinic currently lacks, and the PDF reporting and audit logging features support clinical recordkeeping and administrative oversight.
+P **IT Practitioners and Software Developers.** The comparison of YOLOv12 and YOLOv8, the use of KNN for risk classification and recommendations, and the ISO/IEC 25010 evaluation provide a documented example of building and assessing an AI-based health support system in a real clinic setting.
+P **Future Researchers.** Students and researchers interested in AI in dentistry can use the methodology, dataset preparation, model comparison, and system design of this study as a basis for further work, such as expanding the detectable conditions, testing other clinics, or studying long-term clinical outcomes.
+P **The Research Community.** There are relatively few local studies that apply AI-based detection to dental screening in the Philippine setting. This project contributes to that growing body of work and may serve as a reference for similar initiatives at other clinics across the country.
+H 1.6 Definition of Terms
+P For clarity and common understanding, the following terms are defined based on how they are used in this study.
+P **Calculus (Tartar).** A hardened deposit of mineralized plaque that forms on the tooth surface and along the gumline. In this study, it refers to one of the five conditions detected by the Toothwise system.
+P **Dental Caries (Cavity).** The decay and structural breakdown of tooth enamel and underlying tissue caused by bacterial activity. In this study, it refers to one of the five conditions detected by the Toothwise system.
+P **Gum Inflammation (Gingival Inflammation).** A visible reddening, swelling, or irritation of the gum tissue, often an early indicator of gingivitis. In this study, it refers to one of the five conditions detected by the Toothwise system.
+P **Inference Speed.** The amount of time a trained detection model takes to process an input image and produce a detection result. In this study, it is one of the metrics used to compare the performance of YOLOv12 and YOLOv8.
+P **K-Nearest Neighbors (KNN).** A supervised machine learning algorithm introduced by Cover and Hart (1967), which classifies a new case by identifying and comparing it to the most similar cases in a reference dataset. In this study, KNN is used to classify each screening into a risk tier and generate a personalized prevention plan based on a patient's detected findings.
+P **Mean Average Precision (mAP).** A standard evaluation metric for object detection models that summarizes a model's precision and recall performance across all detected classes. In this study, it is one of the metrics used to compare YOLOv12 and YOLOv8.
+P **Plaque.** A soft, sticky film of bacteria that forms on the surface of teeth. In this study, it refers to one of the five conditions detected by the Toothwise system.
+P **Precision.** A performance metric that measures the proportion of correctly identified detections out of all detections made by the model. In this study, it is used to evaluate and compare the performance of YOLOv12 and YOLOv8.
+P **Recall.** A performance metric that measures the proportion of actual conditions in an image that were correctly identified by the model. In this study, it is used to evaluate and compare the performance of YOLOv12 and YOLOv8.
+P **Risk Score.** A numerical value from 0 to 100, classified as low, medium, or high, generated by the system from a patient's detected findings to indicate the overall severity of a screening result. In this study, the risk score is computed by a rule-based formula.
+P **Toothwise.** The AI-assisted dental screening support system developed in this study, which uses YOLOv12 and YOLOv8 for detection and KNN for risk classification and generating personalized prevention plans.
+P **YOLOv8 (You Only Look Once, version 8).** An object detection model architecture in the YOLO family, used in this study as a baseline for comparison against YOLOv12 in detecting dental conditions.
+P **YOLOv12 (You Only Look Once, version 12).** An attention-centric object detection model architecture introduced by Tian et al. (2025), used in this study as the primary detection model for identifying dental conditions from intraoral images.
+H CHAPTER II
+P **REVIEW OF RELATED LITERATURE AND STUDIES** 
+P This chapter presents the related literature and studies that have been gathered by the proponents. It introduces many ideas linked to the topic, which includes the research's principal focus. The study's synthesis is offered to analyze the previous research that the researchers have gathered.
+H 2.1 Related Literature
+P **Convolutional Neural Networks for Dental Image Diagnostics.** Schwendicke et al. (2021) put together a systematic review of how convolutional neural networks had been applied in dental imaging, covering everything from caries detection to tooth segmentation. What stood out from their findings was that CNN models were not just competitive with experienced dental clinicians but actually outperformed them in some cases. The authors were careful to point out, though, that the quality of training data matters enormously. Models trained on poorly labeled or inconsistent datasets tend to underperform in real clinical scenarios. They also made it clear that these tools are meant to assist dentists, not replace them. That design principle carries directly into Toothwise, where all detected findings at CodiSmile Dental Clinic are reviewed by a licensed dentist before being communicated to any patient. The review also noted the absence of systems that go beyond detection and actually provide clinical guidance afterward, which is precisely the gap that the personalized prevention plan feature of Toothwise was built to address. 
+P **Deep Learning for Caries Detection: A Systematic Review.** Mohammad Rahimi et al. (2022) reviewed a large number of studies that used machine learning and deep learning to detect caries across different image types, including intraoral photographs. Their main takeaway was that deep learning, particularly convolutional neural networks, worked reliably for identifying both early and more advanced carious lesions. They also raised a concern that is very relevant to this project: there are not many large, standardized, and publicly available dental datasets out there, which makes it harder to train models that perform well across different clinical settings. For Toothwise, this limitation was addressed by combining publicly available annotated datasets with data augmentation techniques during model training. The review also found that no existing study had combined automated caries detection with a recommendation output, which reinforces why the prevention plan feature of Toothwise fills a genuine gap in the existing body of work. 
+P **Deep Learning for Detecting Dental Plaque and Gingivitis from Oral Photographs.** Moharrami et al. (2025) conducted a systematic review evaluating deep learning models specifically for detecting dental plaque and gingivitis from RGB intraoral photographs, including images captured through standard consumer devices rather than specialized dental equipment. Across the studies they reviewed, models showed stronger and more consistent performance for plaque detection than for gingivitis, where the certainty of evidence was rated lower due to the more subtle and gradual visual presentation of early gingival inflammation. This finding is directly relevant to Toothwise, since gum inflammation is one of the five conditions the system is trained to detect from standard-camera photographs; it signals that this class may require more careful dataset curation and potentially larger sample sizes than the other conditions to reach comparable performance during training. 
+P **Oral Screening of Dental Calculus, Gingivitis, and Dental Caries through Segmentation on Intraoral Photographic Images.** Zhang (2024) developed a deep learning segmentation system, Oral-Mamba, capable of simultaneously detecting three conditions — dental caries, dental calculus, and gingivitis — from a single set of intraoral photographic images, achieving accuracy rates above 0.81 for each condition. This study is one of the few in the literature that approaches multi-condition detection from a single intraoral image source rather than treating each condition as a separate, isolated detection task. It directly supports the feasibility of the multi-class detection approach used in Toothwise, which similarly trains a single model to identify several distinct conditions — tartar, plaque, cavity, and gum inflammation — from one still-image source. 
+P **Oral Health Philippines Country Profile.** The World Health Organization (2022) released a country-specific oral health profile for the Philippines as part of its Global Oral Health Status Report. The numbers are difficult to ignore. Dental caries was listed as one of the most prevalent health concerns in the country, with high rates of untreated cases across all age groups. The report also pointed out something that many Filipinos already know from experience: access to dental care is not evenly distributed. People in rural and community settings have significantly fewer options, and the limited dental workforce makes it harder to reach those who need care the most. This profile is the most authoritative reference for understanding the national oral health landscape that Toothwise seeks to contribute to. Deploying an artificial intelligence-assisted screening system at CodiSmile Dental Clinic is a concrete step toward addressing the access and consistency gaps that the WHO profile describes. 
+P **Pediatrician Knowledge, Attitude and Practices on Children's Oral Health in the Philippines.** Oliveros Villarico et al. (2023) looked at something that often goes undiscussed, which is the role of pediatricians in preventing dental caries among Filipino children. Their study, conducted at a tertiary public hospital in Metro Manila, found that a significant number of pediatricians had limited awareness of evidence-based caries prevention approaches, even though the 2018 DOH National Survey on Oral Health already documented that 85.2% of Filipino five-year-olds had dental caries. The gap between what the data shows and what frontline healthcare workers actually know about it is striking. For this project, this literature helps explain why a tool like Toothwise matters at the clinic level. If even pediatricians are not fully equipped to address oral caries early, having an AI-assisted screening system that flags dental conditions during a regular consultation at CodiSmile Dental Clinic can make a real difference in catching problems before they get worse. 
+P **Guiding Responsible Artificial Intelligence in Healthcare in the Philippines.** Alibudbud et al. (2025) wrote a narrative review and policy analysis on responsible AI adoption in Philippine healthcare. They went through the current landscape of AI applications in the country, examined what regulatory frameworks exist, and laid out recommendations for making sure AI tools in clinical settings are used ethically and safely. Some of the key concerns they raised were limited digital infrastructure, the lack of local clinical validation standards, and the need for healthcare workers to understand and critically evaluate AI outputs. They also emphasized that AI systems used in Philippine healthcare should be transparent, subject to human oversight, and compliant with the Data Privacy Act of 2012. Reading this study shaped several decisions in how Toothwise was designed, particularly the requirement that all AI detection results at CodiSmile Dental Clinic must be reviewed and confirmed by a licensed dentist before they are communicated to patients, and that all patient data is stored securely with authenticated access and audit logging. 
+P **An Overview of Recommendation Techniques and Their Applications in Healthcare.** Yue et al. (2021) reviewed the major recommendation approaches used in healthcare contexts, namely content-based, collaborative filtering, and hybrid methods, and mapped their application across five scenarios: dietary recommendation, lifestyle recommendation, training recommendation, decision-making support for patients and physicians, and disease-related prediction. Their review positions K-Nearest Neighbors-based approaches as a foundational technique underlying several of these healthcare recommendation scenarios, particularly where recommendations are generated by classifying a case according to its similarity to previously seen cases. This framework directly informs how the KNN-based risk classification and prevention plan feature of Toothwise was conceptualized, positioning it within the "decision-making support for patients" category identified in their review, an application area that, per their analysis, remains comparatively underexplored relative to dietary and lifestyle recommendation systems. 
+H 2.2 Related Studies
+P **Detecting White Spot Lesions on Dental Photography Using Deep Learning.** Askar et al. (2021) worked on detecting white spot lesions in intraoral dental photos captured with standard consumer cameras, using deep learning. White spot lesions are early stage demineralization, essentially the very beginning of a cavity before it becomes a visible hole. What made this study particularly useful is that it was done with a small dataset, which is a realistic constraint for many research projects, including this one. Despite that limitation, the model still managed to detect subtle surface level changes that would be easy to miss in a routine visual check. For Toothwise, this matters because it shows that even with limited annotated data and images from standard, non-specialized cameras, deep learning can pick up early, crucial changes from photographs, which is the same image modality the system uses at CodiSmile Dental Clinic. It also gave the team confidence that training a YOLOv12 model for early cavity detection is achievable even when the training dataset is not massive and specialized imaging hardware is not required. 
+P **Ultralytics YOLO (Version 8.0.0).** Jocher et al. (2023) released YOLOv8 as an open source framework under the Ultralytics platform. Compared to older YOLO versions, YOLOv8 came with a cleaner training pipeline, an anchor free detection head, and support for multiple tasks like detection, segmentation, and classification all in one package. It became one of the most widely used detection frameworks in both academic and applied settings because it was relatively easy to work with while still delivering strong results. Understanding YOLOv8 matters for this project because YOLOv12 was built on the same foundation. The training tools, dataset formats, and evaluation methods used in YOLOv8 largely carry over to YOLOv12, so much of what Jocher et al. (2023) established applies directly to how the Toothwise models were trained and tested. YOLOv8 also serves as the direct comparison baseline against YOLOv12 in this study's model evaluation. 
+P **Accuracy in Diagnosing Caries in Young Permanent Molars Using Interproximal Radiographic Imaging and Validation by Artificial Intelligence.** de Brito et al. (2025) applied YOLOv8 together with a pre-trained EfficientNet-B0 model to diagnose caries in interproximal radiographic images of young permanent molars, comparing the AI-based evaluation against diagnoses made by dental professionals. Their results showed strong inter-examiner agreement and confirmed that YOLOv8 performs reliably even on the small, low-contrast lesion types that are typically difficult to detect visually. This study provides direct evidence that YOLOv8 is a credible, well-validated baseline for detecting caries-type conditions, supporting its selection as the comparison model against YOLOv12 in this study. 
+P **Deep Learning in Oral Hygiene: Automated Dental Plaque Detection via YOLO Frameworks and Quantification Using the O'Leary Index.** Ramírez-Pedraza et al. (2025) trained and compared several YOLO model variants, including YOLOv11, specifically for detecting dental plaque in varied imaging conditions, using the O'Leary Index as a clinical benchmark for plaque quantification. Their results showed that YOLO-based models could reliably distinguish plaque at different stages of maturity, though newer, less mineralized plaque was harder to detect than older, more visually distinct plaque, since it tends to blend with surrounding gingival tissue. This finding is directly relevant to Toothwise, since it identifies a specific detection challenge, distinguishing early plaque from gum tissue, that the model must account for during training and dataset annotation for the plaque class. 
+P **Diagnostic Accuracy of Dental Caries Detection Using Ensemble Deep Learning with Intraoral Camera Images.** Kang et al. (2024) took a different approach from most dental AI studies by using an ensemble of deep learning models rather than a single model for caries detection. By combining multiple detectors, they were able to reduce false positives while keeping sensitivity high, which is especially important in a clinical setting where unnecessary alarms can make dentists lose trust in the system. Their work confirmed that photographic intraoral images, rather than radiographs, are a sufficient and practical input for reliable AI-based detection, validated against annotations made by experienced dentists. This finding supports the still-image, standard-camera approach used in Toothwise, and gave the team confidence that deep learning for photographic dental screening is not just theoretically possible but has already been shown to work efficiently in a clinical environment similar to CodiSmile Dental Clinic. 
+P **AI-Assisted Detection of Interproximal, Occlusal, and Secondary Caries on Bite-Wing Radiographs Using YOLOv8.** Karakus et al. (2024) applied YOLOv8 to the task of detecting different types of dental caries from bitewing radiographs. One thing that stood out in their findings was how well YOLOv8 handled small and overlapping lesions, which is a tricky problem in dental imaging because caries can be close together or partially hidden. Even though Toothwise uses standard photographic images rather than radiographs, the core detection challenge is similar. The model needs to find and correctly label multiple small, carious areas within a single image. The performance of YOLOv8 in this study, combined with the architectural improvements introduced in YOLOv12, provided the team with a strong technical basis for believing that YOLOv12 can handle the multi-condition detection demands of Toothwise. 
+P **YOLOv12: Attention-Centric Real-Time Object Detectors.** Tian et al. (2025) introduced YOLOv12 in a preprint that gained significant attention in the computer vision community. The paper presents a new approach to the YOLO architecture centered around area attention mechanisms, which allow the model to focus on relevant regions of an image rather than processing everything equally. The results were impressive. The YOLOv12 N configuration achieved 40.6% mean average precision at an inference latency of just 1.64 milliseconds on a T4 GPU, outperforming comparable YOLOv10 and YOLOv11 models. For a system like Toothwise, where detection results need to be produced quickly enough to fit within a standard dental consultation, that combination of accuracy and speed is exactly what is needed. This paper is the primary technical reference for the detection model used in this project, and its findings directly justify choosing YOLOv12 for evaluation against YOLOv8 for deployment at CodiSmile Dental Clinic. At the time of this review, no widely published study had applied YOLOv12 specifically to multi-condition dental screening from standard photographic images, positioning Toothwise among the earliest efforts to explore this architecture in that context.
+P **Feedback Collection and Nearest-Neighbor Profiling for Recommendation Systems in Healthcare Scenarios.** António et al. (2024) developed a physical activity recommendation system for patients in rehabilitation using a K-Nearest Neighbors sampling strategy combined with feedback collection, generating
+P activity recommendations by identifying patients with the highest similarity to a given case based on their health profile. Their system was shown to outperform traditional collaborative filtering and purely human-constrained recommendation methods in producing recommendations suited to a patient's specific therapeutic needs, physical capacity, and stage of recovery. This is one of the few studies to apply a KNN-based approach directly to generating personalized, condition-specific health guidance rather than general product or content recommendations, and it provides a close technical parallel for how Toothwise's KNN-based feature classifies a screening into a risk tier and composes a prevention plan by matching a patient's findings against similar synthetic and dentist-confirmed cases.
+P **Bridging the Gap or Widening the Divide: A Call for Capacity-Building in Artificial Intelligence for Healthcare in the Philippines.** Gutierrez and Viacrusis (2023) took a critical look at AI readiness in Philippine healthcare. When the researchers tested AI generated responses to clinical queries relevant to Filipino patients, they found notable inaccuracies, including instances where the AI produced fabricated references and incorrect medical guidance. The paper used this to argue that Filipino healthcare professionals urgently need better AI literacy and that unsupervised use of AI clinical tools carries real risks. The call to action was for structured local validation and, most importantly, mandatory human oversight in any clinical AI application. This study speaks directly to a design decision in Toothwise. The system does not allow AI detection results to be shown to patients without going through a dentist first. At CodiSmile Dental Clinic, the dentist reviews every output before it becomes part of the clinical record or is communicated to the patient, which is exactly the kind of human oversight that Gutierrez and Viacrusis argued for.
+H 2.3 Synthesis
+P The literature and studies reviewed in this chapter come together to build a clear and well-supported case for the approach that Toothwise has taken. Schwendicke et al. (2021) and Mohammad Rahimi et al. (2022) established through separate systematic reviews that deep learning models are genuinely reliable for dental caries detection, often performing at the level of trained clinicians or better. Moharrami et al. (2025) and Zhang (2024) extended this evidence beyond caries alone, showing that plaque, calculus, and gingivitis can also be reliably detected from standard intraoral photographs, with Zhang's work in particular demonstrating that multiple conditions can be detected from a single image source using one model, directly supporting the five-class detection approach used in Toothwise. Kang et al. (2024) and Askar et al. (2021) further confirmed that photographic images captured without specialized intraoral camera hardware are a sufficient and practical input modality for AI-based detection in an actual clinical setting, closely paralleling the still-image, standard-camera acquisition approach of Toothwise at CodiSmile Dental Clinic.
+P The most important gap identified across the reviewed works is that existing dental AI systems detect conditions but stop there; the photograph-based reviews by Moharrami et al. (2024, 2025) cover detection only. None of the detection-focused studies reviewed generated recommendations or patient-facing guidance after detection. At the same time, Yue et al. (2021) and António et al. (2024) show that KNN-based recommendation approaches have been successfully applied in other healthcare domains, such as physical rehabilitation, but remain comparatively unexplored in dental screening specifically. Toothwise fills this gap by embedding a KNN-based risk classification and recommendation engine into a multi-condition detection pipeline, pairing YOLO-based detection with an actionable, personalized prevention plan, a combination not found together in the literature reviewed.
+P On the technical side, Tian et al. (2025) established YOLOv12 as a highly accurate and efficient real-time object detection architecture, while Jocher et al. (2023), de Brito et al. (2025), Ramírez-Pedraza et al. (2025), and Karakus et al. (2024) documented the strong and well-validated performance of YOLOv8 specifically across caries and plaque detection tasks, supporting its selection as this study's comparison baseline. Askar et al. (2021) further showed that deep learning-based detection is achievable even under limited dataset conditions, supporting the training strategy used in this project.
+P The Philippine context literature from the WHO (2022) and Oliveros Villarico et al. (2023) grounds all of this in a concrete public health reality. Dental conditions are widespread among Filipinos, they often go undetected until they have already progressed, and access to professional dental care remains out of reach for many due to cost and geography. Alibudbud et al. (2025) and Gutierrez and Viacrusis (2023) shaped responsible design decisions around human oversight, data privacy, and clinical transparency. What no existing work reviewed has done is bring together YOLO-based multi-condition detection from standard photographic images, a KNN-based risk classification and personalized prevention plan generator, and a full-stack clinical system deployed at an actual Philippine dental clinic. That is the specific contribution of Toothwise.
+H CHAPTER III
+P **METHODOLOGY** This chapter presents the methodology used in the development of Toothwise: A YOLO-Based Multi-Condition Dental Screening System with
+P KNN-Based Recommendation for CodiSmile Dental Clinic. It describes the development methodology, the composition and responsibilities of the five-member development team, the project planning and requirements analysis process, the major system design diagrams required for the capstone examination, and the development, testing, and screenshot documentation of the current system.
+H 3.1 Development Methodology
+P Toothwise was developed using the Agile Software Development Life Cycle (Agile SDLC). Agile was selected because the system integrates several interconnected components, including a React.js web interface, a FastAPI REST backend, a PostgreSQL database, a dual-model YOLOv8/YOLOv12 detection pipeline, a KNN-based risk classification and recommendation engine, authentication and authorization, audit logging, and a separate patient self-service portal. These components benefit from incremental development, continuous testing, regular review, and repeated refinement rather than a single sequential build.
+P Instead of completing the entire system in one long development cycle, the project was carried out through manageable iterations in which requirements were prioritized, features were implemented, tested, reviewed, and improved before the next set of features was developed. Each iteration followed the same general cycle of planning, requirements analysis, system design, development, testing, evaluation, and refinement, illustrated in Figure 1.
+P Planning Requirements Analysis System Design next Development iteration Testing Evaluation Refinement
+H Figure 1 Agile Development Methodology
+P The cycle in Figure 1 was applied repeatedly across the project's documented iterations. Planning and requirements analysis identified the features required for the clinic workflow; system design translated those requirements into frontend routes, API endpoints, and database structures; development implemented the corresponding React, FastAPI, and machine-learning components; testing verified the implemented behavior; evaluation compared the result against the intended requirements; and refinement corrected any issues found before the next iteration began.
+H 3.2 Project Planning
+PN The Toothwise project was planned around the screening and record-keeping workflow of CodiSmile Dental Clinic. The following considerations guided the planning of the system:
+P **Project Objectives** — to provide CodiSmile Dental Clinic with an AI-assisted •
+P dental screening system that detects tartar, plaque, cavity, gum inflammation, and
+P healthy tooth from a still photograph, estimates a risk level, and generates a
+P recommendation/prevention plan, while also supporting day-to-day clinic record- keeping. •
+P **Project Scope** — the system covers staff authentication, patient management,
+P dental screening and AI detection from still images, risk assessment,
+P recommendation generation, clinical notes, PDF reporting, audit logging, and a
+P self-service patient portal. •
+P **Target Users** – CodiSmile Dental Clinic staff (dentist, receptionist, and assistant
+P roles) and the clinic's patients through the patient portal.
+P **Clinic Workflow** — a patient is registered or already on file, a still intraoral •
+P photograph is captured through a standard device camera or uploaded during a
+P screening, the system produces detection, risk, and recommendation results for the
+P dentist to review, and the dentist may add clinical notes or generate a PDF report. •
+P **Functional Requirements** — detailed in Section 3.4. •
+P **Non-Functional Requirements** — detailed in Section 3.4, covering security,
+P privacy, usability, reliability, performance efficiency, and data protection.
+P **AI Screening Requirements** — the system was planned to use two independent •
+P detection models (YOLOv8 and YOLOv12) whose outputs are fused into a single
+P clinical detection set, rather than relying on a single model. •
+P **Database Requirements** — a relational PostgreSQL schema was planned to store
+P dentists, patients, screenings, detections, recommendations, clinical notes, and
+P audit logs with referential integrity between related records. •
+P **Security Requirements** — JWT-based authentication, hashed passwords, rate-
+P limited login endpoints, authenticated (non-public) image access, and audit logging
+P were planned from the outset given the clinical and personal nature of the data
+P involved. The requirements and technical decisions behind this planning were drawn directly from the current Toothwise project package rather than from separate interview transcripts or survey forms, since the project does not maintain those as separate dated records. Table 1 summarizes the actual sources used.
+H Table 1 Sources of Requirements and Technical Data
+H Source
+P **Use in the Study** System and code review
+P The frontend routes, pages, API client, FastAPI routers,
+P schemas, security module, ML modules, and database models
+P were reviewed to identify actual implemented functions and
+P data flows. Database and schema
+P The PostgreSQL schema and migration scripts were reviewed review
+P to verify entities, relationships, enumerated values, detection
+P sets, and audit logs. Testing and debugging
+P CHANGES.md documents API contract reconciliation, enum records
+P and image-path fixes, smoke testing, security validation, and
+P feature verification. AI evaluation procedure
+P The evaluate_models.py utility defines how precision, recall,
+P F1, mAP50, mAP50-95, and average inference time can be
+P obtained from a labeled test set. No real model comparison
+P values are claimed here since the current package documents
+P the use of mock inference until trained weights are installed.
+H 3.3 Roles and Responsibilities of the Five-Member Development Team
+PN Toothwise was developed by a five-member capstone development team. Table 2 presents each member's assigned role and corresponding responsibilities based on the work represented in the current project package. A member may carry more than one responsibility.
+H Table 2 Roles and Responsibilities of the Development Team
+H Group Member
+H Assigned Role
+P **Responsibilities** Arreola, Reizen S.
+P Project Manager /
+P Coordinated the activities of the System Analyst /
+P development team, monitored the Programmer
+P project schedule, translated clinic
+P workflow requirements into system
+P requirements, and ensured that project
+P deliverables remained aligned with the
+P objectives of the Toothwise system;
+P Developed and integrated the YOLOv8/
+P YOLOv12 dental image detection
+P pipeline, and the KNN recommendation engine Magpantay, Rizelle Backend Developer
+P Implemented and integrated the FastAPI Carla N.
+P REST API, authentication and
+P authorization logic, and database
+P operations and connected the frontend
+P with the backend API; resolved
+P programming and integration issues
+P identified during testing. Sales, Keith Ashly V.
+P Frontend Developer
+P Implemented the React.js user interface,
+P including the dashboard, patient and
+P dentist management screens, screening
+P workflow, patient portal, and the visual
+P design and layout of the system. Tubillas, Brayan Database Developer /
+P Designed and maintained the Axel L.
+P Documentation Lead
+P PostgreSQL database schema and
+P relationships; and conducted functional,
+P security, and integration testing of the
+P system; Responsible for organizing,
+P compiling, and standardizing all
+P documents into a cohesive capstone
+P paper that complies with formatting,
+P style, and academic guidelines. Ponce, Robin C.
+P UI-UX Designer
+P Responsible for defining information
+P architecture, and creating accessible
+P design system for toothwise, to ensure
+P the capstone deliverable delivers an
+P intuitive, user-centered experience. The specific division of responsibilities above reflects the major components of the current system — project coordination and requirements, backend/API development, frontend/interface development, database/documentation, and interface design work.
+H 3.4 Requirements Analysis
+P The requirements of Toothwise were analyzed from the intended clinic workflow and the functions represented in the current system and its API. Toothwise has two authenticated user groups: clinic staff (dentist, receptionist, and assistant roles) and patients using the self-service portal. Tables 3 and 4 present the functional and non-functional requirements that are currently implemented in the application.
+H Table 3 Functional Requirements
+H ID
+H Requirement
+P **Specification** FR-01 Staff authentication
+P Authenticate staff (dentist, receptionist, assistant) by
+P email and password and issue a JWT bearer token
+P for API access. FR-02 Role-based access
+P Distinguish dentist, receptionist, assistant, and
+P patient scopes and restrict functions. FR-03 Patient management
+P Create, view, update, and delete patient records and
+P view screening history and risk trends. FR-04 Dental screening
+P Submit a still intraoral photograph, captured through
+P a standard device camera or uploaded from an
+P existing file, in a single multipart screening request
+P and receive detection, risk, recommendation, and screening-record results. FR-05 AI detection
+P Run the configured YOLOv8 and YOLOv12
+P detectors, retain raw model outputs, and produce a
+P fused clinical detection set. FR-06 Risk assessment
+P Calculate a 0–100 risk score with a rule-based
+P formula and classify the screening as LOW,
+P MEDIUM, or HIGH. FR-07 Recommendation
+P Use the KNN recommender and condition-specific generation
+P rules to generate an ordered prevention plan. FR-08 Screening review
+P View screening images, fused detections, risk
+P information, recommendations, clinical notes, and model-comparison information. FR-09 PDF report
+P Generate an authenticated PDF screening report
+P containing patient/screening information, findings,
+P prevention plan, and clinical notes. FR-10 Patient portal
+P Patients register, log in, and view their own
+P screening history and screening details. FR-11 Audit logging
+P Record relevant authentication and create/update/
+P delete actions for administrative review. FR-12 Health monitoring
+P Expose a health endpoint that checks database
+P connectivity without exposing internal errors. FR-13 Database backup
+P Provide a pg_dump-based backup utility that creates timestamped, retained backups.
+H Table 4 Non-Functional Requirements
+H ID
+H Quality Area
+P **Specification** NFR- Security
+P Passwords hashed with bcrypt; protected operations -01
+P require JWT authentication; login/registration endpoints
+P rate-limited to 5 requests per minute per IP. NFR- Privacy
+P Screening images are not publicly exposed; authenticated -02
+P and ownership-checked image endpoints are used instead
+P of a public upload route. NFR- Usability
+P Browser-based workflows for dashboard monitoring, -03
+P patient records, screening, dentist management, audit
+P review, and patient self-service. NFR- Reliability
+P Backend returns a generic response for unhandled errors -04
+P while recording diagnostic detail server-side. NFR- Performance
+P YOLOv8 and YOLOv12 inference times are recorded per -05 Efficiency
+P screening; model-comparison views report runtime and detection statistics. NFR- Data Protection
+P Relational constraints, enumerated status/risk values, -06
+P foreign keys, and transactions preserve consistent, valid records.
+H 3.5 System Design
+P This section presents the major design diagrams required for the capstone preliminary examination: the Use Case Diagram, the Entity Relationship Diagram, the Data Flow Diagrams at Level 0 and Level 1, and the development Gantt Chart. Each diagram was produced from the actual implemented system roles, database schema, and documented development sequence. 
+H 3.5.1 Use Case Diagram
+PN Figure 2 presents the use case diagram of Toothwise. It shows the four system roles – Dentist (Administrator), Receptionist, Dental Assistant, and Patient – and the functions each role can perform, verified against the implemented routes and authorization checks. It represents system user roles, not the development team in Section 3.3.
+P ToothWise System Manage Staff Accounts Review Audit Trail «include» «include» Manage Patient «include» Authenticate User Records Receptionist «extend» Delete Patient Record «include» «include» Perform AI Dental Capture / Upload «include» Screening
+P Intraoral Image Dentist (Administrator) «include» Review Findings and Recommendations «extend» Confirm Risk Tier «extend» Add Clinical Note «extend» Dental View Own Screening History Assistant Generate PDF Report Patient Ask AI Assistant
+H Figure 2 Use Case Diagram
+H 3.5.2 Entity Relationship Diagram (ERD)
+PN Figure 3 presents the Entity Relationship Diagram of the Toothwise PostgreSQL database, verified against the current database/schema.sql and backend/app/models.py. The database contains seven tables: dentists, patients, screenings, detections, recommendations, clinical_notes, and audit_logs, related through foreign keys as shown below. The complete field-level specification of each table is presented in Section 4.4.
+P dentists audit_logs patients PK id SERIAL PK id SERIAL PK id SERIAL full_name VARCHAR(120) records FK actor_dentist_id INTEGER full_name VARCHAR(120) first_name VARCHAR(60) actor_email VARCHAR(150) first_name VARCHAR(60) middle_name VARCHAR(60) action VARCHAR(60) middle_name VARCHAR(60) last_name VARCHAR(60) entity_type VARCHAR(40) last_name VARCHAR(60) email entity_id birthdate UQ VARCHAR(150) INTEGER DATE hashed_password details gender VARCHAR(255) TEXT gender role dentistrole created_at TIMESTAMPTZ contact_number VARCHAR(30) license_no VARCHAR(60) address VARCHAR(255) is_active BOOLEAN UQ email VARCHAR(150) created_at TIMESTAMP hashed_password VARCHAR(255) is_active BOOLEAN created_at TIMESTAMP undergoes screenings performs authors PK id SERIAL FK patient_id INTEGER FK dentist_id INTEGER image_path VARCHAR(255) image_width clinical_notes INTEGER recommendations image_height INTEGER PK id SERIAL PK id SERIAL risk_level risklevel FK screening_id INTEGER FK screening_id INTEGER has risk_score INTEGER yields FK dentist_id INTEGER text TEXT yolov8_ms FLOAT body TEXT priority INTEGER yolov12_ms FLOAT created_at TIMESTAMP order_index INTEGER created_at TIMESTAMP contains Crow's foot notation exactly one detections PK id SERIAL zero or one FK screening_id INTEGER zero or many label VARCHAR(40) confidence FLOAT x1 FLOAT
+P PK primary key, FK foreign key, y1 FLOAT UQ unique x2 FLOAT y2 FLOAT dentistrole: dentist (administrator), source_model VARCHAR(20) receptionist, assistant detection_set VARCHAR(20)
+P risklevel: low, medium, high
+P gender: Male, Female, Other
+H Figure 3 Entity Relationship Diagram (ERD)
+P Table 5 consolidates the seven core entities of the Toothwise database into a single database schema, summarizing each table's primary key, purpose, classification, and relationships to the other entities, ahead of the full field-level data dictionary presented in Section 4.4. 
+H Table 5 Toothwise Database Schema Data Dictionary
+H Table
+H Primary
+H Role/
+H Purpose
+H Related Tables
+H Key
+H Classifica-
+P **tion** dentists id Dimension
+P Stores staff accounts (dentist, screenings, Table
+P receptionist, or assistant) used clinical_notes,
+P for login and access control.
+P audit_logs patients id Dimension Stores patient demographic screenings Table information and, optionally, patient-portal login credentials. screenings id Fact Table
+P Central record of one AI- patients, dentists, assisted dental image detections,
+P screening event, including risk recommendatio-
+P level and model timing.
+P ns, clinical_notes detections id Fact Detail Stores each bounding-box screenings Table
+P finding produced by the YOLOv8/YOLOv12 ensemble
+P for a screening (5-label taxonomy). recommen- id Fact
+P Stores the risk classification screenings dations Detail and prevention/advice text Table
+P generated by the KNN
+P recommender for a screening. clinical_n- id Fact Stores dentist-authored clinical screenings, otes Detail
+P notes attached to a screening.
+P dentists Table audit_logs id System Append-only record of dentists Table
+P sensitive staff actions, kept for administrative review.
+H 3.5.3 Data Flow Diagram Level 0
+PN Figure 4 presents the Level 0 (context) Data Flow Diagram of Toothwise, drawn in Gane and Sarson notation. It shows the system as a single process exchanging data with its four external entities – Dentist (Administrator), Receptionist, Dental Assistant, and Patient – verified against the authenticated routes each role can reach.
+P 0 staff credentials, patient registration data staff credentials, patient
+P record data, intraoral image, RECEPTIONIST PDF report request access token, patient DENTAL ASSISTANT directory
+P access token, patient records,
+P detections and risk result,
+P screening review and PDF report ToothWise AI-Assisted Dental Screening and Recommendation staff credentials, patient System
+P record data, staff account data, intraoral image, risk-tier confirmation and
+P clinical note, PDF report
+P request, audit log query
+P portal registration and login,
+P screening history request, AI DENTIST assistant question (ADMINISTRATOR)
+P access token, patient records, PATIENT
+P staff roster, detections and
+P risk result, screening review access token, screening
+P and PDF report, audit trail
+P history and prevention plan, report AI assistant reply External entity Process Data flow
+H Figure 4 Data Flow Diagram Level 0
+H 3.5.4 Data Flow Diagram Level 1
+P Figure 5 decomposes the Toothwise system, in Gane and Sarson notation, into seven major processes: 1.0 Authenticate Users, 2.0 Manage Patient Records, 3.0 Manage Staff Accounts, 4.0 Perform AI Dental Screening (YOLOv8/YOLOv12 detection, risk scoring, and KNN recommendation), 5.0 Review Findings and Generate Report, 6.0 Serve Patient Portal and AI Assistant, and 7.0 Review Audit Trail. So that it remains legible in print, the diagram is drawn on two sheets: Sheet 1 covers processes 1.0, 2.0,
+PN 3.0, and 7.0, and Sheet 2 covers processes 4.0, 5.0, and 6.0. Its seven data stores, D1 to D7, map one-to-one onto the database tables in Figure 3, and its external data flows
+PN match the Level 0 diagram in Figure 4. Sheet 1 of 2: processes 1.0, 2.0, 3.0 and 7.0 credentials 1.0
+P registration / login RECEPTIONIST PATIENT access token access token credentials staff account DENTIST D1 Staff Accounts (ADMINISTRATOR) Authenticate access token Users new portal account credentials D2 Patients DENTAL ASSISTANT patient account access token login event D7 Audit Logs registration data 2.0 RECEPTIONIST
+P new / updated record patient directory D2 Patients patient record data
+P patient record DENTIST (ADMINISTRATOR) Manage Patient patient records Records record change event patient record data D7
+P Audit Logs DENTAL ASSISTANT patient records D7 Audit Logs staff change event 3.0 7.0 audit log query staff account data DENTIST Manage Staff (ADMINISTRATOR) Review Audit Accounts staff roster audit trail report Trail staff account staff audit log records record accounts D1 Staff Accounts D7 Audit Logs External entity Process D# Data store Data flow
+P Duplicated entity / data store (drawn again to avoid crossing flows) D#
+P **Figure 5 Data Flow Diagram Level 1 (Sheet 1 of 2)** Sheet 2 of 2: processes 4.0, 5.0 and 6.0 D2 Patients D7 Audit Logs patient screening reference event 4.0 intraoral image intraoral image DENTIST DENTAL (ADMINISTRATOR) Perform AI Dental ASSISTANT detections, risk result Screening detections, risk result screening record KNN detections recommendations D4 Detections D3 Screenings D5 Recommendations screening confirmed detections record risk tier recommendations 5.0 tier confirmation, note PDF report request
+P PDF report request DENTIST Review Findings DENTAL (ADMINISTRATOR) ASSISTANT and Generate review, PDF report Report review, PDF report clinical clinical review patient note notes event details D7 Audit Logs D6 Clinical Notes D2 Patients patient profile 6.0 history request own screenings D3 Screenings AI assistant question Serve Patient PATIENT history, prevention plan Portal and AI prevention plan D5 Recommendations Assistant AI assistant reply
+H Figure 5 Data Flow Diagram Level 1 (Sheet 2 of 2)
+H 3.5.5 Gantt Chart
+P Figure 6 presents the Toothwise development schedule from July 12 to October 30, organized into the five Agile iterations summarized in Table 11. Each bar shows the working period of one task, the black band shows the span of each iteration, and the diamonds mark the 30%, 60%, and 100% system completion milestones that the documentation followed.
+H Iteration / task
+P Jul 12 Jul 26 Aug 9
+P Aug 23 Sep 6 Sep 20 Oct 4 Oct 18 Nov 1
+P **Iteration 1: Core System Foundation** Requirements Analysis & Mapping PostgreSQL Schema & ERD Setup FastAPI Framework Setup React UI Prototyping & Base Repo
+P **Iteration 2: AI Screening** Dataset Processing & Annotation YOLOv8 & YOLOv12 Model Training Inference API Endpoint Development Bounding Box UI Integration
+H Milestone: 30% of the system
+P Aug 12
+P **Iteration 3: Recommendations & Clinical Workflow** KNN Recommendation Engine Logic Role-Based Access Control & Routing Patient History & Clinical Logs UI Database Integration Testing
+P **Iteration 4: Clinic Operations** Dashboard & Staff Management Patient Self-Service Portal Security Hardening & RBAC Auditing 60% Milestone Verification
+H Milestone: 60% of the system
+P Oct 2
+P **Iteration 5: Testing, Hardening & Defense** ISO/IEC 25010 System Evaluation Performance Tuning & Bug Fixing Final Manuscript Standardization Final Defense Execution
+H Milestone: 100% of the system
+P Oct 30 Task Milestone verification Iteration span System completion milestone
+H Figure 6 Toothwise Development Gantt Chart
+H 3.6 Software Specifications
+P The software requirements of Toothwise cover the programming languages, frameworks, libraries, services, and development tools represented in the current project package, distinguishing development-environment resources (Table 6)
+P from implementation/deployment-environment resources (Table 7).
+H Table 6 Software Development Requirements
+H Software
+H Specification
+P **Description** Operating System
+P Windows 10 or 11, 64- Primary development environment bit
+P for the frontend, backend, database
+P administration, and system testing. Runtime / Backend Python 3.11
+P Used for the FastAPI backend, AI Language inference, KNN-based recommendation engine, database
+P integration, testing, and utility scripts. Frontend Language JavaScript (ES6+)
+P Used to implement the React.js user
+P interface and client-side application logic. Frontend Framework React 18.2.0
+P Provides the component-based web interface for dentists,
+P administrators, clinic staff, and the patient portal. Routing React Router DOM
+P Provides client-side routing for 6.21.1
+P login, dashboard, patient records, screening, dentist management,
+P audit logs, and the patient portal. HTTP Client Axios 1.6.5 Handles authenticated
+P communication between the React
+P frontend and the FastAPI REST API. UI Feedback
+P React Hot Toast 2.4.1
+P Provides success and error
+P notifications in the web interface. Camera Integration React Webcam 7.2.0
+P Supports still-image capture from a
+P standard device camera (webcam)
+P for uploading during a screening. Charting Recharts 2.10.3
+P Renders the patient risk trend and
+P dashboard trend visualizations. Backend Framework FastAPI 0.111.0
+P Implements the REST API, request validation, authentication dependencies, routing, health
+P checks, and integration with AI and
+P PostgreSQL. ORM / Database SQLAlchemy 2.0.30 and
+P Provide ORM-based database Driver psycopg 3.1.19 access and PostgreSQL connectivity. Validation / Pydantic 2.7.4 and
+P Validate API payloads and load Configuration pydantic-settings 2.3.4
+P environment-based configuration. AI Framework Ultralytics YOLO with
+P Runs the YOLOv8 and YOLOv12 PyTorch
+P object-detection models used in the
+P dental screening pipeline. Computer Vision OpenCV 4.10.0.84, Support image processing, Pillow 10.3.0
+P validation, and preparation of
+P uploaded still images. Recommendation / scikit-learn 1.5.0, joblib
+P Support the KNN risk classification ML 1.4.2
+P and recommendation model and
+P persistence of the trained recommender artifact. Database PostgreSQL 15
+P Stores patient, dentist, screening, detection, recommendation, clinical
+P note, and audit-log records. Authentication / python-jose 3.3.0, bcrypt
+P Provide JWT authentication, Security 4.2.0, SlowAPI 0.1.9
+P password hashing, and rate limiting. PDF Reporting ReportLab 4.2.2 Generates authenticated PDF screening reports. Testing pytest 8.2.2, HTTPX
+P Support automated and API-level 0.27.0
+P testing of the FastAPI application. Version Control Git and GitHub
+P Used for source-code versioning, collaboration, and project traceability. IDE Visual Studio Code
+P Primary editor for frontend,
+P backend, database, and AI development. Package Managers npm and pip
+P Manage JavaScript and Python project dependencies.
+H Table 7 Implementation Software Requirements
+H Software
+H Specification
+P **Description** Server Operating
+P Windows 10 or 11, 64-bit
+P Hosts the FastAPI backend, System
+P PostgreSQL database, and YOLO
+P inference services in the documented local deployment setup. Client Platform Any operating system
+P Dentists and clinic staff access the
+P with a modern web
+P system without installing a separate browser desktop application. Browser
+P Google Chrome 110+ or
+P Supported browser environment for Mozilla Firefox 110+
+P the React.js interface and camera-
+P enabled workflows. Backend Runtime
+P Python 3.11 + FastAPI
+P Runs the REST API, authentication,
+P screening workflow, and supporting services. Database PostgreSQL 15+
+P Stores persistent clinical and administrative records. Authentication JWT Bearer tokens
+P Separates staff and patient access
+P scopes and protects authenticated
+P API routes. AI Runtime YOLOv8 + YOLOv12
+P Runs two detection models ensemble
+P independently and fuses their
+P outputs for the clinical detection
+P set. The current package defaults to
+P deterministic mock inference until
+P trained weights are installed. Recommendation KNN, K=5
+P Classifies the screening into a risk Runtime
+P tier used to compose the prevention plan. Upload Limit 15 MB maximum
+P Limits the size of uploaded configured upload size
+P screening images before processing. API Documentation
+P FastAPI Swagger UI / Provides developer-facing ReDoc
+P documentation for the REST API.
+H 3.7 Hardware Specifications
+H Table 8 Hardware Development Requirements
+H Hardware
+H Specification
+P **Description** Processor
+P Intel Core i7 or AMD Ryzen 7, 8 cores, Recommended for
+P 2.5 GHz or above concurrent frontend, backend, image- processing, and model- development workloads. RAM
+P 16 GB minimum; 32 GB recommended Supports model training, dataset preprocessing, database services, and development tools. GPU
+P NVIDIA GPU with CUDA support, at Recommended for
+P least 6 GB VRAM practical YOLO training and accelerated inference during model development. Storage
+P 512 GB SSD or higher Stores source code, datasets, model weights, Python environments, PostgreSQL data, and generated artifacts. Display
+P 1920 × 1080 or higher Supports development, image review, detection overlays, and responsive interface testing. Network
+P Stable Internet connection, 10 Mbps or Supports dependency higher installation, dataset access, repository synchronization, and remote development resources.
+H Table 9 Implementation Hardware Requirements
+H Hardware
+H Specification
+P **Description** Server Machine
+P Intel Core i5 / AMD Ryzen 5, 8 GB
+P Runs the FastAPI API,
+P RAM, 256 GB SSD or better PostgreSQL database, and YOLO inference services. Client Workstation
+P Computer or tablet with at least 4
+P Used by dentists and
+P GB RAM and a modern browser
+P clinic staff to access the
+P web application. Device Camera
+P Smartphone camera or webcam
+P Captures the patient's still
+P capable of capturing still images intraoral photograph used
+P as input to the screening process; no specialized intraoral camera
+P hardware is required. Local Area Network
+P Wired or Wi-Fi router, 100 Mbps
+P Connects the server and or higher authorized client devices
+P for local access. Uninterruptible Power
+P 600 VA minimum recommended
+P Helps protect the server Supply and preserve availability during short power interruptions.
+H 3.8 System Development
+P Toothwise was developed iteratively, following the six development phases in Table 10, applied repeatedly across the five documented iterations in Table 11 rather than as a single sequential build.
+H Table 10 Development Phase Activities
+H Phase
+P **Activities** 1. Planning and
+P Define the clinic workflow, user roles, screening objectives, AI Requirements
+P detection needs, risk assessment, recommendation output, patient
+P portal functions, security requirements, and reporting needs. 2. System Analysis
+P Translate the requirements into frontend routes, FastAPI
+P endpoints, database entities, AI modules, authentication
+P dependencies, and data flows. 3. System Design
+P Design the three-layer architecture, relational schema, JWT
+P authentication model, detection-set structure, risk classification
+P and recommendation flow, patient ownership checks, and local
+P network deployment. 4. Development
+P Implement React pages and API services, FastAPI routers and
+P schemas, SQLAlchemy models, PostgreSQL schema, YOLO
+P detector integration, KNN risk classifier and recommender,
+P reports, audit logs, and patient portal. 5. Integration and
+P Reconcile frontend requests with the actual backend contract, Testing
+P validate database enum labels and image paths, smoke-test API
+P workflows, test security controls, and verify the frontend build. 6. Deployment and
+P Prepare the PostgreSQL database, backend environment, frontend Maintenance
+P build, model-weight configuration, local network access, backups,
+P and operational monitoring. Continue maintenance through
+P versioned changes and database migration scripts.
+H Table 11 Agile Iteration Summary
+H Iteration / Focus
+H Major Activities
+P **Output** Iteration 1 – Core System
+P Initial React.js frontend, FastAPI Working Foundation backend, PostgreSQL schema, application
+P authentication, and core patient/dentist foundation and structures.
+P authenticated
+P API. Iteration 2 – AI Screening
+P Integration of still-image upload, YOLO End-to-end
+P detection workflow, detection storage, dental screening
+P risk scoring, and screening results.
+P workflow. Iteration 3 –
+P KNN risk classification and Expanded Recommendations and
+P recommendation logic, prevention plans, clinical Clinical Workflow
+P clinical notes, screening details, and PDF screening and reporting.
+P recommendation
+P workflow. Iteration 4 – Clinic Dashboard functions, dentist Broader clinic Operations
+P management, audit logs, and patient and patient portal features.
+P workflows. Iteration 5 – Testing and
+P API contract reconciliation, database and Hardened and Hardening
+P enum corrections, image access controls, verified system
+P rate limiting, validation, security behavior.
+P headers, and frontend integration fixes.
+P Each iteration in Table 10 was carried through the full cycle shown earlier in Figure 1: the corresponding requirements were planned and analyzed, the affected parts of the system were designed, the frontend and backend components were developed and integrated, the iteration's features were tested, the result was evaluated against the intended requirement, and any issue found was corrected before the next iteration began. The Gantt chart in Figure 6 visualizes this same sequence.
+P The system was implemented as a three-tier web application: a React.js single-page frontend, a FastAPI REST backend exposing versioned JSON endpoints, and a PostgreSQL relational database. The AI detection pipeline (YOLOv8 and YOLOv12) and the KNN-based risk classification and recommendation engine were developed as backend modules invoked synchronously by the screening endpoint. The complete technical specification of this architecture is presented in Chapter IV.
+H 3.9 System Testing
+P Toothwise was tested through functional, integration, and security testing conducted against the running backend using FastAPI's TestClient, supplemented by manual and code-review verification for checks that are not easily exercised through an automated client alone.
+P To confirm that Toothwise satisfies its intended functional requirements, a systematic software testing phase was conducted. This process evaluated module-level correctness, system-wide component interaction, and user acceptance, while specifically validating the accuracy of the YOLOv8/YOLOv12 detection pipeline and the KNN risk classification and recommendation engine in producing appropriate detections, risk classifications, and prevention plans based on patient screening data.
+P The system was evaluated using three structured testing tiers: Unit Testing (utilizing a white-box approach), Integration Testing (utilizing a gray-box approach), and User Acceptance Testing (utilizing a black-box approach). Structured test case matrices recorded the function under test, input parameters, expected behavior, actual results, and overall pass/fail status.
+H 3.10 Full Current System Screenshots
+PN This section documents the current Toothwise system as implemented, one screen per numbered figure, in the order a user would encounter them: the public landing page, staff login, the dashboard, patient management, the screening workflow and results, dentist management, the audit log, and the patient portal. Captured screenshots require a running instance of the system, a live PostgreSQL database with representative seeded data, and the FastAPI backend serving the React frontend, which is outside what can be produced from the static project files alone.
+PN **Figure 7 Public Landing Page.*** This is the first page guests see when they visit the site. It introduces what the platform does and gives new users a quick way to sign up or log in.** * Figure 8 Staff Login Page. ***This is the login portal reserved exclusively for staff. It includes inputting an email address along with a password for a secure login. *
+P * * **Figure 9 Dashboard.** *This is the main screen staff members see right after logging in. It gives them quick summary screenings of patients and cases as well as monthly reports for the system. * **Figure 10 Patient List.** *Displays all registered patient in the system. Let staff quickly view basic details, and click on a patient to open their full medical profile. Staff may also register patients manually. *
+PN **Figure 11 Patient Details.** *This screen shows the complete record for an individual patient. It organizes their medical history, current treatment plans, and personal contact information all in one place. * **Figure 12 New Screening (Capture/Upload).** *This screen allows staff to capture a photo live using the system's built-in camera feature or upload an existing file directly from their device. * **Figure 13 Screening Results.** *This screen displays the system's analysis of the uploaded image, highlighting any detected abnormalities, calculating an overall risk level, and providing a recommended prevention plan. *
+PN **Figure 14 Staff Management (Admin).** *This dashboard lets system administrators manage the workforce by adding new employees, updating staff details, and setting specific access permissions. * **Figure 15 Audit Log (Admin).** *This administrative panel tracks all user actions across the system, creating a permanent timeline of who logged in, what data was changed, and when it happened. *
+PN **Figure 16 Patient Portal—Login.*** This is the login portal for patients, allowing them to securely access their own accounts using their personal credentials. *
+PN **Figure 17 Patient Portal — Register.** *This page allows new patients to create an account by filling out their basic personal information, contact details, and password. * 
+PN **Figure 18 Patient Portal — Screening History.*** This screen gives patients a private dashboard where they can see a complete list of their past evaluations, tracking their previous results and dates over time. *
+H CHAPTER IV
+H RESULTS AND DISCUSSION
+P This chapter presents the results obtained from the development, training, testing, and evaluation of Toothwise. The results are organized according to the Statement of the Problem and the Specific Objectives in Chapter I: the results of the trained detection models (Specific Objective 1), the specialization and technical results of the implemented system (Specific Objectives 2 and 3), the software quality evaluation based on ISO/IEC 25010 (Specific Objective 4), and the comparison of screening consistency and screening time against the manual process (Specific Objective 5). Values marked **[TBD]** are placeholders for data that had not yet been collected when this chapter was drafted; they are not results.
+H 4.1 Results of the Trained Datasets
+P This section answers the first problem of the study by reporting how accurately the trained models detect tartar, plaque, cavity, gum inflammation, and healthy tooth on still intraoral photographs, and how YOLOv8 and YOLOv12 compare in precision, recall, mAP, and inference speed.
+H 4.1.1 Dataset Preparation
+P Four publicly available, annotated dental image datasets exported in YOLOv8 format were merged into a single training corpus. Because each source used a different class list, every source class was remapped to one of the five Toothwise classes or dropped when it fell outside the scope of the study (for example, missing teeth, malalignment, spacing, ulcers, and hypodontia). Segmentation polygons in the source labels were converted into bounding boxes so that all annotations share the same detection format. Table 12 presents the class mapping applied to each source. **Table 12** *Source Datasets and Class Remapping to the Toothwise Taxonomy*
+H Original classes
+H Mapped to Toothwise class
+H Dropped classes
+H Source dataset
+P **(export)** dadad12 (v3) calculus, cavities,
+P calculus → tartar; cavities → maligned, maligned, missing,
+P cavity; plaque → plaque missing, spacing, plaque, spacing, stains stains DenPal (v8) Caries, Missing Tooth,
+P Caries → cavity; Tartar → Missing Tooth Tartar tartar oral-diseases calculus, caries,
+P calculus → tartar; caries → hypodontia, (v2) gingivitis, hypodontia, cavity; gingivitis → tooth_discolation, tooth_discolation, ulcer gum_inflammation
+P ulcer Teeth 2 (v1) Caries, Cavity, Healthy
+P Caries → cavity; Cavity → None cavity; Healthy →
+P healthy_tooth *Source: class lists and remap printed by the YOLOv12 training notebook (train_dental_yolov12_5class_2.ipynb).*
+P After merging, the dataset was divided into training, validation, and test splits, as shown in Table 13. Images that contained only dropped classes were kept as background (negative) images, which teach the models not to raise false detections on unremarkable regions. **Table 13** *Merged Dataset Split*
+H Split
+H Images
+H Background images (no target
+H Share of images
+P **label)** Training 40,271 10,791 83.0% Validation 5,299 2,833 10.9% Test 2,930 1,067 6.0% Total 48,500 14,691
+P 100.0% *Label rows written during the merge: 86,028 bounding boxes and 7,457 polygons converted to boxes (93,485 in total). Test background count taken from the rebuilt test split.*
+P Table 14 presents the number of labeled findings per class in the held-out test split, which was used for the per-class evaluation in Section 4.1.4. The classes are clearly unbalanced, ranging from 42 labeled healthy tooth instances to 2,716 cavity instances. **Table 14** *Labeled Instances per Class (Test Split, 2,930 Images)*
+H Class
+H Labeled instances
+H Images containing the
+H Share of
+H class
+P **instances** Healthy tooth 39 42 0.6% Cavity 1,190 2,716 39.6% Gum inflammation 297 1,544 22.5% Plaque 147 554 8.1% Tartar 558 2,009 29.3% Total — 6,865
+P 100.0% *Counted from the rebuilt test split (same source order, class remap, and polygon-to-box conversion as the training notebook).*
+H 4.1.2 Training Configuration
+P Both models were trained with the Ultralytics framework on Google Colab using an NVIDIA Tesla T4 GPU, with identical hyperparameters and the same merged dataset so that the comparison is fair. Training was resumed from the last saved checkpoint whenever a Colab session disconnected. Table 15 summarizes the configuration, which was read directly from the saved model checkpoints. **Table 15** *Training Configuration of the Two Detection Models*
+H Parameter
+H YOLOv8
+P **YOLOv12** Model scale YOLOv8m (medium; depth YOLOv12m (medium)
+P 0.67, width 0.75) Trainable parameters 25,859,215
+P 19,662,111 Pretrained starting weights Yes (COCO) Yes (COCO) Classes 5 5 Epochs 60 60 Image size
+P 640 × 640 px
+P 640 × 640 px Batch size 12 12 Optimizer
+P auto (selected by Ultralytics)
+P auto (MuSGD, lr 0.01,
+P momentum 0.9) Early-stopping patience 15 epochs
+P 15 epochs Random seed 0 0
+H Parameter
+H YOLOv8
+P **YOLOv12** Ultralytics version 8.4.146 8.4.160 Training hardware
+P Google Colab, NVIDIA Tesla
+P Google Colab, NVIDIA Tesla T4 (15 GB)
+P T4 (15 GB) Checkpoint date (UTC) 2026-09-10 2026-09-23
+H 4.1.3 Overall Detection Performance of YOLOv8 and YOLOv12
+P The models were evaluated with the standard object-detection metrics. Precision is the share of predicted boxes that are correct, and recall is the share of actual findings that the model detected. The F1-score is the harmonic mean of precision and recall. mAP@50 is the mean average precision across the five classes when a predicted box must overlap the labeled box by at least 50% (IoU 0.50), and mAP@50-95 averages this over stricter overlaps from 0.50 to 0.95. Detection accuracy, which is not a single built-in metric for object detection, is reported separately in Section 4.1.5.
+P Table 16 presents the overall results on two splits: the validation split (5,299 images), which was scored automatically at the end of training, and the held-out test split (2,930 images), which neither model saw during training and which is the primary basis for the comparison. **Table 16** *Overall Detection Performance of YOLOv8 and YOLOv12*
+H Metric
+H YOLOv8
+H YOLOv12
+H YOLOv8 (test)
+H YOLOv12 (test)
+H (validation)
+P **(validation)** Precision 53.96% 49.43% 54.32% 52.94% Recall 49.73% 49.05% 52.34% 50.06% F1-score 51.76% 49.24% 53.31% 51.46% mAP@50 46.83% 45.02% 51.91% 48.11% mAP@50-95 26.80% 25.87% 28.53%
+P 26.28% *Validation: train_metrics stored in the checkpoints (epoch 60). Test: one prediction pass over the held-out test split (confidence 0.001, NMS IoU 0.70, image size 640), scored with the Ultralytics matching rule.*
+PN **Figure 19** *mAP@50 and mAP@50-95 per Training Epoch for YOLOv8 and YOLOv12*
+P **Figure 20** *Final Validation Metrics of YOLOv8 and YOLOv12*
+P On the validation split, YOLOv8 obtained a slightly higher score than YOLOv12 on every overall metric, with an mAP@50 of 46.83% against 45.02%. On the held-out test split, YOLOv8 obtained the higher mAP@50 (51.91% against 48.11%) and mAP@50-95 (28.53% against 26.28%). Test precision was 54.32% for YOLOv8 and 52.94% for YOLOv12, and test recall was 52.34% and 50.06%, respectively. YOLOv12 reached its results with about 24% fewer parameters (19.66 million against 25.86 million).
+P Figure 19 shows that both models improved quickly during the first ten epochs and then levelled off: after roughly epoch 25, validation mAP@50 rose by only about two percentage points for either model. Additional epochs alone are therefore unlikely to produce large gains; further improvement depends more on the training data than on longer training.
+H 4.1.4 Per-Class Detection Results
+P Tables 17 and 18 present the precision, recall, F1-score, mAP@50, and mAP@50-95 of each class on the test split, and Figure 21 compares the per-class mAP@50 of the two models and the fused ensemble. **Table 17** *Per-Class Detection Performance of YOLOv8 (Test Split)*
+H Class
+H Instances
+H Precision
+H Recall
+H F1-score
+H mAP@50
+H mAP@50-
+H 95
+PN Healthy tooth 42 42.86% 83.33% 56.60% 80.54% 62.37% Cavity 2,716 65.55% 69.43% 67.43% 66.33% 33.11% Gum inflammation 1,544 61.01% 49.85% 54.87% 52.35% 21.97% Plaque 554 42.84% 7.04% 12.09% 7.36% 3.06% Tartar 2,009 59.33% 52.07% 55.46% 52.97% 22.15% All classes 6,865 54.32% 52.34% 53.31% 51.91%
+P 28.53% *Source: test-split evaluation pass, scored with the Ultralytics matching rule.* **Table 18** *Per-Class Detection Performance of YOLOv12 (Test Split)*
+H Class
+H Instances
+H Precision
+H Recall
+H F1-score
+H mAP@50
+H mAP@50-
+H 95
+PN Healthy tooth 42 43.40% 78.57% 55.91% 70.13% 54.83% Cavity 2,716 62.82% 69.26% 65.88% 64.50% 32.27% Gum inflammation 1,544 60.59% 45.60% 52.04% 48.95% 20.16% Plaque 554 39.55% 8.30% 13.73% 7.15% 3.52% Tartar 2,009 58.34% 48.59% 53.03% 49.82% 20.62% All classes 6,865 52.94% 50.06% 51.46% 48.11%
+P 26.28% *Source: test-split evaluation pass, scored with the Ultralytics matching rule.*
+P **Figure 21** *Per-Class mAP@50 on the Test Split*
+P Performance differed strongly between classes. Among the well-represented classes, both models detected cavity best (mAP@50 of 66.33% for YOLOv8 and 64.50% for YOLOv12, from 2,716 labeled instances) and plaque worst (7.36% and 7.15%). In descending order of mean mAP@50, the classes ranked as follows: healthy tooth, cavity, tartar, gum inflammation, plaque. The healthy tooth class scored 80.54% and 70.13%, but the test split contains only 42 labeled healthy tooth instances in 39 images, so this result is less certain than the others.
+P The weakest class, plaque, is the main limitation of the trained models. Of the 554 labeled plaque instances in the test split, YOLOv8 found 7.04% and YOLOv12 8.30% at the confidence that gives each model its best F1-score. Plaque appears as a thin, low-contrast film that is hard to separate from the tooth surface and from tartar in an ordinary photograph, and its boundaries are hard to annotate consistently, which makes an overlap of 0.50 with the labeled box difficult to reach. In addition, the plaque labels come from only one of the four source datasets. Class frequency also matters: the test split contains 554 plaque instances against 2,716 cavity instances. These are the same difficulties that the first problem of the study identifies in visual-only screening.
+H 4.1.5 Detection Accuracy and Confusion Matrix
+P Object detection does not have a single built-in accuracy measure, because a model can be wrong in three ways: it can label a finding with the wrong class, raise a box where there is no finding (false alarm), or miss a finding entirely. This study therefore defines detection accuracy as the number of correctly located and correctly labeled findings divided by the total of correct, wrongly labeled, false-alarm, and missed findings. The counts were taken from the confusion matrix at the confidence threshold used by the deployed system (0.25) and an IoU of 0.45. Tables 19 and 20 present the result, and Figure 22 shows the confusion matrices. **Table 19** *Detection Accuracy on the Test Split (Confidence 0.25, IoU 0.45)*
+H Model
+H Correct
+H Missed
+H Wrong
+H False
+H Detection
+H class
+H alarms
+P **accuracy** YOLOv8 3,877 114 1,992 2,874 43.77% YOLOv12 3,726 119 2,039 3,020 41.85% Fused ensemble 4,491 158 3,574 2,216
+P 43.02% *Detection accuracy = Correct / (Correct + Wrong class + False alarms + Missed).* **Table 20** *Detection Accuracy per Class on the Test Split*
+H Class
+H YOLOv8
+H YOLOv12
+P **Fused ensemble** Healthy tooth 38.20% 39.29% 33.94% Cavity 52.87% 51.38% 49.83% Gum inflammation 40.53% 37.16% 42.25% Plaque 6.46% 7.58% 10.46% Tartar 40.52% 38.01%
+P 39.54% *Per class: correct detections of the class divided by all detections and labels of that class (correct + wrong + false alarms + missed).*
+PN **Figure 22** *Confusion Matrices on the Test Split (Columns Normalized by True Class)*
+P At the deployed confidence threshold, YOLOv8 reached a detection accuracy of 43.77%, YOLOv12 41.85%, and the fused ensemble 43.02%; the highest was obtained by YOLOv8. For both single models, the most common error type was missed findings. Wrong-class detections were comparatively rare, which means that when a model does locate a finding it usually names the condition correctly; most errors come from findings that are not detected at all or from boxes raised on unremarkable areas. The most frequent confusion between two conditions was a true tartar labeled as cavity.
+P The fused ensemble had a slightly lower detection accuracy than YOLOv8 even though its mAP@50 was higher (Section 4.1.7). The ensemble keeps a finding reported by either model, so it missed fewer findings (2,216 against 2,874) but raised more false alarms (3,574 against 1,992). Detection accuracy weighs both errors equally, whereas mAP rewards ranking correct findings above false ones across all confidence levels.
+P Two cautions apply to these counts. First, the four source datasets were not all annotated for the same conditions; for example, a photograph from a source without a gum inflammation class may show inflamed gums that were never labeled. A correct detection on such an image is counted as a false alarm, so the false-alarm counts, and therefore the accuracy, are conservative. Second, the counts depend on the confidence threshold: a lower threshold finds more findings but raises more false alarms.
+P For a screening support tool, missed findings are the more serious error because a false alarm is reviewed and dismissed by the dentist, whereas a missed finding may not be examined. This supports keeping the dentist's visual examination as the reference and presenting the detections as suggestions.
+H 4.1.6 Inference Speed
+P Inference speed was measured on the deployment-class workstation without a GPU, which reflects the clinic setting described in Chapter III. Each model processed four clinic screening images five times at 640 × 640 pixels after a warm-up pass. Table 21 reports the mean time per image. **Table 21** *Inference Time per Image on CPU*
+H Configuration
+H Mean time per
+H Standard
+H Model forward
+H image
+H deviation
+P **pass only** YOLOv8 215.9 ms 8.9 ms 203.7 ms YOLOv12 206.5 ms 7.6 ms
+P 198.9 ms Both models (ensemble, run in 506.8 ms 138.7 ms
+P — sequence) *Machine: Intel Core i7-13620H, 16 GB RAM, CPU only (PyTorch 2.14 CPU, Ultralytics 8.4.116); n = 20 timed predictions per configuration.*
+P Both models analyzed a photograph in about one fifth of a second, with YOLOv12 about 4% faster than YOLOv8 on the same hardware. Running both models for the ensemble took about half a second per image. This is well within an interactive response time for a screening workflow, in which the dentist uploads a photograph and reviews the results on the same screen.
+H 4.1.7 Ensemble Fusion
+P In the deployed system, both models analyze each image and their outputs are combined into a single clinical detection set. Boxes from both models are grouped when they share a label and overlap with an IoU of at least 0.50; each group is merged into one box whose coordinates are the confidence-weighted average of its members (weighted box fusion). A finding confirmed by both models receives a confidence increase of 0.08, capped at 0.98, because agreement between two independently trained models is stronger evidence than either model alone.
+P To measure the effect of fusion, the test split was passed once through both models, and the YOLOv8 output, the YOLOv12 output, and the fused output were scored with the same matching code. Table 22 presents the result. **Table 22** *YOLOv8, YOLOv12, and the Fused Ensemble on the Test Split*
+H Metric
+H YOLOv8
+H YOLOv12
+P **Fused ensemble** Precision 54.32% 52.94% 53.51% Recall 52.34% 50.06% 55.77% F1-score 53.31% 51.46% 54.62% mAP@50 51.91% 48.11% 54.24% mAP@50-95 28.53% 26.28%
+P 29.31% mAP@50 – healthy tooth 80.54% 70.13%
+P 83.11% mAP@50 – cavity 66.33% 64.50%
+P 66.72% mAP@50 – gum inflammation 52.35% 48.95%
+P 56.36% mAP@50 – plaque 7.36% 7.15%
+P 9.45% mAP@50 – tartar 52.97% 49.82%
+P 55.58% *Same prediction pass as Tables 16 to 18; the single-model columns repeat those results.*
+P The fused ensemble obtained an mAP@50 of 54.24%, against 51.91% for the better single model (YOLOv8) in the same evaluation, a difference of +2.34 percentage points, and it scored higher than YOLOv8 on all five classes. Its recall was 55.77% against 52.34%, and its precision 53.51% against 54.32%. At the deployed confidence threshold, the ensemble missed 2,216 findings against 2,874 for YOLOv8, but raised 3,574 false alarms against 1,992, because a box from either model is kept.
+P Fusion therefore improved on both single models: findings that one model misses are often detected by the other, and agreement between the two raises the confidence of the findings that both models report. This result supports the design decision to run both models in the deployed system rather than choosing one.
+H 4.1.8 Summary of the Model Comparison
+P In answer to the first problem, both models learned to detect the five target classes. On the held-out test split, YOLOv8 obtained the higher mAP@50 (YOLOv8 51.91%, YOLOv12 48.11%), while YOLOv12 was lighter and slightly faster (about 206 ms against 216 ms per image on CPU). The difference between the two models is small compared with the difference between classes: cavity was detected reliably, while plaque remained difficult for both. The fused ensemble reached an mAP@50 of 54.24% and a detection accuracy of 43.02%. These results support the delimitation in Chapter I that Toothwise is a screening support tool and not a diagnostic replacement: detections are presented to the dentist as suggestions, and the dentist confirms or corrects the findings and the risk tier.
+H 4.2 Specialization and Technical Results
+P This section presents the technical results of the implemented system: the detection pipeline, the risk scoring engine, the KNN recommendation feature, the results interface and patient records, role-based access, the patient-facing chatbot, and the measured quality of the web application.
+H 4.2.1 AI Detection Pipeline
+P The FastAPI backend loads both trained checkpoints when the server starts and exposes the screening workflow through authenticated REST endpoints. For each uploaded intraoral photograph the pipeline (1) validates the file type and size (maximum 15 MB), (2) runs YOLOv8 and YOLOv12, (3) fuses their detections as described in Section 4.1.6, (4) computes a risk score and risk tier, (5) generates a prevention plan, and (6) stores the image, every detection with its bounding box and confidence, the risk result, and the plan in the patient's record. The response includes the fused detections and the raw output of each model.
+H 4.2.2 Risk Scoring Engine
+P The risk score is rule-based so that every score can be explained to the patient and audited by the dentist. Each non-healthy detection contributes its class severity multiplied by its confidence; the score is the highest such value plus 6 points for every additional finding (up to 5 additional findings), capped at 100. Table 23 lists the severity weights and the tier thresholds. **Table 23** *Risk Scoring Weights and Tier Thresholds*
+H Class
+H Severity weight
+H Highest possible score from one
+P **finding** Healthy tooth 0
+P 0 (no risk contribution) Plaque 25 25 (LOW) Tartar 35
+P 35 (MEDIUM) Gum inflammation 45 45 (MEDIUM) Cavity 70
+P 70 (HIGH) *Tiers: LOW 0–34, MEDIUM 35–69, HIGH 70–100. Source: backend/app/ml/labels.py (SEVERITY_WEIGHT) and backend/app/ml/risk_engine.py.*
+H 4.2.3 KNN-Based Recommendation Feature
+P A K-Nearest Neighbors classifier (K = 5, distance-weighted) assigns each screening to a LOW, MEDIUM, or HIGH tier from its detection profile, and the prevention plan is composed from that tier and the specific conditions found. The classifier was first trained on synthetic reference cases generated from the clinical scoring rule. Every tier that a dentist confirms or corrects in the system is stored as a real labeled case and added to the reference data on retraining.
+P Table 24 presents the result of the evaluation script on 2,000 synthetic cases that were not used in training. Because these cases follow the same rule as the training cases, the result measures how faithfully the classifier reproduces the rule, not its clinical accuracy. **Table 24** *KNN Tier Classification on Unseen Synthetic Cases*
+H Risk tier
+H Precision
+H Recall
+H F1-score
+P **Cases** LOW 98.35% 96.30% 97.31% 864 MEDIUM 90.18% 95.47% 92.75% 971 HIGH 76.19% 58.18% 65.98% 165 Overall (weighted) — — 92.51%
+P 2,000 *Overall accuracy: 92.75%. Source: python -m app.ml.evaluate_knn.*
+P The classifier agreed with the rule on 92.75% of the unseen cases. Most errors occurred at tier boundaries; the weakest tier was HIGH, where 69 of 165 cases were classified as MEDIUM (recall 58.18%). No LOW case was classified as HIGH and no HIGH case as LOW. Because a missed HIGH tier is the most consequential error, the dentist's confirmation step remains part of the workflow. The accuracy of the classifier against dentist-confirmed tiers is **[TBD – number of dentist-confirmed cases and accuracy; none were recorded when this chapter was drafted]**.
+H 4.2.4 Results Interface and Patient Records
+P In answer to the second problem, every screening is saved as a standardized visual record: the original photograph, color-coded bounding boxes with the condition label and confidence, a plain-language description of each condition, the risk score and tier, the prevention plan, and the dentist's clinical notes. The patient record lists all screenings in chronological order with a risk trend chart, so findings can be compared across visits. Each screening can be exported as a PDF report. Patients can register for the self-service portal and view their own screening history, findings, and prevention plans, but no other patient's data.
+H 4.2.5 Role-Based Web Application
+P The staff side of the system enforces three roles. The dentist acts as administrator and can manage staff accounts and view the audit log; the receptionist manages patient registration and records; and the dental assistant performs screenings. Patients use a separate login scope. Access is enforced by the backend on every request, not only by hiding menu items. Passwords are hashed with bcrypt, sessions use JSON Web Tokens, login and chatbot requests are rate-limited, and sensitive staff actions are written to an append-only audit log.
+P The backend has an automated test suite of 84 test cases covering authentication, staff management, patients, screenings, labels, the risk engine, the recommender, and role permissions. All 84 tests passed in the final run (Table 25). **Table 25** *Automated Backend Test Results*
+H Test module
+H Area tested
+H Test cases
+P **Result** test_auth.py
+P Staff and patient login, tokens 11 Passed test_dentists.py Staff account management 14 Passed test_patients.py Patient records 10 Passed test_screenings.py
+P Screening workflow and storage 9 Passed test_labels.py Class list consistency 11 Passed test_risk_engine.py
+P Risk score and tier 9 Passed test_recommender.py
+P KNN tier and prevention plan 9 Passed test_roles.py Three-role access control 11 Passed Total 84
+P 84 passed, 0 failed *Source: python -m pytest in backend/.*
+H 4.2.6 AI Chatbot
+P The public website includes an AI assistant for general dental-care questions and questions about the clinic and the Toothwise service. It is powered by the Google Gemini API. Before a message is sent to the model, e-mail addresses, phone numbers, and record identifiers are removed, and any request for a personal record or screening result is answered with a referral to the secure patient portal instead of being forwarded. Requests are limited to 12 per minute per client.
+H 4.2.7 Web Performance and Accessibility
+P The production build of the frontend was audited with Google Lighthouse 12 on the public pages at a mobile width (390 px, simulated slow 4G) and a desktop width (1440 px). Table 26 presents the scores. **Table 26** *Lighthouse Audit Results*
+H Page
+H Viewport
+P **Performance Accessibility**
+H Best
+H Largest
+H practices
+H Contentful
+P **Paint** Landing Desktop 99 100 100 0.8 s Landing Mobile 83 100 100
+P 4.0 s Staff login Desktop 100 100 100
+P 0.7 s Staff login Mobile 92 100 100
+P 2.9 s Patient portal Desktop 100 100 100
+P 0.7 s Patient portal Mobile 91 100 100
+P 3.0 s *Cumulative Layout Shift was 0 on every page. Source: docs/frontend_polish_plan.md.*
+P Accessibility and best practices scored 100 on every audited page, and performance ranged from 99 to 100 on desktop and from 83 to 92 on mobile. The lowest score, the landing page on mobile, is due to the hero photograph being discovered late in page loading. Splitting the application by route reduced the main JavaScript bundle from 231 KB to 95 KB (compressed). The signed-in staff pages, which Lighthouse cannot reach, were audited with axe-core 4.14 against WCAG 2.0 and 2.1 Level A and AA rules on all eight staff routes and five dialogs in both light and dark mode; the final audit found zero violations.
+H 4.3 Software Quality Evaluation Based on ISO/IEC 25010
+P This section answers the fourth problem of the study. **[TBD – the evaluation** 
+H survey is scheduled for administration; every number in this section is a placeholder
+H to be replaced with the tallied responses.]
+H 4.3.1 Respondents
+P The evaluation targets 100 respondents in two groups: 30 IT experts (software developers, systems analysts, database administrators, and IT educators) and 70 clinical end users (licensed dentists, dental assistants, receptionists, and patients of CodiSmile Dental Clinic). Table 27 presents the planned and actual distribution of respondents. **Table 27** *Distribution of Respondents*
+H Respondent group
+H Planned (n)
+H Actual (n)
+P **Percentage** IT experts 30
+H [TBD]
+P **[TBD]** Licensed dentists 10
+H [TBD]
+P **[TBD]** Dental assistants 10
+H [TBD]
+P **[TBD]** Receptionists 5
+H [TBD]
+P **[TBD]** Patients 45
+H [TBD]
+P **[TBD]** Total 100
+H [TBD]
+P 100%
+PN **Table 28** *Demographic Profile of Respondents*
+H Profile
+H Category
+H Frequency
+P **Percentage** Age
+P 18–25 / 26–35 / 36–45 / 46–55 / 56
+H [TBD]
+H [TBD]
+P and above Gender
+P Male / Female / Prefer not to say
+H [TBD]
+P **[TBD]** Experience with digital
+P Less than 1 year / 1–3 years / 4–7
+H [TBD]
+P **[TBD]** health or IT systems
+P years / 8 years or more *Expand each row into one row per category when the responses are tallied.*
+H 4.3.2 Research Instrument
+P The instrument (Appendix A) contains 26 statements grouped under six quality characteristics of the ISO/IEC 25010 software product quality model, as listed in Table 29. Respondents rate each statement after using the system. **Table 29** *ISO/IEC 25010 Characteristics Evaluated*
+H Characteristic
+H Item codes
+H Items
+P **What is evaluated** Functional Suitability FS1–FS5 5
+P Patient records, AI detection, risk scoring,
+P KNN plan, PDF report Performance Efficiency PE1–PE4 4
+P Detection response time, page loading,
+P resource use, concurrency Usability US1–US5 5
+P Layout, result presentation, screening
+P workflow, patient portal, legibility Reliability RE1–RE4 4
+P Error handling, availability, data integrity,
+P backups Security and Privacy SP1–SP4 4
+P Authentication and roles, password hashing,
+P image protection, audit log CP1–CP4 4 Compatibility and
+P Browsers, screen sizes, cameras, Portability deployment Total 26
+H 4.3.3 Rating Scale and Interpretation
+P Each statement is rated on a five-point Likert scale. The weighted mean of each item and characteristic is interpreted using the ranges in Table 30. **Table 30** *Likert Scale and Verbal Interpretation*
+H Scale
+H Mean range
+H Verbal interpretation
+P **Acceptability** 5 4.21 – 5.00 Strongly Agree Highly Acceptable 4 3.41 – 4.20 Agree Acceptable 3 2.61 – 3.40 Neutral Moderately Acceptable 2 1.81 – 2.60 Disagree Slightly Acceptable 1 1.00 – 1.80 Strongly Disagree Not Acceptable
+H 4.3.4 Statistical Treatment
+P The weighted mean of each item is computed as WM = Σ(f × x) / N, where f is the number of respondents who chose a rating, x is the rating (1 to 5), and N is the number of respondents. The mean of a characteristic is the average of its item means, and the overall mean is the average of the six characteristic means. The standard deviation is reported to show how much the respondents agreed with one another.
+H 4.3.5 Evaluation Results per Characteristic
+P Tables 31 to 36 present the weighted mean, standard deviation, and verbal interpretation of each statement, grouped by characteristic. The statements are abbreviated; the full wording is in Appendix A. **Table 31** *Evaluation Results for Functional Suitability*
+H Code
+H Statement
+H WM
+H SD
+H Verbal
+P **interpretation** FS1
+P The system accurately captures and maintains
+H [TBD]
+H [TBD]
+H [TBD]
+P patient information and records. FS2
+H [TBD]
+H [TBD]
+H [TBD]
+P The AI detection module correctly identifies
+P and localizes dental conditions. FS3
+P The risk score (0–100) and risk tier
+H [TBD]
+H [TBD]
+H [TBD]
+P classification are appropriate to the findings. FS4
+H [TBD]
+H [TBD]
+H [TBD]
+P The KNN recommendation feature generates
+P relevant, condition-specific prevention plans. FS5
+P The system generates complete PDF screening
+H [TBD]
+H [TBD]
+H [TBD]
+P reports.
+P Functional Suitability — mean
+H [TBD]
+H [TBD]
+H [TBD]
+H [TBD – one paragraph interpreting the Functional Suitability results: the
+H highest- and lowest-rated statements and what respondents' comments say about
+P **them.] Table 32** *Evaluation Results for Performance Efficiency*
+H Code
+H Statement
+H WM
+H SD
+H Verbal
+P **interpretation** PE1
+P The AI model returns detection results within
+H [TBD]
+H [TBD]
+H [TBD]
+P an acceptable time. PE2
+P Pages, patient lists, and images load quickly.
+H [TBD]
+H [TBD]
+P **[TBD]** PE3
+P The system runs smoothly without using
+H [TBD]
+H [TBD]
+H [TBD]
+P excessive computer resources. PE4
+P Concurrent requests and database transactions
+H [TBD]
+H [TBD]
+H [TBD]
+P are handled reliably.
+P Performance Efficiency — mean
+H [TBD]
+H [TBD]
+H [TBD]
+H [TBD – one paragraph interpreting the Performance Efficiency results: the
+H highest- and lowest-rated statements and what respondents' comments say about
+P **them.] Table 33** *Evaluation Results for Usability*
+H Code
+H Statement
+H WM
+H SD
+H Verbal
+P **interpretation** US1
+H [TBD]
+H [TBD]
+H [TBD]
+P The interface layout is well-structured,
+P intuitive, and easy to navigate. US2
+P Detection results, color-coded labels, and risk
+H [TBD]
+H [TBD]
+H [TBD]
+P badges are easy to understand. US3
+H [TBD]
+H [TBD]
+H [TBD]
+P The four-step screening workflow is easy to follow. US4
+P The patient portal is accessible and patient-
+H [TBD]
+H [TBD]
+H [TBD]
+P friendly. US5
+P Contrast, typography, and light and dark
+H [TBD]
+H [TBD]
+H [TBD]
+P themes make the text easy to read.
+P Usability — mean
+H [TBD]
+H [TBD]
+H [TBD]
+H [TBD – one paragraph interpreting the Usability results: the highest- and
+P **lowest-rated statements and what respondents' comments say about them.] Table 34** *Evaluation Results for Reliability*
+H Code
+H Statement
+H WM
+H SD
+H Verbal
+P **interpretation** RE1
+P The system handles invalid inputs and
+H [TBD]
+H [TBD]
+H [TBD]
+P interruptions gracefully. RE2
+H [TBD]
+H [TBD]
+H [TBD]
+P The system remains available for continuous use. RE3
+P Data integrity is maintained across all records.
+H [TBD]
+H [TBD]
+P **[TBD]** RE4
+P Database backups run reliably to protect
+H [TBD]
+H [TBD]
+H [TBD]
+P patient data.
+P Reliability — mean
+H [TBD]
+H [TBD]
+H [TBD]
+H [TBD – one paragraph interpreting the Reliability results: the highest- and
+P **lowest-rated statements and what respondents' comments say about them.] Table 35** *Evaluation Results for Security and Privacy*
+H Code
+H Statement
+H WM
+H SD
+H Verbal
+P **interpretation** SP1
+P Authentication uses secure tokens and role-
+H [TBD]
+H [TBD]
+H [TBD]
+P based access. SP2
+P Passwords are stored using secure hashing.
+H [TBD]
+H [TBD]
+P **[TBD]** SP3
+P Patient photographs are protected from
+H [TBD]
+H [TBD]
+H [TBD]
+P unauthorized access. SP4
+H [TBD]
+H [TBD]
+H [TBD]
+P An audit trail records sensitive administrative and clinical actions.
+P Security and Privacy — mean
+H [TBD]
+H [TBD]
+H [TBD]
+H [TBD – one paragraph interpreting the Security and Privacy results: the
+H highest- and lowest-rated statements and what respondents' comments say about
+P **them.] Table 36** *Evaluation Results for Compatibility and Portability*
+H Code
+H Statement
+H WM
+H SD
+H Verbal
+P **interpretation** CP1
+P The application works consistently across
+H [TBD]
+H [TBD]
+H [TBD]
+P mainstream browsers. CP2
+H [TBD]
+H [TBD]
+H [TBD]
+P The system adapts to desktop, laptop, and tablet screens. CP3
+P The system works with standard device
+H [TBD]
+H [TBD]
+H [TBD]
+P cameras for image capture. CP4
+H [TBD]
+H [TBD]
+H [TBD]
+P The system can be deployed on standard clinic computers.
+P Compatibility and Portability — mean
+H [TBD]
+H [TBD]
+H [TBD]
+H [TBD – one paragraph interpreting the Compatibility and Portability results:
+H the highest- and lowest-rated statements and what respondents' comments say about
+H them.]
+H 4.3.6 Summary of the ISO/IEC 25010 Evaluation
+PN **Table 37** *Summary of ISO/IEC 25010 Evaluation Results*
+H Characteristic
+H IT experts
+H Clinical
+H Overall
+H SD
+H Interpretation
+H (WM)
+H WM
+H users
+P **(WM)** Functional Suitability
+H [TBD]
+H [TBD]
+H [TBD]
+H [TBD]
+P **[TBD]** Performance Efficiency
+H [TBD]
+H [TBD]
+H [TBD]
+H [TBD]
+P **[TBD]** Usability
+H [TBD]
+H [TBD]
+H [TBD]
+H [TBD]
+P **[TBD]** Reliability
+H [TBD]
+H [TBD]
+H [TBD]
+H [TBD]
+P **[TBD]** Security and Privacy
+H [TBD]
+H [TBD]
+H [TBD]
+H [TBD]
+H [TBD]
+H [TBD]
+H [TBD]
+H [TBD]
+H [TBD]
+P **[TBD]** Compatibility and Portability Overall
+H [TBD]
+H [TBD]
+H [TBD]
+H [TBD]
+H [TBD]
+H [TBD – discussion of the overall result: the overall weighted mean and its
+H interpretation, the highest- and lowest-rated characteristics, any difference between
+H IT experts and clinical users, and the main themes of the qualitative feedback in
+H Section D of the instrument.]
+H 4.4 Screening Consistency and Screening Time
+P This section answers the fifth problem of the study by comparing Toothwise-assisted screening with the current manual process, using the dentist's findings as the reference. **[TBD – this comparison had not been conducted when this chapter was** 
+P **drafted.] Table 38** *Screening Time: Manual Process versus Toothwise*
+H Measure
+H Manual process
+H With Toothwise
+P **Difference** Number of screenings timed
+H [TBD]
+H [TBD]
+P — Mean screening and documentation
+H [TBD]
+H [TBD]
+P **[TBD]** time per patient Standard deviation
+H [TBD]
+H [TBD]
+P — Statistical test (e.g., paired t-test) and — —
+P **[TBD]** p-value
+PN **Table 39** *Screening Consistency against the Dentist's Findings*
+H Measure
+H Manual process
+P **With Toothwise** Agreement with the dentist's findings (%)
+H [TBD]
+P **[TBD]** Cohen's kappa against the dentist's findings
+H [TBD]
+P **[TBD]** Findings missed (false negatives)
+H [TBD]
+H [TBD]
+H [TBD – interpretation of the time and consistency results.]
+P **REFERENCES** Alibudbud, R. C., et al. (2025). Guiding responsible AI in healthcare in the Philippines. npj Digital Medicine. https://doi.org/10.1038/s41746-025-01755-3 Askar, H., Krois, J., Gilen, M., Buttner, M., Paris, S., & Schwendicke, F. (2021). Detecting white spot lesions on dental photography using deep learning: A pilot study. Journal of Dentistry, 107, 103615. https://doi.org/10.1016/j.jdent.2021.103615 Jocher, G., Chaurasia, A., & Qiu, J. (2023). Ultralytics YOLO (Version 8.0.0) [Software]. Ultralytics. https://github.com/ultralytics/ultralytics Kang, S., Shon, B., Park, E. Y., Jeong, S., & Kim, E. K. (2024). Diagnostic accuracy of dental caries detection using ensemble techniques in deep learning with intraoral camera images. PLOS ONE, 19(9), e0310004. https://doi.org/10.1371/journal.pone.0310004 Karakus, R., Ozic, M. U., & Tassoker, M. (2024). AI assisted detection of interproximal, occlusal, and secondary caries on bite wing radiographs using YOLOv8. Journal of Imaging Informatics in Medicine, 37(6), 3146 to 3159. https://doi.org/10.1007/s10278-024-01113-x Mohammad Rahimi, H., Nadimi, M., Ghalyanchi Langeroudi, A., Taheri, M., & Ghafouri Fard, S. (2022). Application of deep learning in diagnosis of dental caries: A systematic review. Journal of Dentistry, 122, 104115. https://doi.org/10.1016/j.jdent.2021.104115 Moharrami, M., Farmer, J., Singhal, S., Watson, E., Glogauer, M., Johnson, A. E. W., Schwendicke, F., & Quiñonez, C. (2024). Detecting dental caries on oral photographs using artificial intelligence: A systematic review. Oral Diseases, 30(4), 1765 to 1783. https://doi.org/10.1111/odi.14659 Moharrami, M., Vahab, E., Bagherianlemraski, M., Hemmati, G., Singhal, S., Quiñonez, C., Schwendicke, F., & Glogauer, M. (2025). Deep learning for detecting dental plaque and gingivitis from oral photographs: A systematic review. Community Dentistry and Oral Epidemiology, 53(6), 617 to 632. https://doi.org/10.1111/cdoe.70001 Oliveros Villarico, M., Flores, K. K. R., de Guzman, J. C. Z., Manrique, A. L. V., Millo, G. A., & Estrera, K. R. P. (2023). Pediatrician knowledge, attitude and practices on children's oral health in a tertiary public hospital in the Philippines. Acta Medica Philippina, 57(7), 56 to 63. https://doi.org/10.47895/amp.vi0.5323 Park, E. Y., Cho, H., Kang, S., Jeong, S., & Kim, E. K. (2022). Caries detection with tooth surface segmentation on intraoral photographic images using deep learning. BMC Oral Health, 22(1), 573. https://doi.org/10.1186/s12903-022-02589-1 PhilHealth and Department of Health. (2025). Cost effectiveness analysis of oral health care package of services within a comprehensive PhilHealth benefit package. PMC. https://pmc.ncbi.nlm.nih.gov/articles/PMC12572879/ Schwendicke, F., Golla, T., Dreher, M., & Krois, J. (2021). Convolutional neural networks for dental image diagnostics: A systematic review. Journal of Dentistry, 91, 103226. https://doi.org/10.1016/j.jdent.2019.103226 The Journal of Evidence Based Dental Practice. (2025). Variability in manual dental caries detection: Observer consistency in clinical screenings. The Journal of Evidence Based Dental Practice, 25(1), 1 to 12. https://doi.org/10.1016/j.jebdp.2024.101950 Tian, Y., Ye, Q., & Doermann, D. (2025). YOLOv12: Attention centric real time object detectors. arXiv preprint arXiv:2502.12524. https://arxiv.org/abs/2502.12524 University of Santo Tomas. (2023). Bridging the gap or widening the divide: A call for capacity building in artificial intelligence for healthcare in the Philippines. Journal of Medicine of the University of Santo Tomas, 7. https://doi.org/10.35460/2546-1621.2023-0081 World Health Organization. (2022). Oral health Philippines country profile. WHO. https://www.who.int/publications/m/item/oral-health-phl-2022-country-profile World Health Organization.
+P (2024).
+P Oral health:
+P Key facts.
+P WHO. https://www.who.int/news-room/fact-sheets/detail/oral-health
