@@ -118,7 +118,7 @@
 .tw6-section-head { max-width: 720px; margin-bottom: clamp(36px, 5vw, 60px); }
 .tw6-section-head-center { margin-left: auto; margin-right: auto; text-align: center; }
 .tw6-section-head-center .tw6-eyebrow::after { content: ""; width: 22px; height: 2px; border-radius: 2px; background: currentColor; }
-.tw6-section-head-center p:not(.tw6-eyebrow) { margin-left: auto; margin-right: auto; }
+.tw6 .tw6-section-head-center p:not(.tw6-eyebrow) { margin-left: auto; margin-right: auto; }
 .tw6 h2 {
   margin: 0 0 18px;
   font-size: clamp(34px, 4.6vw, 60px); line-height: 1.02; font-weight: 800;
@@ -509,6 +509,10 @@
   }
   .tw6-sticky-cta.is-visible { transform: none; opacity: 1; pointer-events: auto; }
   .tw6-sticky-cta .tw6-btn { min-height: 46px; padding: 0 18px; box-shadow: none; }
+}
+/* Above 640px the chat launcher keeps its "Ask ToothWise" label, so leave room for it. */
+@media (min-width: 641px) and (max-width: 768px) {
+  .tw6-sticky-cta { right: 214px; bottom: 21px; }
 }
 @media (max-width: 480px) {
   .tw6-highlights-inner { grid-template-columns: 1fr 1fr; }
