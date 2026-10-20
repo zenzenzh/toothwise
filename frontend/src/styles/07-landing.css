@@ -426,7 +426,7 @@
   .tw6-hero { grid-template-columns: 1fr; padding-top: 40px; }
   .tw6-hero-media { margin: 8px auto 0; width: min(78%, 420px); }
   .tw6-highlights-inner { grid-template-columns: 1fr 1fr; }
-  .tw6-highlight:nth-child(3) { padding-left: 0; box-shadow: none; }
+  .tw6-highlight:nth-child(odd) { padding-left: 0; box-shadow: none; }
   .tw6-faq-wrap { grid-template-columns: 1fr; }
   .tw6-faq-head { position: static; }
   .tw6-benefits { grid-template-columns: 1fr; }
@@ -469,7 +469,7 @@
   .tw6-float-a { left: -16%; }
   .tw6-float-b { right: -16%; }
   .tw6-highlights-inner { width: calc(100% - 32px); gap: 28px 20px; }
-  .tw6-highlight + .tw6-highlight { padding-left: 20px; }
+  .tw6-highlight:nth-child(even) { padding-left: 20px; }
   .tw6-highlight span { font-size: 15px; }
   .tw6-section-head p:not(.tw6-eyebrow), .tw6-faq-head > p:not(.tw6-eyebrow), .tw6-find-copy > p:not(.tw6-eyebrow) { font-size: 17px; }
   .tw6-story, .tw6-faq-wrap { width: calc(100% - 32px); }

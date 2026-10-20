@@ -19,7 +19,7 @@ const CLINIC = {
 // public/codismile/services-stock/CREDITS.txt.
 const SERVICES = [
   { name: 'Oral Prophylaxis', local: 'Cleaning', photo: 'cleaning', description: 'Professional cleaning that removes plaque, tartar, and surface stains to help keep gums and teeth healthy.' },
-  { name: 'Tooth Restoration', local: 'Pasta', photo: 'restoration', description: 'Repairs teeth affected by cavities or damage using a tooth-coloured filling material.' },
+  { name: 'Tooth Restoration', local: 'Pasta', photo: 'restoration', description: 'Repairs teeth affected by cavities or damage using a filling that matches your tooth colour.' },
   { name: 'Tooth Extraction', local: 'Bunot', photo: 'extraction', description: 'Removes a tooth that cannot be safely restored or needs to be taken out for dental treatment.' },
   { name: 'Dentures', local: 'Pustiso', photo: 'dentures', description: 'Removable replacement teeth that help restore chewing, speaking, and the appearance of your smile.' },
   { name: 'Fixed Bridge and Crowns', photo: 'crowns', description: 'Restores missing or damaged teeth with fixed restorations designed to look and work naturally.' },
@@ -31,11 +31,11 @@ const SERVICES = [
 ];
 
 const FAQS = [
-  ['What is ToothWise?', 'ToothWise is CodiSmile’s digital dental-care workspace for patient access, AI-assisted image screening, clinical workflows, and prevention guidance.'],
-  ['Does the AI replace a dentist?', 'No. ToothWise is an assistive screening system. A qualified dental professional should review AI-assisted findings and make clinical decisions.'],
-  ['Can the chatbot see my patient record?', 'No. The public AI assistant is intentionally separated from individual patient records and screening results. Use the secure Patient Portal for account-specific information.'],
-  ['How do I book a visit?', 'Contact CodiSmile Dental Clinic directly by phone to schedule a visit — the Patient Portal covers account access and screening history, not booking.'],
-  ['What are the clinic hours?', 'CodiSmile is open Monday–Saturday, 9:00 AM–5:00 PM, and Sunday, 9:00 AM–2:00 PM.'],
+  ['What is ToothWise?', 'ToothWise is CodiSmile’s digital workspace for patient access, AI screening of dental images, clinical workflows, and prevention guidance.'],
+  ['Does the AI replace a dentist?', 'No. ToothWise is an assistive screening system. A qualified dental professional should review every AI finding and make clinical decisions.'],
+  ['Can the chatbot see my patient record?', 'No. The public AI assistant is intentionally separated from individual patient records and screening results. Use the secure Patient Portal for information about your own account.'],
+  ['How do I book a visit?', 'Call CodiSmile Dental Clinic directly to schedule a visit. The Patient Portal covers account access and screening history, not booking.'],
+  ['What are the clinic hours?', 'CodiSmile is open Monday to Saturday, 9:00 AM to 5:00 PM, and Sunday, 9:00 AM to 2:00 PM.'],
 ];
 
 const FACTS = [
@@ -46,14 +46,14 @@ const FACTS = [
 ];
 
 const BENEFITS = [
-  { icon: UsersRound, title: 'Your own secure portal', text: 'Sign in to see your screenings and your dentist’s advice — no paperwork, no calling to ask.' },
+  { icon: UsersRound, title: 'Your own secure portal', text: 'Sign in to see your screenings and your dentist’s advice. No paperwork, no calling to ask.' },
   { icon: ScanSearch, title: 'AI that spots issues early', text: 'Dental images are screened by AI so possible problems are flagged for your dentist sooner.' },
   { icon: Stethoscope, title: 'A dentist makes every call', text: 'AI assists; a qualified dentist reviews every finding and decides your treatment.' },
 ];
 
 const STEPS = [
-  { title: 'Visit the clinic', text: 'Call to book, then come in for your check-up beside LRT Central.' },
-  { title: 'Get screened', text: 'Your dental images go through ToothWise’s AI-assisted screening.' },
+  { title: 'Visit the clinic', text: 'Call to book, then come in for your checkup beside LRT Central.' },
+  { title: 'Get screened', text: 'ToothWise’s AI screens your dental images.' },
   { title: 'Follow your plan', text: 'Your dentist’s findings and prevention tips wait for you in the portal.' },
 ];
 
@@ -282,7 +282,7 @@ export default function Landing() {
     <div className="tw6">
       <SEO
         title="CodiSmile Dental Clinic | ToothWise"
-        description="Dental care beside LRT Central Terminal, Ermita, Manila. Ten treatments, open seven days, with AI-assisted screening and your results online through ToothWise."
+        description="Dental care beside LRT Central Terminal, Ermita, Manila. Ten treatments, open seven days, with AI screening and your results online through ToothWise."
         structuredData={{ '@context': 'https://schema.org', '@type': 'WebSite', name: 'ToothWise', url: window.location.origin }}
       />
 
@@ -326,7 +326,7 @@ export default function Landing() {
             <ul className="tw6-trust">
               <li><Check size={16} aria-hidden="true" /> Open Sundays</li>
               <li><Check size={16} aria-hidden="true" /> Cleanings to braces</li>
-              <li><Check size={16} aria-hidden="true" /> Dentist-reviewed AI screening</li>
+              <li><Check size={16} aria-hidden="true" /> AI screening reviewed by dentists</li>
             </ul>
           </div>
           <figure className="tw6-hero-media">
@@ -362,7 +362,7 @@ export default function Landing() {
           <div className="tw6-section-head">
             <p className="tw6-eyebrow">Services</p>
             <h2>Everything your smile needs, under one roof.</h2>
-            <p>From a routine cleaning to braces, crowns and whitening — no referrals across the city, no second clinic.</p>
+            <p>From a routine cleaning to braces, crowns and whitening. No referrals across the city, no second clinic.</p>
           </div>
           <ServiceCarousel services={SERVICES} phoneHref={phoneHref} />
           <div className="tw6-services-cta">
@@ -375,7 +375,7 @@ export default function Landing() {
           <div className="tw6-section-head tw6-section-head-center">
             <p className="tw6-eyebrow">ToothWise patient portal</p>
             <h2>Your dental care doesn’t stop at the door.</h2>
-            <p>ToothWise is CodiSmile’s own portal. See what your dentist found, what to do next, and how to prevent problems — anytime, from your phone.</p>
+            <p>ToothWise is CodiSmile’s own portal. See what your dentist found, what to do next, and how to prevent problems. Anytime, from your phone.</p>
           </div>
           <ul className="tw6-benefits">
             {BENEFITS.map(({ icon: Icon, title, text }) => (
@@ -403,7 +403,7 @@ export default function Landing() {
 
         <Reveal as="section" className="tw6-prevention">
           <div className="tw6-prevention-inner">
-            <h2>Your next check‑up is one call away.</h2>
+            <h2>Your next checkup is one call away.</h2>
             <p>Open every day beside LRT Central Terminal. Call the clinic to book, then follow your results online.</p>
             <div className="tw6-actions tw6-actions-center">
               <a className="tw6-btn tw6-btn-light tw6-btn-lg" href={phoneHref}><Phone size={18} aria-hidden="true" /> Call {CLINIC.phone}</a>
@@ -430,7 +430,7 @@ export default function Landing() {
             <ul className="tw6-contact-list">
               <li><MapPin size={18} /><span>{CLINIC.address}</span></li>
               <li><Phone size={18} /><a href={phoneHref}>{CLINIC.phone}</a></li>
-              <li><Clock3 size={18} /><span>Mon–Sat 9:00 AM–5:00 PM · Sun 9:00 AM–2:00 PM</span></li>
+              <li><Clock3 size={18} /><span>Mon to Sat 9:00 AM to 5:00 PM · Sun 9:00 AM to 2:00 PM</span></li>
             </ul>
             <div className="tw6-actions">
               <a className="tw6-btn tw6-btn-primary" target="_blank" rel="noreferrer" href={directionsUrl}><Navigation size={16} /> Get directions</a>
@@ -466,11 +466,11 @@ export default function Landing() {
           <div className="tw6-footer-col">
             <h2>Contact</h2>
             <a href={phoneHref}>{CLINIC.phone}</a>
-            <p>Mon–Sat 9:00 AM–5:00 PM<br />Sun 9:00 AM–2:00 PM</p>
+            <p>Mon to Sat 9:00 AM to 5:00 PM<br />Sun 9:00 AM to 2:00 PM</p>
           </div>
           <div className="tw6-footer-col tw6-footer-nav">
             <h2>ToothWise</h2>
-            <p>AI-assisted dental screening and patient workflow for {CLINIC.name}.</p>
+            <p>AI dental screening and patient workflow for {CLINIC.name}.</p>
             <button type="button" onClick={(event) => scrollToSection(event, 'faq')}>Read the FAQ</button>
           </div>
         </div>
