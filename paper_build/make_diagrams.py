@@ -550,7 +550,7 @@ def gantt():
     days = day(D(11, 1))
     px = (W - LX - 52) / days
     X = lambda d: LX + 18 + day(d) * px
-    rh, top = 15.2, 22
+    rh, top = 13.4, 20
     H = top + rh * len(rows) + 34
     b = [rect(0.5, 0.5, W - 1, top + rh * len(rows), fill="#fff", sw=1.0)]
     b.append(line(0.5, top, W - 0.5, top, 1.0))

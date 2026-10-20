@@ -56,7 +56,7 @@ def save(fig, path):
 
 
 def training_curves(data, out):
-    fig, axes = plt.subplots(1, 2, figsize=(6.0, 2.7))
+    fig, axes = plt.subplots(1, 2, figsize=(6.0, 2.35))
     for ax, (key, title, yl) in zip(axes, [("map50", "mAP@50 (validation)", "mAP@50"),
                                            ("map50_95", "mAP@50-95 (validation)", "mAP@50-95")]):
         style(ax, title, yl, "Epoch")
@@ -86,7 +86,7 @@ def bars(ax, series, keys, width):
 def final_metrics(data, out):
     keys = [("precision", "Precision"), ("recall", "Recall"), ("f1", "F1-score"),
             ("map50", "mAP@50"), ("map50_95", "mAP@50-95")]
-    fig, ax = plt.subplots(figsize=(6.0, 2.9))
+    fig, ax = plt.subplots(figsize=(6.0, 2.4))
     style(ax, "Final validation metrics (epoch 60)", "Score (0 to 1)")
     bars(ax, {n: [d["final"][k] for k, _ in keys] for n, d in data.items()}, keys, 0.36)
     ax.set_xticks(range(len(keys)))
@@ -103,7 +103,7 @@ def per_class_map(ev, out):
         d = ev["shared"][name]
         vals = dict(zip(d["class_index"], d["ap50"]))
         series[name] = [vals.get(k, 0.0) for k in range(5)]
-    fig, ax = plt.subplots(figsize=(6.0, 3.0))
+    fig, ax = plt.subplots(figsize=(6.0, 2.55))
     style(ax, "Per-class mAP@50 on the test split", "mAP@50")
     bars(ax, series, CLASS_LABELS, 0.26)
     ax.set_xticks(range(5))

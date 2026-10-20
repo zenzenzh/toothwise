@@ -320,7 +320,12 @@ def write(blocks, toc_pages=None):
             add_runs(par, b["num"] + "\t" + b["text"])
         elif k == "REF":
             add_runs(fmt(doc.add_paragraph(), WD_ALIGN_PARAGRAPH.LEFT, left=0.5, hanging=0.5, after=6), b["text"])
-        elif k == "FIG":
+        elif k in ("FIG", "FIGPAIR") and b.get("page_break"):
+            brk = fmt(doc.add_paragraph(), WD_ALIGN_PARAGRAPH.LEFT, 0, 0, 0, 1.0)
+            brk.paragraph_format.page_break_before = True
+            brk.paragraph_format.line_spacing = Pt(1)
+            brk.add_run().font.size = Pt(1)
+        if k == "FIG":
             par = fmt(doc.add_paragraph(), WD_ALIGN_PARAGRAPH.CENTER, 0, 8, 4, 1.0, keep_next=True)
             par.add_run().add_picture(str(FIGS / b["file"]), width=Inches(b["width"]))
             cap = fmt(doc.add_paragraph(), WD_ALIGN_PARAGRAPH.CENTER if not b["desc"] else WD_ALIGN_PARAGRAPH.JUSTIFY,
@@ -344,7 +349,9 @@ def write(blocks, toc_pages=None):
             t._tbl.tblPr.append(parse_xml(f'<w:tblLayout {nsdecls("w")} w:type="fixed"/>'))
             for row in t.rows:
                 row._tr.get_or_add_trPr().append(parse_xml(f'<w:cantSplit {nsdecls("w")}/>'))
-            fmt(doc.add_paragraph(), after=4, line=1.0)
+            spacer = fmt(doc.add_paragraph(), after=4, line=1.0)
+            spacer.paragraph_format.line_spacing = Pt(1)       # must not spill onto a page of its own
+            spacer.add_run().font.size = Pt(1)
     return doc
 
 
@@ -421,8 +428,8 @@ def write_table(doc, b):
     for i, row in enumerate(rows):
         tr = t.rows[i]._tr
         trPr = tr.get_or_add_trPr()
-        trPr.append(parse_xml(f'<w:cantSplit {nsdecls("w")}/>'))
         if i == 0:
+            trPr.append(parse_xml(f'<w:cantSplit {nsdecls("w")}/>'))
             trPr.append(parse_xml(f'<w:tblHeader {nsdecls("w")}/>'))
         for j in range(ncol):
             cell = t.cell(i, j)
@@ -480,6 +487,11 @@ def find_pages(pdf: Path, blocks):
 
 def main():
     blocks = parse(CONTENT.read_text(encoding="utf-8"))
+    layout = HERE / "layout.json"            # written by layout_pass.py
+    if layout.exists():
+        import json
+        from layout_pass import apply
+        blocks = apply(blocks, json.loads(layout.read_text(encoding="utf-8")))
     out = ROOT / f"{NAME}.docx"
     write(blocks).save(out)
     pages = find_pages(to_pdf(out), blocks)

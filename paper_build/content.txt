@@ -7,11 +7,17 @@ TOC
 ## 1.1 Background of the Study
 = CodiSmile Dental Clinic currently relies on manual
 = Dental caries, commonly referred to
+~ The World Health Organization (2024) >>> The World Health Organization (2025)
+~ and adequate dental care. >>> and adequate dental care. In the Philippines, Mendoza et al. (2025) note that an estimated 29 million Filipinos have untreated dental caries and that outpatient dental services were not covered by the PhilHealth benefit package at the time of their analysis.
+~ According to Qari et al. (2023), untreated dental caries does not just cause physical pain, it also affects a person's confidence and overall quality of life. >>> Untreated caries does not just cause physical pain; Almajed et al. (2023) found that children with untreated caries had higher rates of poor oral-health-related quality of life.
 = A critical dimension of the current
+~ as confirmed by systematic reviews from Schwendicke et al. (2021) and Mohammad Rahimi et al. (2022). >>> as reported in the reviews by Schwendicke et al. (2019) and Mohammad-Rahimi et al. (2022).
 = Standard digital cameras and smartphone
 ~ since the system is designed to work from uploaded or device-captured photographs rather than requiring a dedicated intraoral camera. >>> since the system is designed to work from photographs taken with an ordinary device camera, such as a smartphone, and uploaded to the system, rather than requiring a dedicated intraoral camera.
+~ Studies such as those by Moharrami et al. (2025) and Askar et al. (2021) >>> Park et al. (2022), for example, improved caries classification on intraoral camera photographs by first segmenting the tooth surfaces, and studies such as those by Moharrami et al. (2025) and Askar et al. (2021)
 = The AI model powering the primary
 = To evaluate whether YOLOv12's architectural
+~ (Ultralytics, 2023) >>> (Jocher et al., 2023)
 = Beyond detection, Toothwise also generates
 = While AI-assisted dental screening has grown
 = This project was created in partnership
@@ -76,30 +82,41 @@ P **ONNX Runtime.** An open-source engine for running machine learning models sa
 #CH CHAPTER II | REVIEW OF RELATED LITERATURE AND STUDIES
 = This chapter presents the related literature and studies
 ## 2.1 Related Literature
-= **Convolutional Neural Networks for Dental Image Diagnostics.**
+P **Convolutional Neural Networks for Dental Image Diagnostics.** Schwendicke et al. (2019) carried out a scoping review of 36 studies, published from 2015 to 2019, that applied convolutional neural networks (CNNs) to dental images. Most of the studies detected, segmented, or classified anatomical structures such as teeth, jaw bone, and skeletal landmarks, and only a few targeted pathologies such as caries. The authors noted that CNNs have shown the potential to detect structures and pathologies on medical images with accuracy similar to, or even higher than, that of professionals, but they also warned of possible bias in the underlying algorithms and of limited robustness and generalizability. These cautions carry directly into Toothwise, where the models are evaluated on a held-out test split and all detected findings at CodiSmile Dental Clinic are reviewed by a licensed dentist before being communicated to any patient. The review also shows that the field has concentrated on detection and segmentation tasks, which is the gap that the personalized prevention plan feature of Toothwise was built to address.
 = **Deep Learning for Caries Detection: A Systematic Review.**
+~ Mohammad Rahimi et al. (2022) reviewed a large number of studies >>> Mohammad-Rahimi et al. (2022) reviewed 42 studies
+~ The review also found that no existing study had combined automated caries detection with a recommendation output, which reinforces >>> The studies they reviewed covered classification, object detection, and segmentation only, with image, object, or pixel accuracy between 68% and 99%, and the authors concluded that deep learning models can serve as an assistant for decisions on the presence or absence of carious lesions. None of the reviewed models went on to produce a recommendation, which reinforces
 = **Deep Learning for Detecting Dental Plaque and Gingivitis
 = **Oral Screening of Dental Calculus
+~ Zhang (2024) developed >>> Liu et al. (2024) developed
 = **Oral Health Philippines Country Profile.**
-= **Pediatrician Knowledge, Attitude
-= **Guiding Responsible Artificial Intelligence
+P **Pediatrician Knowledge, Attitude and Practices on Children's Oral Health in a Tertiary Public Hospital in the Philippines.** Oliveros-Villarico et al. (2023) looked at the role of pediatricians in preventing dental caries among Filipino children, a role that often goes undiscussed. Their survey of 122 pediatricians at a tertiary public hospital found that most had high oral health knowledge (67.8%) and a positive attitude toward caries prevention (85.0%), but that their reported practices, such as caries risk assessment and preventive oral health education, varied. The authors describe dental caries as a tolerated and overlooked chronic disease in the Philippines, with untreated caries in the primary teeth of 85.18% of five-year-olds. For this project, this literature helps explain why a tool like Toothwise matters at the clinic level: knowledge alone has not translated into consistent early detection, and an AI-assisted screening system that flags dental conditions during a regular consultation at CodiSmile Dental Clinic can help catch problems before they get worse.
+P **Guiding Responsible AI in Healthcare in the Philippines.** Sarmiento et al. (2025) reviewed the barriers to the safe and effective deployment of AI in Philippine healthcare and drew on lessons from other Southeast Asian nations, the European Union, and the United States to propose directions for a national strategy. They noted that the Philippines lags behind fellow ASEAN member states in governmental AI readiness, and they pointed to structural constraints, such as connectivity, data stewardship, and workforce capacity, together with governance requirements, such as bias and safety monitoring, transparency, and accountability, that must accompany any deployment. These points shaped several decisions in how Toothwise was designed, particularly the requirement that all AI detection results at CodiSmile Dental Clinic are reviewed and confirmed by a licensed dentist before they are communicated to patients, that every sensitive action is written to an audit log, and that patient data is stored securely with authenticated access in line with the Data Privacy Act of 2012.
 = **An Overview of Recommendation Techniques
 ## 2.2 Related Studies
 = **Detecting White Spot Lesions
 = **Ultralytics YOLO (Version 8.0.0).**
-= **Accuracy in Diagnosing Caries
+P **Accuracy in Diagnosing Caries in Young Permanent Molars Using Interproximal Radiographic Imaging and Validation by Artificial Intelligence.** de Brito et al. (2025) compared the caries diagnoses of calibrated dentists on interproximal radiographs of the first permanent molars of children aged 6 to 9 with an AI pipeline in which YOLOv8 located the teeth and a pre-trained EfficientNet-B0 model classified each tooth as carious or sound. Agreement between the examiners was excellent (97.4%, kappa 0.88); YOLOv8 detected the carious teeth with 91% accuracy and 98% precision, and EfficientNet-B0 classified teeth with and without caries lesions with 89% accuracy. This study provides evidence that YOLOv8 is a credible baseline for caries-related detection tasks, supporting its selection as the comparison model against YOLOv12 in this study.
 = **Deep Learning in Oral Hygiene
 = **Diagnostic Accuracy of Dental Caries Detection
+~ validated against annotations made by experienced dentists. >>> validated against annotations made by an experienced dentist.
 = **AI-Assisted Detection of Interproximal
+~ Bite-Wing Radiographs Using YOLOv8.** Karakus et al. (2024) >>> Bite-Wing Radiographs: A Single-Shot Deep Learning Approach.** Karakuş et al. (2024)
 = **YOLOv12: Attention-Centric
 = **Feedback Collection and Nearest-Neighbor
 =+ activity recommendations by identifying patients
-= **Bridging the Gap or Widening the Divide
+P **Bridging the Gap or Widening the Divide: A Call for Capacity-Building in Artificial Intelligence for Healthcare in the Philippines.** Gutierrez and Viacrusis (2023) took a critical look at AI readiness in Philippine healthcare. When they asked GPT-4, GPT-3, Bard, and Claude about isoniazid dosing for Filipinos compared with other ethnic groups, three of the four models produced convincing but false content. The authors argued that regions with lower medical research output risk bias and misrepresentation in AI-generated content, and they called on Filipino clinicians and researchers to begin capacity-building, including locally representative data, quality assurance, and early AI education in medical schools, before relying on such tools in clinical practice. This study speaks directly to a design decision in Toothwise. The system does not allow AI detection results to be shown to patients without going through a dentist first. At CodiSmile Dental Clinic, the dentist reviews every output before it becomes part of the clinical record or is communicated to the patient, which reflects the caution that Gutierrez and Viacrusis called for.
 ## 2.3 Synthesis
 = The literature and studies reviewed in this chapter
+~ Schwendicke et al. (2021) and Mohammad Rahimi et al. (2022) established through separate systematic reviews >>> Schwendicke et al. (2019) and Mohammad-Rahimi et al. (2022) showed through separate reviews
+~ and Zhang (2024) extended >>> and Liu et al. (2024) extended
+~ with Zhang's work >>> with the work of Liu et al.
 = The most important gap identified
 = On the technical side, Tian et al. (2025)
+~ Karakus et al. >>> Karakuş et al.
 = The Philippine context literature
+~ Oliveros Villarico et al. (2023) >>> Oliveros-Villarico et al. (2023)
+~ Alibudbud et al. (2025) >>> Sarmiento et al. (2025)
 
 #CH CHAPTER III | METHODOLOGY
 P This chapter presents the methodology used in the development of Toothwise: A YOLO-Based Multi-Condition Dental Screening System with KNN-Based Recommendation for CodiSmile Dental Clinic. It describes the development methodology, the composition and responsibilities of the five-member development team, the project planning and requirements analysis process, the major system design diagrams required for the capstone examination, and the development, testing, and screenshot documentation of the current system.
@@ -207,6 +224,18 @@ ENDTABLE
 FIG dfd0 | fig_dfd0.png | 6.0 | Data Flow Diagram Level 0
 ###+ 3.5.4 Data Flow Diagram Level 1
 P Figure {fig:dfd1a} decomposes the Toothwise system, in Gane and Sarson notation, into seven major processes: 1.0 Authenticate Users, 2.0 Manage Patient Records, 3.0 Manage Staff Accounts, 4.0 Perform AI Dental Screening (YOLOv8/YOLOv12 detection, risk scoring, and KNN recommendation), 5.0 Review Findings and Generate Report, 6.0 Serve Patient Portal and AI Assistant, and 7.0 Review Audit Trail. So that it remains legible in print, the diagram is drawn on two sheets: Sheet 1 covers processes 1.0, 2.0, 3.0, and 7.0, and Sheet 2 covers processes 4.0, 5.0, and 6.0. Each process is drawn in its own band with its external entities on the left and its data stores on the right, so no data flows cross. The seven data stores, D1 to D7, correspond to the database tables in Figure {fig:erd} (D3 Screenings covers both the screenings and screening_images tables), and the external data flows match the Level 0 diagram in Figure {fig:dfd0}.
+P Table {tab:dfdproc} describes each Level 1 process, with its main inputs and outputs and the data stores it reads or writes.
+TABLE dfdproc | Level 1 Process Descriptions
+W 1.35,2.25,1.2,1.24
+| Process | Description | Main inputs | Main outputs and data stores |
+| 1.0 Authenticate Users | Checks staff and patient credentials and issues a JWT access token for the matching scope; registers new patient-portal accounts. | Credentials; portal registration | Access token; reads D1 and D2, writes new portal accounts to D2 and login events to D7 |
+| 2.0 Manage Patient Records | Creates, lists, and updates patient records; only the dentist can delete one. | Patient registration and record data | Patient directory and records; D2; record change events to D7 |
+| 3.0 Manage Staff Accounts | Lets the dentist add, edit, reset, deactivate, and delete staff accounts and assign the dentist, receptionist, or assistant role. | Staff account data | Staff roster; D1; staff change events to D7 |
+| 4.0 Perform AI Dental Screening | Validates the uploaded photograph, runs YOLOv8 and YOLOv12, fuses their detections, computes the risk score and tier, and builds the KNN prevention plan. | Intraoral image; patient reference from D2 | Detections and risk result; writes D3, D4, and D5; screening event to D7 |
+| 5.0 Review Findings and Generate Report | Shows the screening for review, records the dentist's tier confirmation and clinical notes, and produces the PDF report. | Tier confirmation, clinical note, report request; D2 to D6 | Screening review and PDF report; confirmed tier to D3; notes to D6; review event to D7 |
+| 6.0 Serve Patient Portal and AI Assistant | Shows patients only their own screenings and prevention plans and answers general questions through the AI assistant. | History request, assistant question; D2, D3, D5 | Screening history, prevention plan, assistant reply |
+| 7.0 Review Audit Trail | Lets the dentist search and filter the audit log. | Audit log query; D7 | Audit trail report |
+ENDTABLE
 FIG dfd1a | fig_dfd1_sheet1.png | 6.0 | Data Flow Diagram Level 1 (Sheet 1 of 2: Processes 1.0, 2.0, 3.0, and 7.0)
 FIG dfd1b | fig_dfd1_sheet2.png | 6.0 | Data Flow Diagram Level 1 (Sheet 2 of 2: Processes 4.0, 5.0, and 6.0)
 ###+ 3.5.5 Gantt Chart
@@ -315,9 +344,9 @@ P The system was implemented as a three-tier web application: a React.js single-
 = The system was evaluated using three structured
 
 ## 3.10 Full Current System Screenshots
-P This section documents the current Toothwise system as implemented, one screen per numbered figure, in the order a user would encounter them: the public landing page, staff login, the dashboard, patient management, the screening workflow and results, staff management, the audit log, the patient portal, and the PDF screening report. The screenshots were captured from a running instance of the current system in light mode, using demonstration accounts, demonstration patients, and a stock dental photograph; no real patient data is shown.
+P This section documents the current Toothwise system as implemented, one screen per numbered figure, in the order a user would encounter them: the public landing page, the staff and patient sign-in pages, the dashboard, patient management, the screening workflow and results, staff management, the audit log, the rest of the patient portal, and the PDF screening report. The screenshots were captured from a running instance of the current system in light mode, using demonstration accounts, demonstration patients, and a stock dental photograph; no real patient data is shown.
 FIG s_landing | shot_landing.png | 5.2 | Public Landing Page | This is the first page guests see. It introduces CodiSmile Dental Clinic and ToothWise, gives the clinic's location and opening hours, links to the patient portal, and opens the AI assistant.
-FIG s_login | shot_login.png | 2.9 | Staff Login Page | The login page reserved for clinic staff. Staff sign in with their email address and password; patients are directed to the patient portal instead.
+FIGPAIR s_login | shot_login.png | 2.75 | Staff Login Page | Sign-in page for clinic staff; patients are directed to the patient portal. || s_plogin | shot_portal_login.png | 2.75 | Patient Portal — Sign In | Patients sign in to see only their own records.
 FIG s_dash | shot_dashboard.png | 5.2 | Dashboard | The first screen staff see after signing in. It summarizes total screenings, patients, high-risk cases, and today's screenings, and shows the monthly screening trend and the breakdown of detected conditions.
 FIG s_patients | shot_patients.png | 5.2 | Patient List | Lists every registered patient with age, gender, contact number, and address. Staff can search, register a patient, open a record, edit it, or (as dentist) delete it.
 FIG s_detail | shot_patient_detail.png | 5.2 | Patient Details | The record of one patient: demographic details, the latest risk result, the risk trend across visits, and the screening history.
@@ -326,11 +355,8 @@ FIG s_preview | shot_screening_preview.png | 5.2 | New Screening (Step 2: Review
 FIG s_result | shot_screening_result_full.png | 5.6 | Screening Results | The analysis of the uploaded photograph: color-coded bounding boxes for the fused, YOLOv8, and YOLOv12 detections, the risk level, the prevention plan, the dentist's clinical notes, and the button that downloads the PDF report.
 FIG s_staff | shot_staff.png | 5.2 | Staff Management (Dentist/Administrator) | Lets the dentist add staff members, assign the dentist, receptionist, or assistant role, edit details, reset passwords, and deactivate or delete accounts.
 FIG s_audit | shot_audit.png | 5.2 | Audit Log (Dentist/Administrator) | A permanent, filterable timeline of who signed in, which records were created, changed, or deleted, and when.
-FIGPAIR s_plogin | shot_portal_login.png | 2.75 | Patient Portal — Sign In | Patients sign in with their own email address and password to see only their own records. || s_preg | shot_portal_register.png | 2.75 | Patient Portal — Sign Up | New patients create an account with their name, email address, mobile number, gender, birthdate, address, and password.
-// paired above
-FIGPAIR s_phome | shot_portal_home.png | 2.75 | Patient Portal — Home and Screening History | After signing in, patients see their latest risk level, the number of screenings on record, and their screening history. || s_pscreen | shot_portal_screening.png | 2.75 | Patient Portal — Screening Details | A patient's view of one screening: the photograph with detected findings, the findings with their confidence, and the numbered prevention plan.
-// paired above
-FIG s_report | shot_report_1.png | 4.0 | PDF Screening Report | The first page of the downloadable report, with the patient and screening details, the risk level, the screening image, and the detected findings.
+FIGPAIR s_preg | shot_portal_register.png | 2.75 | Patient Portal — Sign Up | New patients create an account with their contact details and a password. || s_phome | shot_portal_home.png | 2.75 | Patient Portal — Home and Screening History | Patients see their latest risk level and their screening history.
+FIGPAIR s_pscreen | shot_portal_screening.png | 2.75 | Patient Portal — Screening Details | One screening: the photograph with its findings and the prevention plan. || s_report | shot_report_1.png | 2.75 | PDF Screening Report | First page of the report: patient details, risk level, image, and findings.
 
 #CH CHAPTER IV | RESULTS AND DISCUSSION
 = This chapter presents the results obtained from the development
@@ -401,9 +427,9 @@ W 1.4,1.15,1.15,1.15,1.15
 | mAP@50-95 | 26.80% | 25.87% | 28.53% | 26.28% |
 ENDTABLE
 NOTE Validation: train_metrics stored in the checkpoints (epoch 60). Test: one prediction pass over the held-out test split (confidence 0.001, NMS IoU 0.70, image size 640), scored with the Ultralytics matching rule.
+= On the validation split, YOLOv8 obtained
 FIG curves | fig_training_curves.png | 6.0 | mAP@50 and mAP@50-95 per Training Epoch for YOLOv8 and YOLOv12
 FIG final | fig_final_metrics.png | 6.0 | Final Validation Metrics of YOLOv8 and YOLOv12
-= On the validation split, YOLOv8 obtained
 P Figure {fig:curves} shows that both models improved quickly during the first ten epochs and then levelled off: after roughly epoch 25, validation mAP@50 rose by only about two percentage points for either model. Additional epochs alone are therefore unlikely to produce large gains; further improvement depends more on the training data than on longer training.
 ### 4.1.4 Per-Class Detection Results
 P Tables {tab:pc8} and {tab:pc12} present the precision, recall, F1-score, mAP@50, and mAP@50-95 of each class on the test split, and Figure {fig:perclass} compares the per-class mAP@50 of the two models and the fused ensemble.
@@ -712,20 +738,28 @@ ENDTABLE
 P [TBD – interpretation of the time and consistency results.]
 
 #CH REFERENCES | 
-REF Alibudbud, R. C., et al. (2025). Guiding responsible AI in healthcare in the Philippines. *npj Digital Medicine*. https://doi.org/10.1038/s41746-025-01755-3
-REF Askar, H., Krois, J., Gilen, M., Buttner, M., Paris, S., & Schwendicke, F. (2021). Detecting white spot lesions on dental photography using deep learning: A pilot study. *Journal of Dentistry, 107*, 103615. https://doi.org/10.1016/j.jdent.2021.103615
-REF Jocher, G., Chaurasia, A., & Qiu, J. (2023). *Ultralytics YOLO* (Version 8.0.0) [Software]. Ultralytics. https://github.com/ultralytics/ultralytics
-REF Kang, S., Shon, B., Park, E. Y., Jeong, S., & Kim, E. K. (2024). Diagnostic accuracy of dental caries detection using ensemble techniques in deep learning with intraoral camera images. *PLOS ONE, 19*(9), e0310004. https://doi.org/10.1371/journal.pone.0310004
-REF Karakus, R., Ozic, M. U., & Tassoker, M. (2024). AI assisted detection of interproximal, occlusal, and secondary caries on bite wing radiographs using YOLOv8. *Journal of Imaging Informatics in Medicine, 37*(6), 3146–3159. https://doi.org/10.1007/s10278-024-01113-x
-REF Mohammad Rahimi, H., Nadimi, M., Ghalyanchi Langeroudi, A., Taheri, M., & Ghafouri Fard, S. (2022). Application of deep learning in diagnosis of dental caries: A systematic review. *Journal of Dentistry, 122*, 104115. https://doi.org/10.1016/j.jdent.2021.104115
+REF Almajed, O. S., Alayadi, H., & Sabbah, W. (2023). Inequalities in the oral health-related quality of life among children in Saudi Arabia. *Cureus, 15*(11), e49456. https://doi.org/10.7759/cureus.49456
+REF António, J., Malheiro, R., & Jardim, S. (2024). Feedback collection and nearest-neighbor profiling for recommendation systems in healthcare scenarios. *Technologies, 12*(8), 127. https://doi.org/10.3390/technologies12080127
+REF Askar, H., Krois, J., Rohrer, C., Mertens, S., Elhennawy, K., Ottolenghi, L., Mazur, M., Paris, S., & Schwendicke, F. (2021). Detecting white spot lesions on dental photography using deep learning: A pilot study. *Journal of Dentistry, 107*, 103615. https://doi.org/10.1016/j.jdent.2021.103615
+REF Cover, T. M., & Hart, P. E. (1967). Nearest neighbor pattern classification. *IEEE Transactions on Information Theory, 13*(1), 21–27. https://doi.org/10.1109/TIT.1967.1053964
+REF de Brito, D. H. S., dos Santos, T. G. F. T., Costa, S. G. A., dos Santos, A. S., da Silva, I. L. B., da Silva, N. R. C., Fernandes, B. J. T., Niederman, R., Mota, C. C. B. O., da Silveira, M. M. F., Heimer, M. V., & Rosenblatt, A. (2025). Accuracy in diagnosing caries in young permanent molars using interproximal radiographic imaging and validation by artificial intelligence. *Journal of Clinical and Experimental Dentistry, 17*(6), e648–e655. https://doi.org/10.4317/jced.62396
+REF Gutierrez, K. L. T., & Viacrusis, P. M. L. (2023). Bridging the gap or widening the divide: A call for capacity-building in artificial intelligence for healthcare in the Philippines. *Journal of Medicine, University of Santo Tomas, 7*(2). https://doi.org/10.35460/2546-1621.2023-0081
+REF Jocher, G., Chaurasia, A., & Qiu, J. (2023). *Ultralytics YOLOv8* (Version 8.0.0) [Computer software]. https://github.com/ultralytics/ultralytics
+REF Kang, S., Shon, B., Park, E. Y., Jeong, S., & Kim, E.-K. (2024). Diagnostic accuracy of dental caries detection using ensemble techniques in deep learning with intraoral camera images. *PLOS ONE, 19*(9), e0310004. https://doi.org/10.1371/journal.pone.0310004
+REF Karakuş, R., Öziç, M. Ü., & Tassoker, M. (2024). AI-assisted detection of interproximal, occlusal, and secondary caries on bite-wing radiographs: A single-shot deep learning approach. *Journal of Imaging Informatics in Medicine, 37*, 3146–3159. https://doi.org/10.1007/s10278-024-01113-x
+REF Liu, Y., Cheng, Y., Song, Y., Cai, D., & Zhang, N. (2024). Oral screening of dental calculus, gingivitis and dental caries through segmentation on intraoral photographic images using deep learning. *BMC Oral Health, 24*(1), 1287. https://doi.org/10.1186/s12903-024-05072-1
+REF Mendoza, M. F., Yacapin, C. P., Alfaro, A. C. A., Ulitin, A. R., Valverde, H. A., Medina, V. O., & Lam, H. Y. (2025). Cost-effectiveness analysis of oral health care package of services within a comprehensive PhilHealth benefit package. *Acta Medica Philippina, 59*(14), 49–59. https://doi.org/10.47895/amp.v59i14.9619
+REF Mohammad-Rahimi, H., Motamedian, S. R., Rohban, M. H., Krois, J., Uribe, S. E., Mahmoudinia, E., Rokhshad, R., Nadimi, M., & Schwendicke, F. (2022). Deep learning for caries detection: A systematic review. *Journal of Dentistry, 122*, 104115. https://doi.org/10.1016/j.jdent.2022.104115
 REF Moharrami, M., Farmer, J., Singhal, S., Watson, E., Glogauer, M., Johnson, A. E. W., Schwendicke, F., & Quiñonez, C. (2024). Detecting dental caries on oral photographs using artificial intelligence: A systematic review. *Oral Diseases, 30*(4), 1765–1783. https://doi.org/10.1111/odi.14659
 REF Moharrami, M., Vahab, E., Bagherianlemraski, M., Hemmati, G., Singhal, S., Quiñonez, C., Schwendicke, F., & Glogauer, M. (2025). Deep learning for detecting dental plaque and gingivitis from oral photographs: A systematic review. *Community Dentistry and Oral Epidemiology, 53*(6), 617–632. https://doi.org/10.1111/cdoe.70001
-REF Oliveros Villarico, M., Flores, K. K. R., de Guzman, J. C. Z., Manrique, A. L. V., Millo, G. A., & Estrera, K. R. P. (2023). Pediatrician knowledge, attitude and practices on children's oral health in a tertiary public hospital in the Philippines. *Acta Medica Philippina, 57*(7), 56–63. https://doi.org/10.47895/amp.vi0.5323
-REF Park, E. Y., Cho, H., Kang, S., Jeong, S., & Kim, E. K. (2022). Caries detection with tooth surface segmentation on intraoral photographic images using deep learning. *BMC Oral Health, 22*(1), 573. https://doi.org/10.1186/s12903-022-02589-1
-REF PhilHealth and Department of Health. (2025). Cost effectiveness analysis of oral health care package of services within a comprehensive PhilHealth benefit package. PMC. https://pmc.ncbi.nlm.nih.gov/articles/PMC12572879/
-REF Schwendicke, F., Golla, T., Dreher, M., & Krois, J. (2021). Convolutional neural networks for dental image diagnostics: A systematic review. *Journal of Dentistry, 91*, 103226. https://doi.org/10.1016/j.jdent.2019.103226
-REF The Journal of Evidence Based Dental Practice. (2025). Variability in manual dental caries detection: Observer consistency in clinical screenings. *The Journal of Evidence Based Dental Practice, 25*(1), 1–12. https://doi.org/10.1016/j.jebdp.2024.101950
-REF Tian, Y., Ye, Q., & Doermann, D. (2025). YOLOv12: Attention centric real time object detectors. *arXiv preprint* arXiv:2502.12524. https://arxiv.org/abs/2502.12524
-REF University of Santo Tomas. (2023). Bridging the gap or widening the divide: A call for capacity building in artificial intelligence for healthcare in the Philippines. *Journal of Medicine of the University of Santo Tomas, 7*. https://doi.org/10.35460/2546-1621.2023-0081
-REF World Health Organization. (2022). *Oral health Philippines country profile*. WHO. https://www.who.int/publications/m/item/oral-health-phl-2022-country-profile
-REF World Health Organization. (2024). *Oral health: Key facts*. WHO. https://www.who.int/news-room/fact-sheets/detail/oral-health
+REF Oliveros-Villarico, M., Flores, K. K. R., de Guzman, J. C. Z., Manrique, A. L. V., Millo, G. A., & Estrera, K. R. P. (2023). Pediatrician knowledge, attitude and practices on children's oral health in a tertiary public hospital in the Philippines: A descriptive study. *Acta Medica Philippina, 57*(7), 56–63. https://doi.org/10.47895/amp.vi0.5323
+REF Park, E. Y., Cho, H., Kang, S., Jeong, S., & Kim, E.-K. (2022). Caries detection with tooth surface segmentation on intraoral photographic images using deep learning. *BMC Oral Health, 22*(1), 573. https://doi.org/10.1186/s12903-022-02589-1
+REF Ramírez-Pedraza, A., Salazar-Colores, S., Cardenas-Valle, C., Terven, J., González-Barbosa, J.-J., Ornelas-Rodriguez, F.-J., Hurtado-Ramos, J.-B., Ramírez-Pedraza, R., Córdova-Esparza, D.-M., & Romero-González, J.-A. (2025). Deep learning in oral hygiene: Automated dental plaque detection via YOLO frameworks and quantification using the O'Leary index. *Diagnostics, 15*(2), 231. https://doi.org/10.3390/diagnostics15020231
+REF Sarmiento, R. F. R., Overgaard, S. M., Gai, C., Overgaard, J. D., & Ohde, J. W. (2025). Guiding responsible AI in healthcare in the Philippines. *npj Digital Medicine, 8*, 338. https://doi.org/10.1038/s41746-025-01755-3
+REF Schwendicke, F., Golla, T., Dreher, M., & Krois, J. (2019). Convolutional neural networks for dental image diagnostics: A scoping review. *Journal of Dentistry, 91*, 103226. https://doi.org/10.1016/j.jdent.2019.103226
+REF Tian, Y., Ye, Q., & Doermann, D. (2025). *YOLOv12: Attention-centric real-time object detectors* (arXiv:2502.12524). arXiv. https://doi.org/10.48550/arXiv.2502.12524
+REF Wang, Z., Zhu, Z., Jiang, T., & Gu, Y. (2026). Artificial intelligence for dental caries diagnosis: Translating algorithms to clinical practice. *Frontiers in Medicine, 13*, 1879708. https://doi.org/10.3389/fmed.2026.1879708
+REF World Health Organization. (2022). *Oral health Philippines 2022 country profile*. https://www.who.int/publications/m/item/oral-health-phl-2022-country-profile
+REF World Health Organization. (2025, March 17). *Oral health* [Fact sheet]. https://www.who.int/news-room/fact-sheets/detail/oral-health
+REF Wu, P.-Y., Lin, Y.-J., Chang, Y.-J., Wei, S.-T., Chen, C.-A., Li, K.-C., Tu, W.-C., & Abu, P. A. R. (2025). Deep learning-assisted diagnostic system: Apices and odontogenic sinus floor level analysis in dental panoramic radiographs. *Bioengineering, 12*(2), 134. https://doi.org/10.3390/bioengineering12020134
+REF Yue, W., Wang, Z., Zhang, J., & Liu, X. (2021). An overview of recommendation techniques and their applications in healthcare. *IEEE/CAA Journal of Automatica Sinica, 8*(4), 701–717. https://doi.org/10.1109/JAS.2021.1003919
