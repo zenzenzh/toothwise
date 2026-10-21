@@ -75,6 +75,7 @@ def _normalize_email(value) -> Optional[str]:
 class LoginRequest(BaseModel):
     email: EmailStr
     password: str = Field(max_length=PASSWORD_MAX_LENGTH)
+    remember_me: bool = False
 
     _normalize_email = field_validator("email")(_normalize_email)
 
@@ -127,6 +128,34 @@ class DentistPasswordReset(BaseModel):
 
 
 Token.model_rebuild()
+
+
+# ---------- Password recovery / change (staff and patients) ----------
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+    _normalize_email = field_validator("email")(_normalize_email)
+
+
+class ForgotPasswordResponse(BaseModel):
+    message: str
+    # Only filled in development when no SMTP server is configured, so the
+    # flow can be demoed without email. Always None in production.
+    dev_reset_url: Optional[str] = None
+
+
+class ResetPasswordRequest(BaseModel):
+    token: str = Field(min_length=1, max_length=2048)
+    new_password: str = Field(min_length=PASSWORD_MIN_LENGTH, max_length=PASSWORD_MAX_LENGTH)
+
+
+class ChangePasswordRequest(BaseModel):
+    current_password: str = Field(min_length=1, max_length=PASSWORD_MAX_LENGTH)
+    new_password: str = Field(min_length=PASSWORD_MIN_LENGTH, max_length=PASSWORD_MAX_LENGTH)
+
+
+class MessageResponse(BaseModel):
+    message: str
 
 
 # ---------- Patient ----------
@@ -191,6 +220,7 @@ class PatientRegister(BaseModel):
 class PatientLoginRequest(BaseModel):
     email: EmailStr
     password: str = Field(max_length=PASSWORD_MAX_LENGTH)
+    remember_me: bool = False
 
     _normalize_email = field_validator("email")(_normalize_email)
 

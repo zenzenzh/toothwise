@@ -1,12 +1,11 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { authAPI } from '../api';
+import { readAuthJSON, removeAuthItem, setAuthItem } from '../utils/authStorage';
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [dentist, setDentist] = useState(() => {
-    try { return JSON.parse(localStorage.getItem('tw_dentist')); } catch { return null; }
-  });
+  const [dentist, setDentist] = useState(() => readAuthJSON('tw_dentist'));
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -17,26 +16,27 @@ export function AuthProvider({ children }) {
     return () => { window.removeEventListener('tw:patient-session-started', clearStaffSession); window.removeEventListener('storage', onStorage); };
   }, []);
 
-  async function login(email, password) {
+  // rememberMe keeps this device signed in after the browser closes.
+  async function login(email, password, rememberMe = false) {
     setLoading(true);
     try {
-      const { data } = await authAPI.login({ email, password });
+      const { data } = await authAPI.login({ email, password, remember_me: rememberMe });
       // A browser can only have one active workspace at a time. Clear the
       // patient session before exposing the staff workspace, including the
       // in-memory patient state through the cross-context event.
-      localStorage.removeItem('tw_patient_token');
-      localStorage.removeItem('tw_patient');
+      removeAuthItem('tw_patient_token');
+      removeAuthItem('tw_patient');
       window.dispatchEvent(new Event('tw:staff-session-started'));
-      localStorage.setItem('tw_token', data.access_token);
-      localStorage.setItem('tw_dentist', JSON.stringify(data.dentist));
+      setAuthItem('tw_token', data.access_token, rememberMe);
+      setAuthItem('tw_dentist', JSON.stringify(data.dentist), rememberMe);
       setDentist(data.dentist);
       return data;
     } finally { setLoading(false); }
   }
 
   function logout() {
-    localStorage.removeItem('tw_token');
-    localStorage.removeItem('tw_dentist');
+    removeAuthItem('tw_token');
+    removeAuthItem('tw_dentist');
     setDentist(null);
     window.dispatchEvent(new Event('tw:staff-session-ended'));
   }

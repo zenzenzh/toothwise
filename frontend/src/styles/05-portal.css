@@ -632,3 +632,5 @@
   .tw-input { height: 52px; font-size: 16px; }
 }
 
+
+.pp2-masthead-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }

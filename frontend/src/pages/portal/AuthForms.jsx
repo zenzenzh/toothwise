@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { usePatientAuth } from '../../context/PatientAuthContext';
 import PasswordField from '../../components/PasswordField';
 import AuthLayout from '../../components/AuthLayout';
+import AuthOptionsRow from '../../components/AuthOptionsRow';
 import { validateEmail, validatePHMobile, validatePassword, validateRequiredText, validateOptionalText, LIMITS } from '../../utils/validation';
 import toast from 'react-hot-toast';
 
@@ -94,6 +95,7 @@ export default function AuthCard() {
 function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [remember, setRemember] = useState(false);
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const { login, loading } = usePatientAuth();
@@ -118,7 +120,7 @@ function LoginForm() {
     setErrors({});
     setSubmitting(true);
     try {
-      await login(emailCheck.value, password);
+      await login(emailCheck.value, password, remember);
       toast.success('Welcome back!');
     } catch (err) {
       const status = err.response?.status;
@@ -151,6 +153,7 @@ function LoginForm() {
         labelClassName="auth6-label"
         fieldClassName="auth6-field"
       />
+      <AuthOptionsRow remember={remember} onRememberChange={setRemember} forgotTo="/forgot-password?type=patient" />
       <button type="submit" className="auth6-submit" disabled={busy} aria-busy={busy}>{busy ? 'Signing in…' : 'Sign In'}</button>
     </form>
   );

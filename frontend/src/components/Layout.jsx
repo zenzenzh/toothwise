@@ -3,14 +3,15 @@ import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import {
   Menu, X, LayoutDashboard, Users, UserCog, ShieldCheck,
   LogOut, ChevronLeft, Bell, Search, ArrowRight,
-  Moon, Sun,
+  Moon, Sun, KeyRound,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { isDentist, ROLE_LABELS } from '../utils/permissions';
 import useDarkMode from '../hooks/useDarkMode';
 import LogoMark from './LogoMark';
 import SEO from './SEO';
-import { dashboardAPI, patientsAPI } from '../api';
+import { authAPI, dashboardAPI, patientsAPI } from '../api';
+import ChangePasswordModal from './ChangePasswordModal';
 import { MOBILE_BREAKPOINT } from '../tokens';
 
 const COLLAPSE_KEY = 'tw_sidebar_collapsed';
@@ -41,6 +42,7 @@ export default function Layout() {
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(() => localStorage.getItem(COLLAPSE_KEY) === '1');
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [passwordOpen, setPasswordOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -253,6 +255,10 @@ export default function Layout() {
               <div className="tw-sb-user-role">{ROLE_LABELS[dentist?.role] || dentist?.role || 'Staff'}</div>
             </div>}
           </div>
+          <button className="tw-sb-logout" onClick={() => setPasswordOpen(true)} title={railCollapsed ? 'Change password' : undefined} aria-label={railCollapsed ? 'Change password' : undefined}>
+            <KeyRound size={17} />
+            {!railCollapsed && <span>Change password</span>}
+          </button>
           <button className="tw-sb-logout" onClick={handleLogout}>
             <LogOut size={17} />
             {!railCollapsed && <span>Sign out</span>}
@@ -350,6 +356,7 @@ export default function Layout() {
           </div>
         </div>
       </main>
+      <ChangePasswordModal isOpen={passwordOpen} onClose={() => setPasswordOpen(false)} changePassword={authAPI.changePassword} />
     </div>
   );
 }

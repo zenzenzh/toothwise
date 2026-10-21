@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { MessageCircleQuestion, Microscope, TriangleAlert, ChevronRight, LogOut, Clock, CheckCircle, AlertCircle, ImageOff, CloudOff, RotateCw } from 'lucide-react';
-import { patientScreeningsAPI } from '../../api';
+import { MessageCircleQuestion, Microscope, TriangleAlert, ChevronRight, LogOut, KeyRound, Clock, CheckCircle, AlertCircle, ImageOff, CloudOff, RotateCw } from 'lucide-react';
+import { patientAuthAPI, patientScreeningsAPI } from '../../api';
+import ChangePasswordModal from '../../components/ChangePasswordModal';
 import { formatDatePH } from '../../utils/datetime';
 import { SkeletonCard } from '../../components/Skeleton';
 import LogoMark from '../../components/LogoMark';
@@ -42,6 +43,7 @@ export default function PortalHome({ patient, onLogout }) {
   const [screenings, setScreenings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
+  const [passwordOpen, setPasswordOpen] = useState(false);
   // The open screening lives in the URL (?screening=12) so the browser's
   // Back button closes it instead of leaving the portal.
   const [params, setParams] = useSearchParams();
@@ -91,10 +93,17 @@ export default function PortalHome({ patient, onLogout }) {
           </div>
           <span className="pp2-masthead-name">ToothWise</span>
         </div>
-        <button type="button" className="pp2-signout" onClick={onLogout}>
-          <LogOut size={14} aria-hidden="true" />
-          Sign out
-        </button>
+        <div className="pp2-masthead-actions">
+          <button type="button" className="pp2-signout" onClick={() => setPasswordOpen(true)}>
+            <KeyRound size={14} aria-hidden="true" />
+            Change password
+          </button>
+          <button type="button" className="pp2-signout" onClick={onLogout}>
+            <LogOut size={14} aria-hidden="true" />
+            Sign out
+          </button>
+        </div>
+        <ChangePasswordModal isOpen={passwordOpen} onClose={() => setPasswordOpen(false)} changePassword={patientAuthAPI.changePassword} />
       </header>
 
       <main>
