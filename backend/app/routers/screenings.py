@@ -8,6 +8,7 @@ from app import models, schemas
 from app.audit import log_action
 from app.config import get_settings
 from app.database import get_db
+from app.ml.labels import BRACES_NOTICE
 from app.ml.recommender import (
     TIER_NAMES, build_feature_vector, generate_prevention_plan,
     retrain_from_labeled,
@@ -163,6 +164,10 @@ def create_screening(
 
     # --- 3. KNN-driven prevention plan ---
     plan = generate_prevention_plan(raw_detections, patient.age)
+    if result.get("orthodontic_appliance"):
+        plan.insert(0, {"text": BRACES_NOTICE, "priority": 0})
+        for i, rec in enumerate(plan):
+            rec["order_index"] = i
 
     # --- 4. Persist everything ---
     screening = models.Screening(

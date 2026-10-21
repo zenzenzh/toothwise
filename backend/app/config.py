@@ -78,6 +78,18 @@ class Settings(BaseSettings):
     YOLOV12_WEIGHTS_PATH: str = "models_weights/yolov12_dental.pt"
     DETECTION_CONF_THRESHOLD: float = 0.25
     ENSEMBLE_IOU_THRESHOLD: float = 0.5
+    # Cavity is the highest-severity class (it alone triggers the urgent
+    # plan), so it gets a stricter floor than the global threshold above.
+    CAVITY_CONF_THRESHOLD: float = 0.5
+    # In the fused set, keep a cavity only when YOLOv8 AND YOLOv12 both found
+    # it. Ignored when only one model is running.
+    CAVITY_REQUIRE_AGREEMENT: bool = True
+    # Neither model has a braces class, so a metal bracket (a dark, high-
+    # contrast square on the tooth) reads as a cavity. A cavity/plaque/tartar
+    # box whose pixels are at least this fraction metal-grey is dropped as
+    # orthodontic hardware. Enamel, gums and caries score ~0; a tooth box
+    # holding a bracket scores ~0.1-0.3.
+    METAL_FRACTION_THRESHOLD: float = 0.08
 
     KNN_MODEL_PATH: str = "app/ml/artifacts/knn_recommender.joblib"
     KNN_NEIGHBORS: int = 5
