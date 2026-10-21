@@ -129,6 +129,75 @@ def _fuse(dets_v8: list[RawDetection], dets_v12: list[RawDetection],
     return fused
 
 
+# Classes a bracket can be mistaken for. gum_inflammation and healthy_tooth
+# boxes legitimately cover brackets on a braces patient, so they are kept.
+_APPLIANCE_CONFUSABLE = {"cavity", "plaque", "tartar"}
+# Two or more bracket-like boxes mean the patient is wearing braces; one
+# could be a filling or a shadow.
+_MIN_BRACKETS_FOR_APPLIANCE = 2
+
+
+def _load_hsv(source):
+    """HSV pixels of the screening image as floats in 0-1, downscaled so the
+    per-box colour check stays cheap. Returns None if the image can't be read
+    (the filter then does nothing rather than failing the screening)."""
+    import numpy as np
+    from PIL import Image
+
+    try:
+        if isinstance(source, (str, Path)):
+            img = Image.open(Path(settings.UPLOAD_DIR) / source)
+        else:
+            img = source
+        img = img.convert("RGB")
+        img.thumbnail((640, 640))
+        return np.asarray(img.convert("HSV"), dtype=np.float32) / 255.0
+    except Exception:
+        return None
+
+
+def _metal_fraction(hsv, det: RawDetection) -> float:
+    """Share of the box's pixels that look like stainless steel: grey (low
+    saturation) and neither shadow-black nor specular-white. Enamel is
+    cream/yellow, gums are pink and caries are brown or black, so all of them
+    score near zero."""
+    h, w = hsv.shape[:2]
+    x1, x2 = int(max(det.x1, 0) * w), int(min(det.x2, 1) * w)
+    y1, y2 = int(max(det.y1, 0) * h), int(min(det.y2, 1) * h)
+    if x2 <= x1 or y2 <= y1:
+        return 0.0
+    patch = hsv[y1:y2, x1:x2]
+    sat, val = patch[..., 1], patch[..., 2]
+    return float(((sat < 0.18) & (val > 0.2) & (val < 0.8)).mean())
+
+
+def _drop_brackets(dets: list[RawDetection], hsv) -> tuple[list[RawDetection], list[RawDetection]]:
+    """Splits detections into (kept, brackets)."""
+    if hsv is None:
+        return dets, []
+    kept, brackets = [], []
+    for d in dets:
+        if (d.label in _APPLIANCE_CONFUSABLE
+                and _metal_fraction(hsv, d) >= settings.METAL_FRACTION_THRESHOLD):
+            brackets.append(d)
+        else:
+            kept.append(d)
+    return kept, brackets
+
+
+def _count_distinct(dets: list[RawDetection], iou_threshold: float) -> int:
+    """Number of distinct boxes, counting v8/v12 boxes on the same spot once."""
+    distinct: list[RawDetection] = []
+    for d in dets:
+        if all(_iou(d, o) < iou_threshold for o in distinct):
+            distinct.append(d)
+    return len(distinct)
+
+
+def _passes_cavity_floor(det: RawDetection) -> bool:
+    return det.label != "cavity" or det.confidence >= settings.CAVITY_CONF_THRESHOLD
+
+
 def _seed_key(source) -> str:
     """
     Stable string key for the mock detector's deterministic RNG seed.
@@ -281,10 +350,16 @@ class DualYoloDetector:
               "detections_v12": [RawDetection-as-dict, ...],   # YOLOv12 raw output, unfused
               "yolov8_ms": float,
               "yolov12_ms": float,
+              "orthodontic_appliance": bool,  # braces seen; results less reliable
             }
         Raw per-model outputs are included (tagged source_model="yolov8" /
         "yolov12") so the app can show a model-vs-model comparison rather
         than only the fused result.
+
+        Post-processing applied to every set: cavity/plaque/tartar boxes that
+        are mostly metal-grey are dropped as brackets, and cavities below
+        CAVITY_CONF_THRESHOLD are dropped. The fused set additionally keeps a
+        cavity only when both models found it (CAVITY_REQUIRE_AGREEMENT).
         """
         if self.v8_mock:
             t0 = time.perf_counter()
@@ -298,7 +373,18 @@ class DualYoloDetector:
             ms_v12 = 0.0
         else:
             dets_v12, ms_v12 = self._run_real(self.model_v12, source, "yolov12")
+
+        hsv = _load_hsv(source)
+        dets_v8, brackets_v8 = _drop_brackets(dets_v8, hsv)
+        dets_v12, brackets_v12 = _drop_brackets(dets_v12, hsv)
+        appliance = _count_distinct(brackets_v8 + brackets_v12,
+                                    settings.ENSEMBLE_IOU_THRESHOLD) >= _MIN_BRACKETS_FOR_APPLIANCE
+
+        dets_v8 = [d for d in dets_v8 if _passes_cavity_floor(d)]
+        dets_v12 = [d for d in dets_v12 if _passes_cavity_floor(d)]
         fused = _fuse(dets_v8, dets_v12, settings.ENSEMBLE_IOU_THRESHOLD)
+        if settings.CAVITY_REQUIRE_AGREEMENT and not self.v12_mock:
+            fused = [d for d in fused if d.label != "cavity" or d.source_model == "ensemble"]
 
         return {
             "detections": [asdict(d) for d in fused],
@@ -306,6 +392,7 @@ class DualYoloDetector:
             "detections_v12": [asdict(d) for d in dets_v12],
             "yolov8_ms": round(ms_v8, 1),
             "yolov12_ms": round(ms_v12, 1),
+            "orthodontic_appliance": appliance,
         }
 
 
