@@ -1,4 +1,5 @@
 import bcrypt
+import hashlib
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
@@ -46,6 +47,44 @@ def create_access_token(
     )
     payload = {"sub": subject, "exp": expire, "scope": scope}
     return jwt.encode(payload, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+
+
+def _password_fingerprint(hashed_password: str) -> str:
+    """Short digest of the stored hash. Embedding it in a reset token makes
+    the token single-use: once the password changes, the fingerprint no
+    longer matches and every older reset link stops working."""
+    return hashlib.sha256(hashed_password.encode("utf-8")).hexdigest()[:24]
+
+
+def create_password_reset_token(email: str, account_type: str, hashed_password: str) -> str:
+    """account_type is "staff" or "patient". The scope ("reset:staff" /
+    "reset:patient") is never accepted by get_current_staff or
+    get_current_patient, so a reset token can't be used to call the API."""
+    expire = datetime.now(timezone.utc) + timedelta(minutes=settings.PASSWORD_RESET_EXPIRE_MINUTES)
+    payload = {
+        "sub": email,
+        "exp": expire,
+        "scope": f"reset:{account_type}",
+        "pwf": _password_fingerprint(hashed_password),
+    }
+    return jwt.encode(payload, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+
+
+def read_password_reset_token(token: str, account_type: str) -> Optional[dict]:
+    """Returns the token payload, or None if it is invalid, expired or for
+    the other account type. The caller must still check the fingerprint
+    against the account's current hash with reset_token_matches()."""
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+    except JWTError:
+        return None
+    if payload.get("scope") != f"reset:{account_type}" or not payload.get("sub"):
+        return None
+    return payload
+
+
+def reset_token_matches(payload: dict, hashed_password: str) -> bool:
+    return payload.get("pwf") == _password_fingerprint(hashed_password)
 
 
 def get_current_staff(

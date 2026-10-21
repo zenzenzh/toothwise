@@ -3,12 +3,14 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import PasswordField from '../components/PasswordField';
 import AuthLayout from '../components/AuthLayout';
+import AuthOptionsRow from '../components/AuthOptionsRow';
 import { validateEmail, LIMITS } from '../utils/validation';
 import SEO from '../components/SEO';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [remember, setRemember] = useState(false);
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState(null);
@@ -33,7 +35,7 @@ export default function Login() {
     setFormError(null);
     setSubmitting(true);
     try {
-      await login(emailCheck.value, password);
+      await login(emailCheck.value, password, remember);
       window.location.replace('/dashboard');
     } catch (err) {
       // Shown inline rather than as a toast so the reason stays visible
@@ -82,6 +84,7 @@ export default function Login() {
             labelClassName="auth6-label"
             fieldClassName="auth6-field"
           />
+          <AuthOptionsRow remember={remember} onRememberChange={setRemember} forgotTo="/forgot-password?type=staff" />
           <button type="submit" className="auth6-submit" disabled={busy} aria-busy={busy}>
             {busy ? <span className="auth6-spinner" aria-hidden="true" /> : null}
             {busy ? 'Signing in…' : 'Sign in to workspace'}

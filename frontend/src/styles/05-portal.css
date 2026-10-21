@@ -633,6 +633,8 @@
 }
 
 
+.pp2-masthead-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+
 /* =====================================================================
    PATIENT PORTAL — dashboard additions: change since last visit,
    checkup reminder, latest results, risk over time.

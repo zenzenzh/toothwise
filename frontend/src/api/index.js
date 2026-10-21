@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { getAuthItem, removeAuthItem } from '../utils/authStorage';
 
 const apiBase = (process.env.REACT_APP_API_URL || (window.location.hostname === 'localhost' ? 'http://localhost:8000' : `http://${window.location.hostname}:8000`)).replace(/\/$/, '');
 
@@ -37,7 +38,7 @@ function friendlyErrorMessage(err) {
 const api = axios.create({ baseURL: apiBase + '/api' });
 
 api.interceptors.request.use(cfg => {
-  const t = localStorage.getItem('tw_token');
+  const t = getAuthItem('tw_token');
   if (t) cfg.headers.Authorization = 'Bearer ' + t;
   return cfg;
 });
@@ -45,13 +46,15 @@ api.interceptors.request.use(cfg => {
 api.interceptors.response.use(r => r, err => {
   if (err.response?.status === 401) {
     const isLoginPage = window.location.pathname === '/login';
-    const isLoginRequest = err.config?.url?.includes('/auth/login');
-    if (!isLoginPage && !isLoginRequest) {
+    // Auth form requests (login, change-password, etc.) report their own
+    // errors instead of bouncing the user to the login page.
+    const isAuthFormRequest = /\/auth\/(login|change-password|forgot-password|reset-password)/.test(err.config?.url || '');
+    if (!isLoginPage && !isAuthFormRequest) {
       // Only clear the staff session, not a patient session that might
       // also be active in the same browser (separate token/localStorage
       // keys by design - see the patient axios instance below).
-      localStorage.removeItem('tw_token');
-      localStorage.removeItem('tw_dentist');
+      removeAuthItem('tw_token');
+      removeAuthItem('tw_dentist');
       window.location.replace('/login');
     }
   }
@@ -62,6 +65,10 @@ api.interceptors.response.use(r => r, err => {
 export const authAPI = {
   login: (d) => api.post('/auth/login', d),
   me: () => api.get('/auth/me'),
+  forgotPassword: (email) => api.post('/auth/forgot-password', { email }),
+  resetPassword: (token, newPassword) => api.post('/auth/reset-password', { token, new_password: newPassword }),
+  changePassword: (currentPassword, newPassword) =>
+    api.post('/auth/change-password', { current_password: currentPassword, new_password: newPassword }),
 };
 
 export const patientsAPI = {
@@ -148,7 +155,7 @@ export const chatbotAPI = {
 const patientApi = axios.create({ baseURL: apiBase + '/api' });
 
 patientApi.interceptors.request.use(cfg => {
-  const t = localStorage.getItem('tw_patient_token');
+  const t = getAuthItem('tw_patient_token');
   if (t) cfg.headers.Authorization = 'Bearer ' + t;
   return cfg;
 });
@@ -158,8 +165,8 @@ patientApi.interceptors.response.use(r => r, err => {
     const isPortalLogin = window.location.pathname === '/patient-portal';
     const isAuthRequest = err.config?.url?.includes('/auth/patient/');
     if (!isPortalLogin && !isAuthRequest) {
-      localStorage.removeItem('tw_patient_token');
-      localStorage.removeItem('tw_patient');
+      removeAuthItem('tw_patient_token');
+      removeAuthItem('tw_patient');
       window.location.replace('/patient-portal');
     }
   }
@@ -171,6 +178,11 @@ export const patientAuthAPI = {
   register: (d) => patientApi.post('/auth/patient/register', d),
   login: (d) => patientApi.post('/auth/patient/login', d),
   me: () => patientApi.get('/auth/patient/me'),
+  forgotPassword: (email) => patientApi.post('/auth/patient/forgot-password', { email }),
+  resetPassword: (token, newPassword) =>
+    patientApi.post('/auth/patient/reset-password', { token, new_password: newPassword }),
+  changePassword: (currentPassword, newPassword) =>
+    patientApi.post('/auth/patient/change-password', { current_password: currentPassword, new_password: newPassword }),
 };
 
 export const patientScreeningsAPI = {
