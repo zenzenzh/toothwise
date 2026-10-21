@@ -104,6 +104,14 @@ def normalize_label(raw_label: str) -> str:
     return LABEL_ALIASES.get(alias_key, key)
 
 
+# Shown when the detector sees braces. The models were not trained on
+# orthodontic patients, so findings around the brackets need a dentist's eye.
+BRACES_NOTICE = (
+    "Braces detected: the AI was not trained on orthodontic patients, so "
+    "brackets were excluded from the results and findings near them may be "
+    "missed. Have your dentist or orthodontist check these teeth in person."
+)
+
 GENERAL_RECOMMENDATIONS = [
     "Brush your teeth at least twice a day using fluoride toothpaste.",
     "Avoid sugary foods and drinks, especially between meals.",
