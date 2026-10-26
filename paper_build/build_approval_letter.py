@@ -36,18 +36,18 @@ BODY = [
 ]
 ITEMS = [
     "use CodiSmile Dental Clinic as the deployment site and clinical reference of the Toothwise system;",
-    "pilot the system with the clinic's dentist, dental assistants, and receptionist, and with patients who "
-    "give their written informed consent;",
-    "administer the ISO/IEC 25010 software quality evaluation questionnaire to clinic staff and consenting "
-    "patients; and",
-    "compare Toothwise-assisted screening with the current manual process in terms of screening time and "
-    "consistency, using the dentist's findings as the reference.",
+    "demonstrate and pilot the system with the clinic's dentist, dental assistants, and receptionist, using "
+    "sample dental images only; and",
+    "consult the clinic's dentist on the system's detection results, risk classification, and prevention "
+    "plans so that they reflect sound clinical practice.",
 ]
 CLOSING = [
-    "All information gathered will be kept strictly confidential and used solely for academic purposes, in "
-    "accordance with the Data Privacy Act of 2012 (Republic Act No. 10173). No patient photograph or record "
-    "will be used without the patient's consent, data presented in the paper will be anonymized, and the "
-    "study will be scheduled so as not to disrupt the clinic's daily operations.",
+    "The study does not involve the clinic's patients. The ISO/IEC 25010 software quality evaluation has "
+    "already been answered by 50 respondents from outside the clinic, so no patient photograph, record, or "
+    "personal information from CodiSmile Dental Clinic will be collected. Any information shared with us will "
+    "be kept strictly confidential and used solely for academic purposes, in accordance with the Data Privacy "
+    "Act of 2012 (Republic Act No. 10173), and all activities will be scheduled so as not to disrupt the "
+    "clinic's daily operations.",
     "Your approval will be a great help to the completion of our study. Thank you very much for your time "
     "and kind consideration.",
 ]
