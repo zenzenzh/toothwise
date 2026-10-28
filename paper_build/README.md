@@ -15,7 +15,7 @@
 | `pack_screens.py` | Sizes the Section 3.10 screenshots so each page they use is full; adds to `layout.json`. |
 | `layout.json` | Result of the two passes above; `build_paper.py` applies it on every build. |
 | `REFERENCES_CHECK.md` | What was verified, fixed, replaced, or added in the reference list, with sources. |
-| `capture_screens.py` | Takes the Section 3.10 screenshots from a running, seeded instance (backend :8000, frontend :3000). |
+| `capture_screens.py` | Takes the Section 3.10 screenshots from a running, seeded instance (backend :8000 in log-only email mode, frontend :3000): `python paper_build/capture_screens.py OUT_DIR BACKEND_LOG [UPLOAD_SAMPLE]`. |
 
 ```bash
 pip install python-docx pymupdf playwright matplotlib   # plus LibreOffice (soffice) on PATH

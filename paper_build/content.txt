@@ -130,14 +130,14 @@ FIG agile | fig_agile.png | 4.3 | Agile Development Methodology
 ## 3.2 Project Planning
 PN The Toothwise project was planned around the screening and record-keeping workflow of CodiSmile Dental Clinic. The following considerations guided the planning of the system:
 - **Project Objectives** — to provide CodiSmile Dental Clinic with an AI-assisted dental screening system that detects tartar, plaque, cavity, gum inflammation, and healthy tooth from a still photograph, estimates a risk level, and generates a recommendation/prevention plan, while also supporting day-to-day clinic record-keeping.
-- **Project Scope** — the system covers staff authentication, patient management, dental screening and AI detection from uploaded still images, risk assessment, recommendation generation, clinical notes, PDF reporting, audit logging, a self-service patient portal, a public AI assistant, and cloud deployment.
+- **Project Scope** — the system covers staff authentication, patient management, dental screening and AI detection from uploaded still images, risk assessment, recommendation generation, password recovery, clinical notes, PDF reporting, audit logging, a self-service patient portal, a public AI assistant, and cloud deployment.
 - **Target Users** — CodiSmile Dental Clinic staff (dentist, receptionist, and assistant roles) and the clinic's patients through the patient portal.
 - **Clinic Workflow** — a patient is registered or already on file, a still intraoral photograph taken with a standard device camera is uploaded during a screening, the system produces detection, risk, and recommendation results for the dentist to review, and the dentist may confirm the risk tier, add clinical notes, or generate a PDF report.
 - **Functional Requirements** — detailed in Section 3.4.
 - **Non-Functional Requirements** — detailed in Section 3.4, covering security, privacy, usability, reliability, performance efficiency, and data protection.
 - **AI Screening Requirements** — the system was planned to use two independent detection models (YOLOv8 and YOLOv12) whose outputs are fused into a single clinical detection set, rather than relying on a single model.
 - **Database Requirements** — a relational PostgreSQL schema was planned to store staff accounts, patients, screenings and their photographs, detections, recommendations, clinical notes, and audit logs with referential integrity between related records.
-- **Security Requirements** — JWT-based authentication, hashed passwords, rate-limited login endpoints, authenticated (non-public) image access, and audit logging were planned from the outset given the clinical and personal nature of the data involved.
+- **Security Requirements** — JWT-based authentication, hashed passwords, rate-limited login endpoints, secure password recovery, authenticated (non-public) image access, and audit logging were planned from the outset given the clinical and personal nature of the data involved.
 - **Deployment Requirements** — the system had to run on free cloud hosting without a payment card, which limits the backend to 512 MB of memory and a disk that is cleared whenever the service restarts.
 P The requirements and technical decisions behind this planning were drawn directly from the current Toothwise project package rather than from separate interview transcripts or survey forms, since the project does not maintain those as separate dated records. Table {tab:sources} summarizes the actual sources used.
 TABLE sources | Sources of Requirements and Technical Data
@@ -145,7 +145,7 @@ W 1.7,4.3
 | Source | Use in the Study |
 | System and code review | The frontend routes, pages, API client, FastAPI routers, schemas, security module, ML modules, and database models were reviewed to identify actual implemented functions and data flows. |
 | Database and schema review | The PostgreSQL schema, SQLAlchemy models, and migration scripts were reviewed to verify entities, relationships, enumerated values, detection sets, stored screening photos, and audit logs. |
-| Testing and debugging records | The automated backend test suite (100 test cases) and the project's version history document API contract reconciliation, enum and image-path fixes, smoke testing, security validation, and feature verification. |
+| Testing and debugging records | The automated backend test suite (117 test cases) and the project's version history document API contract reconciliation, enum and image-path fixes, smoke testing, security validation, and feature verification. |
 | AI evaluation procedure | The evaluate_models.py utility defines how precision, recall, F1, mAP50, mAP50-95, and average inference time are obtained from a labeled test set. The trained YOLOv8 and YOLOv12 weights are installed, and the measured results are reported in Chapter IV. |
 | Deployment configuration | The Render blueprint (render.yaml), the Vercel configuration, the backend Dockerfile, and the deployment guide (docs/DEPLOYMENT.md) were reviewed to document the hosting environment and its limits. |
 ENDTABLE
@@ -170,7 +170,7 @@ P The specific division of responsibilities above reflects the major components 
 TABLE fr | Functional Requirements
 W 0.7,1.6,3.7
 | ID | Requirement | Specification |
-| FR-01 | Staff authentication | Authenticate staff (dentist, receptionist, assistant) by email and password and issue a JWT bearer token for API access. |
+| FR-01 | Staff authentication | Authenticate staff (dentist, receptionist, assistant) by email and password and issue a JWT bearer token for API access; an optional “Remember me” keeps the device signed in for 30 days. |
 | FR-02 | Role-based access | Distinguish dentist, receptionist, assistant, and patient scopes and restrict functions. |
 | FR-03 | Patient management | Create, view, update, and delete patient records and view screening history and risk trends. |
 | FR-04 | Dental screening | Upload a still intraoral photograph (JPEG, PNG, or WebP, up to 15 MB) taken with a standard device camera in a single multipart screening request and receive detection, risk, recommendation, and screening-record results. |
@@ -179,17 +179,18 @@ W 0.7,1.6,3.7
 | FR-07 | Recommendation generation | Use the KNN recommender and condition-specific rules to generate an ordered prevention plan. |
 | FR-08 | Screening review | View screening images, fused detections, risk information, recommendations, clinical notes, and model-comparison information; let the dentist confirm or correct the risk tier. |
 | FR-09 | PDF report | Generate an authenticated PDF screening report containing patient/screening information, findings, prevention plan, and clinical notes. |
-| FR-10 | Patient portal | Patients register, log in, and view their own screening history and screening details. |
+| FR-10 | Patient portal | Patients register, log in (with optional “Remember me”), and view their latest results, a risk-over-time chart, their next check-up date, their screening history, and screening details. |
 | FR-11 | Audit logging | Record relevant authentication and create/update/delete actions for administrative review. |
 | FR-12 | Health monitoring | Expose a health endpoint that checks database connectivity without exposing internal errors. |
 | FR-13 | Database backup | Provide a pg_dump-based backup utility that creates timestamped, retained backups. |
 | FR-14 | Photo persistence | Keep a database copy of every screening photograph and restore the file automatically when the host's disk has been cleared. |
 | FR-15 | AI assistant | Answer general dental-care and clinic questions on the public website and patient portal without reading patient records. |
+| FR-16 | Password recovery and change | Staff and patients can request a password reset link by email and set a new password, and signed-in users can change their password. |
 ENDTABLE
 TABLE nfr | Non-Functional Requirements
 W 0.8,1.4,3.8
 | ID | Quality Area | Specification |
-| NFR-01 | Security | Passwords hashed with bcrypt; protected operations require JWT authentication; login/registration endpoints rate-limited to 5 requests per minute per IP. |
+| NFR-01 | Security | Passwords hashed with bcrypt; protected operations require JWT authentication; login, registration, and password-reset endpoints rate-limited to 5 requests per minute per IP; password reset links are single-use, expire after 30 minutes, and the response is the same whether or not the email exists. |
 | NFR-02 | Privacy | Screening images are not publicly exposed; authenticated and ownership-checked image endpoints are used instead of a public upload route. |
 | NFR-03 | Usability | Browser-based workflows for dashboard monitoring, patient records, screening, dentist management, audit review, and patient self-service. |
 | NFR-04 | Reliability | Backend returns a generic response for unhandled errors while recording diagnostic detail server-side; screening photos survive host restarts through their database copies. |
@@ -201,7 +202,7 @@ ENDTABLE
 = This section presents the major design diagrams
 ###+ 3.5.1 Use Case Diagram
 = Figure 2 presents the use case diagram
-~ It represents system user roles, not the development team in Section 3.3. >>> A screening always includes uploading an intraoral image, and the dentist may extend the review of findings by confirming the risk tier, adding a clinical note, or generating a PDF report. The diagram represents system user roles, not the development team in Section 3.3.
+~ It represents system user roles, not the development team in Section 3.3. >>> A screening always includes uploading an intraoral image, and the dentist may extend the review of findings by confirming the risk tier, adding a clinical note, or generating a PDF report. Any signed-in user may also reset a forgotten password or change it, which extends Authenticate User. The diagram represents system user roles, not the development team in Section 3.3.
 FIG usecase | fig_use_case.png | 6.0 | Use Case Diagram
 ###+ 3.5.2 Entity Relationship Diagram (ERD)
 P Figure {fig:erd} presents the Entity Relationship Diagram of the Toothwise PostgreSQL database, verified against the current database/schema.sql and backend/app/models.py. The database contains eight tables: dentists, patients, screenings, screening_images, detections, recommendations, clinical_notes, and audit_logs, related through foreign keys as shown below. The screening_images table was added for the cloud deployment: it keeps a copy of each screening photograph in the database, because the hosting service clears its local disk whenever it restarts. Every field of each table is listed in the diagram.
@@ -228,12 +229,12 @@ P Table {tab:dfdproc} describes each Level 1 process, with its main inputs and o
 TABLE dfdproc | Level 1 Process Descriptions
 W 1.35,2.25,1.2,1.24
 | Process | Description | Main inputs | Main outputs and data stores |
-| 1.0 Authenticate Users | Checks staff and patient credentials and issues a JWT access token for the matching scope; registers new patient-portal accounts. | Credentials; portal registration | Access token; reads D1 and D2, writes new portal accounts to D2 and login events to D7 |
+| 1.0 Authenticate Users | Checks staff and patient credentials and issues a JWT access token for the matching scope (30 days with “Remember me”); registers new patient-portal accounts; emails password reset links and changes passwords. | Credentials; portal registration; reset and change-password requests | Access token; reads D1 and D2, writes new portal accounts to D2 and login events to D7 |
 | 2.0 Manage Patient Records | Creates, lists, and updates patient records; only the dentist can delete one. | Patient registration and record data | Patient directory and records; D2; record change events to D7 |
 | 3.0 Manage Staff Accounts | Lets the dentist add, edit, reset, deactivate, and delete staff accounts and assign the dentist, receptionist, or assistant role. | Staff account data | Staff roster; D1; staff change events to D7 |
 | 4.0 Perform AI Dental Screening | Validates the uploaded photograph, runs YOLOv8 and YOLOv12, fuses their detections, computes the risk score and tier, and builds the KNN prevention plan. | Intraoral image; patient reference from D2 | Detections and risk result; writes D3, D4, and D5; screening event to D7 |
 | 5.0 Review Findings and Generate Report | Shows the screening for review, records the dentist's tier confirmation and clinical notes, and produces the PDF report. | Tier confirmation, clinical note, report request; D2 to D6 | Screening review and PDF report; confirmed tier to D3; notes to D6; review event to D7 |
-| 6.0 Serve Patient Portal and AI Assistant | Shows patients only their own screenings and prevention plans and answers general questions through the AI assistant. | History request, assistant question; D2, D3, D5 | Screening history, prevention plan, assistant reply |
+| 6.0 Serve Patient Portal and AI Assistant | Shows patients only their own screenings, latest results, risk trend, and prevention plans and answers general questions through the AI assistant. | History request, assistant question; D2, D3, D5 | Screening history, prevention plan, assistant reply |
 | 7.0 Review Audit Trail | Lets the dentist search and filter the audit log. | Audit log query; D7 | Audit trail report |
 ENDTABLE
 FIG dfd1a | fig_dfd1_sheet1.png | 6.0 | Data Flow Diagram Level 1 (Sheet 1 of 2: Processes 1.0, 2.0, 3.0, and 7.0)
@@ -264,7 +265,8 @@ W 1.6,1.9,2.5
 | Computer Vision | OpenCV 4.10.0.84 (headless), Pillow 10.3.0, NumPy 1.26.4 | Support image processing, validation, letterboxing, and preparation of uploaded still images. |
 | Recommendation / ML | scikit-learn 1.5.0, joblib 1.4.2 | Support the KNN risk classification and recommendation model and persistence of the trained recommender artifact. |
 | Database | PostgreSQL 15 | Stores patient, staff, screening, photo, detection, recommendation, clinical note, and audit-log records. |
-| Authentication / Security | python-jose 3.3.0, bcrypt 4.2.0, SlowAPI 0.1.9 | Provide JWT authentication, password hashing, and rate limiting. |
+| Authentication / Security | python-jose 3.3.0, bcrypt 4.2.0, SlowAPI 0.1.9 | Provide JWT authentication, password hashing, password reset tokens, and rate limiting. |
+| Email | SMTP (Python smtplib) | Sends password reset links; without an SMTP server the link is written to the server log for testing. |
 | PDF Reporting | ReportLab 4.2.2 | Generates authenticated PDF screening reports. |
 | AI Assistant | Google Gemini API (gemini-3.6-flash) | Answers general dental-care and clinic questions for the public AI assistant. |
 | Testing | pytest 8.2.2, HTTPX 0.27.0 | Support automated and API-level testing of the FastAPI application. |
@@ -339,24 +341,26 @@ P The system was implemented as a three-tier web application: a React.js single-
 
 ## 3.9 System Testing
 = Toothwise was tested through functional
-~ supplemented by manual and code-review verification >>> in an automated suite of 100 test cases (Section 4.2.5), supplemented by manual and code-review verification
+~ supplemented by manual and code-review verification >>> in an automated suite of 117 test cases (Section 4.2.5), supplemented by manual and code-review verification
 = To confirm that Toothwise satisfies
 = The system was evaluated using three structured
 
 ## 3.10 Full Current System Screenshots
-P This section documents the current Toothwise system as implemented, one screen per numbered figure, in the order a user would encounter them: the public landing page, the staff and patient sign-in pages, the dashboard, patient management, the screening workflow and results, staff management, the audit log, the rest of the patient portal, and the PDF screening report. The screenshots were captured from a running instance of the current system in light mode, using demonstration accounts, demonstration patients, and a stock dental photograph; no real patient data is shown.
+P This section documents the current Toothwise system as implemented, one screen per numbered figure, in the order a user would encounter them: the public landing page, staff sign-in and password recovery, the dashboard, patient management, the screening workflow and results, staff management, the audit log, changing a password, the patient portal, and the PDF screening report. The screenshots were captured from a running instance of the current system in light mode, using demonstration accounts, demonstration patients, and sample intraoral photographs taken from CodiSmile Dental Clinic's own published before-and-after images; no patient records are shown.
 FIG s_landing | shot_landing.png | 5.2 | Public Landing Page | This is the first page guests see. It introduces CodiSmile Dental Clinic and ToothWise, gives the clinic's location and opening hours, links to the patient portal, and opens the AI assistant.
-FIGPAIR s_login | shot_login.png | 2.75 | Staff Login Page | Sign-in page for clinic staff; patients are directed to the patient portal. || s_plogin | shot_portal_login.png | 2.75 | Patient Portal — Sign In | Patients sign in to see only their own records.
+FIGPAIR s_login | shot_login.png | 2.75 | Staff Login Page | Staff sign in with email and password. “Remember me on this device” keeps them signed in for 30 days. || s_forgot | shot_forgot_password.png | 2.75 | Forgot Password | Staff (or patients, from the portal) enter their email to receive a reset link.
+FIGPAIR s_sent | shot_forgot_password_sent.png | 2.75 | Reset Link Sent | The same message is shown whether or not the email is registered. || s_reset | shot_reset_password_filled.png | 2.75 | Choose a New Password | The emailed link opens this page; the checklist confirms the password rules.
 FIG s_dash | shot_dashboard.png | 5.2 | Dashboard | The first screen staff see after signing in. It summarizes total screenings, patients, high-risk cases, and today's screenings, and shows the monthly screening trend and the breakdown of detected conditions.
 FIG s_patients | shot_patients.png | 5.2 | Patient List | Lists every registered patient with age, gender, contact number, and address. Staff can search, register a patient, open a record, edit it, or (as dentist) delete it.
 FIG s_detail | shot_patient_detail.png | 5.2 | Patient Details | The record of one patient: demographic details, the latest risk result, the risk trend across visits, and the screening history.
 FIG s_upload | shot_screening_upload.png | 5.2 | New Screening (Step 1: Choose Image) | Staff drag and drop or browse for the patient's intraoral photograph (JPEG, PNG, or WebP, up to 15 MB).
 FIG s_preview | shot_screening_preview.png | 5.2 | New Screening (Step 2: Review and Analyse) | The selected photograph is shown for checking before the YOLOv8 and YOLOv12 ensemble is run.
-FIG s_result | shot_screening_result_full.png | 5.6 | Screening Results | The analysis of the uploaded photograph: color-coded bounding boxes for the fused, YOLOv8, and YOLOv12 detections, the risk level, the prevention plan, the dentist's clinical notes, and the button that downloads the PDF report.
+FIG s_result | shot_screening_result_full.png | 5.6 | Screening Results | The analysis of the uploaded photograph: color-coded bounding boxes for the fused, YOLOv8, and YOLOv12 detections (here, gum inflammation), the risk level, the prevention plan, the dentist's clinical notes, and the button that downloads the PDF report.
 FIG s_staff | shot_staff.png | 5.2 | Staff Management (Dentist/Administrator) | Lets the dentist add staff members, assign the dentist, receptionist, or assistant role, edit details, reset passwords, and deactivate or delete accounts.
-FIG s_audit | shot_audit.png | 5.2 | Audit Log (Dentist/Administrator) | A permanent, filterable timeline of who signed in, which records were created, changed, or deleted, and when.
-FIGPAIR s_preg | shot_portal_register.png | 2.75 | Patient Portal — Sign Up | New patients create an account with their contact details and a password. || s_phome | shot_portal_home.png | 2.75 | Patient Portal — Home and Screening History | Patients see their latest risk level and their screening history.
-FIGPAIR s_pscreen | shot_portal_screening.png | 2.75 | Patient Portal — Screening Details | One screening: the photograph with its findings and the prevention plan. || s_report | shot_report_1.png | 2.75 | PDF Screening Report | First page of the report: patient details, risk level, image, and findings.
+FIG s_audit | shot_audit.png | 5.2 | Audit Log (Dentist/Administrator) | A permanent, filterable timeline of who signed in, requested a password reset, and created, changed, or deleted records, and when.
+FIGPAIR s_change | shot_change_password.png | 2.75 | Change Password | Opened from “Change password” in the sidebar (staff) or the portal header (patients); the current password is required. || s_plogin | shot_portal_login.png | 2.75 | Patient Portal — Sign In | Patients sign in to see only their own records, with “Remember me” and “Forgot password?”.
+FIGPAIR s_preg | shot_portal_register.png | 2.75 | Patient Portal — Sign Up | New patients create an account with their contact details and a password. || s_phome | shot_portal_home.png | 2.75 | Patient Portal — Home | Latest risk level and change since the last visit, next check-up date, latest findings and next steps, risk over time, and screening history.
+FIGPAIR s_pscreen | shot_portal_screening.png | 2.75 | Patient Portal — Screening Details | One screening: the photograph with its findings and the prevention plan. || s_report | shot_report_1.png | 2.75 | PDF Screening Report | First page of the report: patient details, risk level, image, findings, and prevention plan.
 
 #CH CHAPTER IV | RESULTS AND DISCUSSION
 = This chapter presents the results obtained from the development
@@ -524,7 +528,8 @@ NOTE Same prediction pass as Tables {tab:overall} to {tab:pc12}; the single-mode
 ## 4.2 Specialization and Technical Results
 = This section presents the technical results of the implemented system
 ### 4.2.1 AI Detection Pipeline
-P The FastAPI backend exposes the screening workflow through authenticated REST endpoints. During development it runs the PyTorch checkpoints with Ultralytics; in the deployed system it runs ONNX exports of the same models with ONNX Runtime, which give identical detections and need about four times less memory. For each uploaded intraoral photograph the pipeline (1) validates the file type and size (JPEG, PNG, or WebP, maximum 15 MB), (2) runs YOLOv8 and YOLOv12, (3) fuses their detections as described in Section 4.1.7, (4) computes a risk score and risk tier, (5) generates a prevention plan, and (6) stores the image, every detection with its bounding box and confidence, the risk result, and the plan in the patient's record. In the deployed system a copy of the photograph is also saved in the database; when the hosting service has restarted and cleared its disk, the image routes and the PDF report restore the file from that copy. The response includes the fused detections and the raw output of each model.
+P The FastAPI backend exposes the screening workflow through authenticated REST endpoints. During development it runs the PyTorch checkpoints with Ultralytics; in the deployed system it runs ONNX exports of the same models with ONNX Runtime, which give identical detections and need about four times less memory. For each uploaded intraoral photograph the pipeline (1) validates the file type and size (JPEG, PNG, or WebP, maximum 15 MB), (2) runs YOLOv8 and YOLOv12, (3) fuses their detections as described in Section 4.1.7 and removes orthodontic brackets that the models mistake for findings, (4) computes a risk score and risk tier, (5) generates a prevention plan, and (6) stores the image, every detection with its bounding box and confidence, the risk result, and the plan in the patient's record. In the deployed system a copy of the photograph is also saved in the database; when the hosting service has restarted and cleared its disk, the image routes and the PDF report restore the file from that copy. The response includes the fused detections and the raw output of each model.
+P Neither model was trained with a braces class, so in early pilot use the metal brackets of patients with braces were reported as urgent cavities. The deployed pipeline therefore drops any cavity, plaque, or tartar box whose pixels are mostly metal-grey (at least 8%), requires a cavity to have a confidence of at least 0.50, and keeps a cavity in the fused set only when both YOLOv8 and YOLOv12 report it. When two or more brackets are found, the prevention plan adds a note that braces were detected and that the dentist or orthodontist should check those teeth in person. These rules were added after the test-split evaluation in Section 4.1, so Tables {tab:acc}, {tab:accclass}, and {tab:fusion} report the ensemble without them.
 ### 4.2.2 Risk Scoring Engine
 = The risk score is rule-based so that every score
 ~ Table 23 lists >>> Table {tab:risk} lists
@@ -554,26 +559,30 @@ NOTE Overall accuracy: 92.75%. Source: python -m app.ml.evaluate_knn (re-run on 
 = The classifier agreed with the rule on 92.75%
 ### 4.2.4 Results Interface and Patient Records
 = In answer to the second problem, every screening
-~ Each screening can be exported as a PDF report. >>> Each screening can be exported as a PDF report (Figure {fig:s_report}). Figures {fig:s_detail} to {fig:s_report} in Section 3.10 show these screens.
+~ Patients can register for the self-service portal and view their own screening history, findings, and prevention plans, but no other patient's data. >>> Patients can register for the self-service portal, where a dashboard shows their latest risk level and how it changed since the previous screening, their latest findings in plain language with the top next steps, a risk-over-time chart, the date of their next check-up (six months after the last screening), and their full screening history, but no other patient's data.
+~ Each screening can be exported as a PDF report. >>> Each screening can be exported as a PDF report (Figure {fig:s_report}). Figures {fig:s_detail}, {fig:s_result}, and {fig:s_phome} to {fig:s_report} in Section 3.10 show these screens.
 ### 4.2.5 Role-Based Web Application
 = The staff side of the system enforces three roles.
-P The backend has an automated test suite of 100 test cases covering authentication, the AI assistant, staff management, the class labels, the ONNX Runtime detector, patients, the recommender, the risk engine, role permissions, and screenings, including the restoration of screening photos from the database. All 100 tests passed in the final run (Table {tab:tests}).
+P Staff and patients sign in with their email address and password. Ticking “Remember me on this device” issues a 30-day token kept in the browser's local storage; otherwise the session ends when the browser is closed. A user who forgets the password requests a reset link by email; the link can be used once, expires after 30 minutes, and stops working as soon as the password changes, and the system gives the same answer whether or not the email address is registered so that it cannot be used to discover accounts. Signed-in staff and patients can also change their password from the sidebar or the portal header.
+P The backend has an automated test suite of 117 test cases covering authentication, password recovery, the braces filter, the AI assistant, staff management, the class labels, the ONNX Runtime detector, patients, the recommender, the risk engine, role permissions, and screenings, including the restoration of screening photos from the database. All 117 tests passed in the final run (Table {tab:tests}).
 TABLE tests | Automated Backend Test Results
 W 1.7,2.6,0.8,1.0
 | Test module | Area tested | Test cases | Result |
 | test_auth.py | Staff and patient login, tokens | 11 | Passed |
+| test_braces_filter.py | Removal of orthodontic brackets from detections | 4 | Passed |
 | test_chatbot.py | AI assistant retries, fallbacks, and verified clinic facts | 6 | Passed |
 | test_dentists.py | Staff account management | 14 | Passed |
 | test_labels.py | Class list consistency | 11 | Passed |
 | test_onnx_yolo.py | ONNX Runtime letterboxing, NMS, and model loading | 4 | Passed |
+| test_password_recovery.py | Remember me, forgot, reset, and change password | 13 | Passed |
 | test_patients.py | Patient records | 10 | Passed |
 | test_recommender.py | KNN tier and prevention plan | 12 | Passed |
 | test_risk_engine.py | Risk score and tier | 9 | Passed |
 | test_roles.py | Three-role access control | 11 | Passed |
 | test_screenings.py | Screening workflow, storage, and photo restore | 12 | Passed |
-| Total |  | 100 | 100 passed, 0 failed |
+| Total |  | 117 | 117 passed, 0 failed |
 ENDTABLE
-NOTE Source: python -m pytest in backend/ (run with YOLO_BACKEND=onnx on 20 October 2026).
+NOTE Source: python -m pytest in backend/ (run with YOLO_BACKEND=onnx on 28 October 2026).
 ### 4.2.6 AI Chatbot
 = The public website includes an AI assistant
 ~ Requests are limited to 12 per minute per client. >>> Requests are limited to 12 per minute per client. In the deployed system the assistant runs as a Vercel serverless function. When the free Gemini quota is used up, questions about the clinic (hours, location, services, and prices) are still answered from verified clinic facts, and other questions receive a "temporarily unavailable" message.

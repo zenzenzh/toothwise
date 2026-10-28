@@ -122,6 +122,7 @@ def use_case():
     }
     right = {
         "auth": (128, "Authenticate\nUser"),
+        "pw": (196, "Reset or Change\nPassword"),
         "upload": (262, "Upload Intraoral\nImage"),
         "history": (448, "View Own\nScreening History"),
         "ask": (510, "Ask AI Assistant"),
@@ -155,6 +156,9 @@ def use_case():
     dash([(L + rx - 14, left["screen"][0] - 13), (ax + 12, ay + 13)])
     lab(268, 104, "«include»")
     lab(268, 196, "«include»")
+    # Reset or Change Password <<extend>> Authenticate User
+    dash([(R, right["pw"][0] - ry), (R, ay + ry)])
+    lab(R + 30, (right["pw"][0] + ay) / 2, "«extend»")
     # Perform screening <<include>> upload image
     dash([(L + rx, left["screen"][0]), (R - rr, right["upload"][0])])
     lab(266, 252, "«include»")
