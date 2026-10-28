@@ -145,8 +145,8 @@ def main(path):
     w("### 4.3.1 Respondents")
     w(f"P The respondents fall into two groups: {nPT} patient respondents, who evaluated the system from a "
       f"patient's point of view after using it, and {nIT} IT experts (IT practitioners). Table {{tab:resp}} "
-      f"presents their distribution. The questionnaire's sections were not all required, so the number of "
-      f"respondents differs per section, as shown in Table {{tab:sectn}}.")
+      f"presents their distribution. The questionnaire's parts were written for different respondent groups, "
+      f"so the number of respondents differs per section, as shown in Table {{tab:sectn}}.")
     w("TABLE resp | Distribution of Respondents")
     w("W 2.8,1.4,1.4")
     w("| Respondent group | Frequency | Percentage |")
@@ -164,8 +164,13 @@ def main(path):
     w("ENDTABLE")
     w(f"P All {N} respondents answered the three sections on the system's features (AI detection and risk "
       f"classification, the results interface and patient records, and the prevention plan). The six ISO/IEC "
-      f"25010 quality sections were answered by {n_iso} respondents ({it_iso} IT experts and {pt_iso} patient "
-      f"respondents), and the two sections on the manual screening process and on screening consistency and time "
+      f"25010 quality sections (Part B3 of the instrument) were written for dentists, clinic staff, and IT "
+      f"experts, as the instructions of that part state, because many of their statements concern staff-side "
+      f"and technical features that a patient using the portal does not see, such as role-based access, the "
+      f"staff audit log, and data consistency between related records. All {it_iso} IT experts answered them; "
+      f"since no dentist or clinic staff member took part, the only other answers came from {pt_iso} patient "
+      f"respondents who completed the part although it was not meant for them, for a total of {n_iso}. The "
+      f"two sections on the manual screening process and on screening consistency and time "
       f"by {n_man}. Of the respondents who gave their experience in their current field, "
       + ", ".join(f"{v} reported {k.lower()}" for k, v in exp.most_common()) + ".")
     w("### 4.3.2 Research Instrument")
@@ -297,7 +302,9 @@ def main(path):
       f"{neg_feat} of {len(featx)} feature ratings were Disagree or Strongly Disagree.")
     w(f"P Two cautions apply. First, the six quality sections were answered by only {n_iso} of the {N} "
       f"respondents, and only {nIT} of the respondents were IT experts, so the quality ratings rest on a small "
-      f"group; no dentist or clinic staff member answered the questionnaire. Second, the ratings express how the "
+      f"group. This follows from the design of the instrument, which directed the quality evaluation to dentists, "
+      f"clinic staff, and IT experts, and from the absence of dentists and clinic staff among the respondents. "
+      f"Second, the ratings express how the "
       f"respondents perceived the system, and are read together with the measured results in Sections 4.1 and "
       f"4.2. In the open-ended answers, the respondents most often praised the system's ease of use, clear "
       f"interface, and understandable explanations; the difficulties they reported were slow first loading, "
@@ -389,8 +396,9 @@ def main(path):
       "the dentist's work, and the respondents found them relevant and easy to follow.")
     w(f"5. Toothwise is highly acceptable to its evaluators on all six quality characteristics and on its main "
       f"features (overall means of {f2(iso_mean)} and {f2(feat_mean)} on a four-point scale). Because the "
-      f"quality characteristics were rated by {n_iso} respondents, of whom {it_iso} were IT experts, this "
-      f"conclusion should be confirmed with a larger group of IT experts and clinic staff.")
+      f"quality characteristics were intended for dentists, clinic staff, and IT experts and were rated by "
+      f"{n_iso} respondents, of whom {it_iso} were IT experts, this conclusion should be confirmed with a larger "
+      f"group of IT experts, dentists, and clinic staff.")
     w("6. Toothwise shortens the documentation of a screening, since results, risk, and the prevention plan are "
       "produced and recorded in seconds, and the respondents expect it to make screening more consistent. "
       "Whether it improves agreement with the dentist and shortens the whole screening in practice could not be "
@@ -417,7 +425,7 @@ def main(path):
     w("1. Conduct the controlled comparison planned for the fifth problem: time the same screenings with and "
       "without Toothwise and measure agreement with the dentist's findings (for example, with Cohen's kappa).")
     w("2. Repeat the ISO/IEC 25010 evaluation with a larger and more balanced group of IT experts, dentists, and "
-      "clinic staff, and require all sections so that every respondent answers every characteristic.")
+      "clinic staff, the groups for which the quality evaluation was designed.")
     w("3. Validate the models on photographs from other clinics and devices, and compare them with newer "
       "detection architectures and with segmentation-based approaches.")
 
