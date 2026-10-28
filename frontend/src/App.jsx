@@ -24,6 +24,8 @@ const AuditLog = lazy(() => import('./pages/AuditLog'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
 const ThankYou = lazy(() => import('./pages/ThankYou'));
+const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
+const ResetPassword = lazy(() => import('./pages/ResetPassword'));
 
 function Protected({ children }) {
   const { dentist } = useAuth();
@@ -101,6 +103,8 @@ export default function App() {
             <Route path="/patient-portal" element={<PatientPortal />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />
             <Route path="/thank-you" element={<ThankYou />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
 
             <Route path="/dashboard" element={<Protected><Layout /></Protected>}>
               <Route index element={<Dashboard />} />

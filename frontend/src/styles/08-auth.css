@@ -144,3 +144,36 @@ select.auth6-input { appearance: auto; }
   .auth6-tab-pill, .auth6-input, .auth6-submit, .auth6-tabs button { transition-duration: .001ms; }
 }
 @keyframes fade-in-soft { to { opacity: 1; transform: none; } }
+
+/* Remember me + forgot password row (sign-in forms) */
+.auth6-options {
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;
+  gap: 4px 16px; margin-top: -6px;
+}
+.auth6-remember {
+  display: inline-flex; align-items: center; gap: 10px; min-height: 44px; cursor: pointer;
+  color: var(--a6-ink); font-size: 15px; user-select: none;
+}
+.auth6-remember input {
+  width: 18px; height: 18px; margin: 0; flex: none; cursor: pointer;
+  accent-color: var(--a6-plum);
+}
+.auth6-remember input:focus-visible { outline: 3px solid var(--a6-rose); outline-offset: 2px; }
+.auth6-forgot {
+  min-height: 44px; display: inline-flex; align-items: center;
+  color: var(--a6-plum); font-weight: 700; font-size: 15px;
+  text-decoration: underline; text-underline-offset: 3px;
+}
+.auth6-forgot:hover { color: var(--a6-dark); }
+
+/* Forgot / reset password pages */
+.auth6-success {
+  padding: 14px 16px; border-radius: 14px;
+  background: oklch(95% .04 155); color: oklch(35% .08 155);
+  font-size: 15px; line-height: 1.5;
+}
+.auth6-devlink {
+  padding: 14px 16px; border-radius: 14px; border: 1px dashed var(--a6-line);
+  font-size: 14px; line-height: 1.5; color: var(--a6-muted); overflow-wrap: anywhere;
+}
+.auth6-devlink a { color: var(--a6-plum); font-weight: 700; }
