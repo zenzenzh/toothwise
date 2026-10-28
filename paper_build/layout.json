@@ -2,12 +2,13 @@
  "move": {
   "agile": 1,
   "usecase": 2,
-  "remap": 1,
   "perclass": 1,
   "dfd1a": 0
  },
  "width": {
-  "s_landing": 5.79,
+  "usecase": 5.4,
+  "dfd1a": 5.4,
+  "s_landing": 6.0,
   "s_login": 1.7,
   "s_plogin": 1.7,
   "s_forgot": 1.7,
@@ -25,11 +26,10 @@
   "s_preg": 2.2,
   "s_phome": 2.2,
   "s_pscreen": 6.0,
-  "s_report": 2.95,
-  "usecase": 5.4,
-  "dfd1a": 5.4
+  "s_report": 2.95
  },
  "break": [
+  "s_landing",
   "s_login",
   "s_dash",
   "s_patients",
