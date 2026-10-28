@@ -6,8 +6,8 @@ Reads  paper_build/content.txt          (text of the paper, simple markup below)
        paper_build/old_text.txt         (paragraphs of the earlier PDF, pulled in by "=")
        paper_build/figures/*.png        (diagrams, charts and screenshots)
        paper_build/assets/letterhead.png
-Writes ToothWise_Chapters_1-4_updated.docx
-       ToothWise_Chapters_1-4_updated.pdf  (LibreOffice export of the .docx)
+Writes ToothWise_Chapters_1-5_updated.docx
+       ToothWise_Chapters_1-5_updated.pdf  (LibreOffice export of the .docx)
 
 The table of contents is filled in a second pass: the document is exported
 once, the page of every heading is read back from the PDF, and the contents
@@ -49,7 +49,7 @@ CONTENT = HERE / "content.txt"
 OLD = HERE / "old_text.txt"
 FIGS = HERE / "figures"
 LETTERHEAD = HERE / "assets" / "letterhead.png"
-NAME = "ToothWise_Chapters_1-4_updated"
+NAME = "ToothWise_Chapters_1-5_updated"
 FONT = "Times New Roman"
 BODY_W = 6.04          # inches between the frame lines
 

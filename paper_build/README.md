@@ -1,6 +1,6 @@
 # Building the Chapters 1-4 paper
 
-`ToothWise_Chapters_1-4_updated.docx` and `.pdf` (repo root) are generated from this folder.
+`ToothWise_Chapters_1-5_updated.docx` and `.pdf` (repo root) are generated from this folder.
 
 | File | Role |
 |---|---|
@@ -11,6 +11,7 @@
 | `build_paper.py` | Builds the .docx with python-docx, exports the PDF with LibreOffice, then fills in the table of contents from the PDF. |
 | `make_diagrams.py` | Redraws the Chapter III diagrams (use case, ERD, DFDs, Gantt, Agile cycle). |
 | `make_charts.py` | Re-plots the Chapter IV charts from `chapter4_figures/*.json`. |
+| `survey_sections.py` | Writes Sections 4.3–4.4 and Chapter V into `content.txt` from the Google Forms export: `python paper_build/survey_sections.py RESPONSES.xlsx`. Respondent names are never copied into the paper; the spreadsheet is not committed. Also writes `survey_stats.json`. |
 | `layout_pass.py` | Removes white space: finds figures/tables pushed to the next page and moves the following text up (or shrinks screenshots/charts slightly). Writes `layout.json`. |
 | `pack_screens.py` | Sizes the Section 3.10 screenshots so each page they use is full; adds to `layout.json`. |
 | `layout.json` | Result of the two passes above; `build_paper.py` applies it on every build. |
