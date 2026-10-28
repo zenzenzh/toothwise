@@ -1,32 +1,41 @@
 {
  "move": {
+  "agile": 1,
   "usecase": 2,
   "remap": 1,
-  "perclass": 1
+  "perclass": 1,
+  "dfd1a": 0
  },
  "width": {
-  "s_landing": 6.0,
-  "s_login": 2.3,
-  "s_plogin": 2.3,
-  "s_dash": 4.67,
-  "s_patients": 5.92,
-  "s_detail": 5.92,
+  "s_landing": 5.79,
+  "s_login": 1.7,
+  "s_plogin": 1.7,
+  "s_forgot": 1.7,
+  "s_sent": 1.7,
+  "s_reset": 1.7,
+  "s_change": 1.7,
+  "s_dash": 6.0,
+  "s_patients": 5.3,
+  "s_detail": 5.3,
   "s_upload": 5.97,
   "s_preview": 5.97,
-  "s_result": 4.8,
-  "s_staff": 6.0,
-  "s_audit": 6.0,
+  "s_result": 3.47,
+  "s_staff": 4.34,
+  "s_audit": 4.47,
   "s_preg": 2.2,
   "s_phome": 2.2,
-  "s_pscreen": 2.2,
-  "s_report": 2.2
+  "s_pscreen": 6.0,
+  "s_report": 2.95,
+  "usecase": 5.4,
+  "dfd1a": 5.4
  },
  "break": [
   "s_login",
+  "s_dash",
   "s_patients",
   "s_upload",
   "s_result",
-  "s_staff",
-  "s_preg"
+  "s_audit",
+  "s_pscreen"
  ]
 }
