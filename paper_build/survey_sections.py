@@ -171,7 +171,7 @@ def main(path):
       f"since no dentist or clinic staff member took part, the only other answers came from {pt_iso} patient "
       f"respondents who completed the part although it was not meant for them, for a total of {n_iso}. The "
       f"two sections on the manual screening process and on screening consistency and time "
-      f"by {n_man}. Of the respondents who gave their experience in their current field, "
+      f"were answered by {n_man}. Of the respondents who gave their experience in their current field, "
       + ", ".join(f"{v} reported {k.lower()}" for k, v in exp.most_common()) + ".")
     w("### 4.3.2 Research Instrument")
     w(f"P The instrument has eleven sections with {len(items)} statements, listed in Table {{tab:chars}}, plus "
