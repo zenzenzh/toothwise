@@ -30,6 +30,8 @@ def limits(f):
     w, h = Image.open(bp.FIGS / f["file"]).size
     r = h / w
     if r > 1.0:                        # tall: portrait pages and the full results page
+        if f.get("cols") == 3:
+            return 1.7, 1.95
         return (2.2, 2.95) if f.get("pair") else ((3.4, 4.8) if "result" in f["file"] else (2.8, 3.6))
     return 4.0, 6.0
 
@@ -48,7 +50,7 @@ def main():
     first_top = None
     for i in idx:
         b = blocks[i]
-        figs = [dict(f, pair=True) for f in b["figs"]] if b["kind"] == "FIGPAIR" else [b]
+        figs = [dict(f, pair=True, cols=len(b["figs"])) for f in b["figs"]] if b["kind"] == "FIGPAIR" else [b]
         n = figs[0]["n"]
         page, y0, y1 = caption_line(doc, f"Figure {n} ")
         imgs = [im["bbox"] for im in doc[page].get_image_info()

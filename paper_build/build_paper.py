@@ -334,18 +334,21 @@ def write(blocks, toc_pages=None):
         elif k == "TABLE":
             write_table(doc, b)
         elif k == "FIGPAIR":
-            t = doc.add_table(rows=2, cols=2)
+            n = len(b["figs"])                       # two or three screenshots side by side
+            t = doc.add_table(rows=2, cols=n)
             t.alignment = WD_TABLE_ALIGNMENT.CENTER
             t.autofit = False
             for j, f in enumerate(b["figs"]):
                 for i in range(2):
-                    t.cell(i, j).width = Inches(BODY_W / 2)
+                    t.cell(i, j).width = Inches(BODY_W / n)
                 par = fmt(t.cell(0, j).paragraphs[0], WD_ALIGN_PARAGRAPH.CENTER, 0, 6, 4, 1.0, keep_next=True)
                 par.add_run().add_picture(str(FIGS / f["file"]), width=Inches(f["width"]))
-                cap = fmt(t.cell(1, j).paragraphs[0], WD_ALIGN_PARAGRAPH.JUSTIFY, 0, 2, 6, 1.15)
-                add_runs(cap, f"**Figure {f['n']} {f['title']}.**" + (f" *{f['desc']}*" if f["desc"] else ""), size=11)
+                cap = fmt(t.cell(1, j).paragraphs[0], WD_ALIGN_PARAGRAPH.JUSTIFY if n == 2 else WD_ALIGN_PARAGRAPH.LEFT,
+                          0, 2, 6, 1.15)
+                add_runs(cap, f"**Figure {f['n']} {f['title']}.**" + (f" *{f['desc']}*" if f["desc"] else ""),
+                         size=11 if n == 2 else 10)
             for gc in t._tbl.tblGrid.findall(qn("w:gridCol")):
-                gc.set(qn("w:w"), str(int(BODY_W / 2 * 1440)))
+                gc.set(qn("w:w"), str(int(BODY_W / n * 1440)))
             t._tbl.tblPr.append(parse_xml(f'<w:tblLayout {nsdecls("w")} w:type="fixed"/>'))
             for row in t.rows:
                 row._tr.get_or_add_trPr().append(parse_xml(f'<w:cantSplit {nsdecls("w")}/>'))

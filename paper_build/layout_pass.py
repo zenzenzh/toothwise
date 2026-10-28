@@ -37,14 +37,16 @@ HEADINGS = {"###", "###+"}
 def min_width(b):
     """Smallest width a float may be printed at, or None if it must not shrink."""
     if b["kind"] == "FIGPAIR":
-        return 2.3
+        return 2.3 if len(b["figs"]) == 2 else 1.7
     if b["kind"] != "FIG":
         return None
     if b["key"].startswith("s_"):
         return 3.4 if b["width"] < 4 else 4.2       # portrait / landscape screenshots
     if b["key"] in ("curves", "final", "perclass", "cm"):
         return 5.0                                  # charts
-    return None                                     # diagrams keep their size
+    if b["key"] in ("usecase", "erd", "dfd1a", "dfd1b", "gantt"):
+        return 5.4                                  # keeps diagram text at 8 pt or more in print
+    return None                                     # other diagrams keep their size
 
 
 def content_bottom(page):
