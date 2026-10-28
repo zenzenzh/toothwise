@@ -115,16 +115,18 @@ def parse(text):
             key, file, width, title = parts[:4]
             blocks.append({"kind": "FIG", "key": key, "file": file, "width": float(width),
                            "title": title, "desc": parts[4] if len(parts) > 4 else ""})
-        elif tag == "#CH":
+        elif tag in ("#CH", "#APP"):
             a, b = [s.strip() for s in rest.split("|")]
-            blocks.append({"kind": "CH", "num": a, "title": b})
+            blocks.append({"kind": "CH", "num": a, "title": b, "app": tag == "#APP"})
+        elif tag == "FRONTH":
+            blocks.append({"kind": "FRONTH", "text": rest})
         elif tag in ("##", "###", "###+"):
             blocks.append({"kind": tag, "text": rest})
         elif tag in ("P", "PN", "REF", "-"):
             blocks.append({"kind": tag, "text": rest})
         elif re.fullmatch(r"\d+\.", tag):
             blocks.append({"kind": "NUM", "num": tag, "text": rest})
-        elif tag in ("PAGEBREAK", "TITLEPAGE", "TOC"):
+        elif tag in ("PAGEBREAK", "TITLEPAGE", "TOC", "LOT", "LOF"):
             blocks.append({"kind": tag})
         else:
             raise ValueError(f"unknown line: {line}")
@@ -279,12 +281,21 @@ def write(blocks, toc_pages=None):
 
     toc_entries = []
     first_chapter = True
+    in_app = False                       # appendices are set at 1.15 line spacing
     for b in blocks:
         k = b["kind"]
+        if k == "CH":
+            in_app = bool(b.get("app"))
+        ls = 1.15 if in_app else 1.5
         if k == "TITLEPAGE":
             title_page(doc)
         elif k == "TOC":
-            write_toc(doc, blocks, toc_pages)
+            write_toc(doc, blocks, (toc_pages or {}).get("toc"))
+        elif k in ("LOT", "LOF"):
+            write_captions_list(doc, blocks, k, (toc_pages or {}).get("cap"))
+        elif k == "FRONTH":
+            par = fmt(doc.add_paragraph(), WD_ALIGN_PARAGRAPH.CENTER, 0, 0, 12, 1.5)
+            add_runs(par, f"**{b['text']}**")
         elif k == "PAGEBREAK":
             doc.add_paragraph().add_run().add_break(WD_BREAK.PAGE)
         elif k == "CH":
@@ -309,9 +320,10 @@ def write(blocks, toc_pages=None):
             fmt(par, WD_ALIGN_PARAGRAPH.LEFT, 0, 10 if k == "##" else 6, 4, 1.5, keep_next=True)
             add_runs(par, b["text"])
         elif k in ("P", "PN"):
-            fmt(add_runs(doc.add_paragraph(), b["text"]), indent=0.5 if k == "P" else 0)
+            fmt(add_runs(doc.add_paragraph(), b["text"]), indent=0.5 if k == "P" else 0, line=ls,
+                before=4 if in_app and k == "PN" else 0)
         elif k == "-":
-            par = fmt(doc.add_paragraph(), left=0.6, hanging=0.25, after=4)
+            par = fmt(doc.add_paragraph(), left=0.6, hanging=0.25, after=2 if in_app else 4, line=ls)
             par.paragraph_format.tab_stops.add_tab_stop(Inches(0.6))
             add_runs(par, "•\t" + b["text"])
         elif k == "NUM":
@@ -375,14 +387,16 @@ def title_page(doc):
         line(n, before=60 if i == 0 else 0)
     line("**Prof. Francis Arlando L. Atienza**", before=60)
     line("Professor")
-    line("September 2026", before=54)
+    line("October 2026", before=54)
     doc.add_paragraph().add_run().add_break(WD_BREAK.PAGE)
 
 
 def toc_items(blocks):
     items = []
     for b in blocks:
-        if b["kind"] == "CH" and not b["title"]:
+        if b["kind"] == "CH" and b.get("app"):
+            items.append((1, f"{b['num'].title()}. {b['title']}", b["num"], "CH"))
+        elif b["kind"] == "CH" and not b["title"]:
             items.append((1, b["num"].title(), b["num"], "CH"))
         elif b["kind"] == "CH":
             items.append((0, f"{b['num']}: {b['title']}", b["num"], "CH"))
@@ -407,6 +421,51 @@ def write_toc(doc, blocks, pages):
         else:
             add_runs(par, f"{text}\t{num}")
     doc.add_paragraph().add_run().add_break(WD_BREAK.PAGE)
+
+
+def caption_items(blocks, kind):
+    out = []
+    for b in blocks:
+        if kind == "LOT" and b["kind"] == "TABLE":
+            out.append((f"Table {b['n']}", b["title"]))
+        elif kind == "LOF" and b["kind"] == "FIG":
+            out.append((f"Figure {b['n']}", b["title"]))
+        elif kind == "LOF" and b["kind"] == "FIGPAIR":
+            out += [(f"Figure {f['n']}", f["title"]) for f in b["figs"]]
+    return out
+
+
+def write_captions_list(doc, blocks, kind, pages):
+    par = fmt(doc.add_paragraph(), WD_ALIGN_PARAGRAPH.CENTER, 0, 0, 8, 1.15)
+    add_runs(par, "**LIST OF TABLES**" if kind == "LOT" else "**LIST OF FIGURES**")
+    tab = Inches(BODY_W - 0.02)
+    for label, title in caption_items(blocks, kind):
+        par = fmt(doc.add_paragraph(), WD_ALIGN_PARAGRAPH.LEFT, 0, 0, 3, 1.0, left=0.85, hanging=0.85)
+        par.paragraph_format.tab_stops.add_tab_stop(Inches(0.85))
+        par.paragraph_format.tab_stops.add_tab_stop(tab, WD_TAB_ALIGNMENT.RIGHT, WD_TAB_LEADER.DOTS)
+        num = str(pages.get(label, 0)) if pages else "0"
+        add_runs(par, f"{label}\t{re.sub(r'[*]', '', title)}\t{num}", size=11)
+    doc.add_paragraph().add_run().add_break(WD_BREAK.PAGE)
+
+
+def find_caption_pages(pdf: Path, blocks, first_page):
+    """Page of each figure/table caption: the first bold line starting with its label."""
+    d = pymupdf.open(pdf)
+    want = {label for k in ("LOT", "LOF") for label, _ in caption_items(blocks, k)}
+    found = {}
+    for i in range(first_page - 1, len(d)):
+        for blk in d[i].get_text("dict")["blocks"]:
+            for line in blk.get("lines", []):
+                spans = [sp for sp in line["spans"] if sp["text"].strip()]
+                if not spans or not spans[0]["flags"] & 16:
+                    continue
+                m = re.match(r"((?:Figure|Table) \d+)\b", "".join(sp["text"] for sp in spans))
+                if m and m.group(1) in want and m.group(1) not in found:
+                    found[m.group(1)] = i + 1
+    missing = want - set(found)
+    if missing:
+        raise ValueError(f"captions not found: {sorted(missing)[:5]}")
+    return found
 
 
 def write_table(doc, b):
@@ -473,7 +532,8 @@ def norm(s):
 def find_pages(pdf: Path, blocks):
     d = pymupdf.open(pdf)
     texts = [[norm(l) for l in d[i].get_text().splitlines()] for i in range(len(d))]
-    pages, start = [], 3
+    pages = []
+    start = next(i for i, lines in enumerate(texts) if "CHAPTER I" in lines)   # skip the front matter
     for lvl, text, key, kind in toc_items(blocks):
         key_n = norm(re.sub(r"\*", "", key))
         for i in range(start, len(texts)):
@@ -496,12 +556,17 @@ def main():
         from layout_pass import apply
         blocks = apply(blocks, json.loads(layout.read_text(encoding="utf-8")))
     out = ROOT / f"{NAME}.docx"
+
+    def numbers(pdf):
+        toc = find_pages(pdf, blocks)
+        return {"toc": toc, "cap": find_caption_pages(pdf, blocks, toc[0])}
+
     write(blocks).save(out)
-    pages = find_pages(to_pdf(out), blocks)
+    pages = numbers(to_pdf(out))
     write(blocks, pages).save(out)
     pdf = to_pdf(out)
-    again = find_pages(pdf, blocks)
-    assert again == pages, f"contents page numbers moved: {pages} -> {again}"
+    again = numbers(pdf)
+    assert again == pages, "contents or list page numbers moved between passes"
     print(f"Wrote {out.name} and {pdf.name}: {len(pymupdf.open(pdf))} pages")
 
 

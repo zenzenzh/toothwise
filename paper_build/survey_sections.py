@@ -114,8 +114,10 @@ def main(path):
     lo_f = min(feat_items, key=lambda i: i["all"]["wm"])
     lo_i = min(iso_items, key=lambda i: i["all"]["wm"])
     hi_i = max(iso_items, key=lambda i: i["all"]["wm"])
-    first = min(str(r[0])[:10] for r in data)
-    last = max(str(r[0])[:10] for r in data)
+    import datetime as _dt
+    _d = sorted(_dt.date.fromisoformat(str(r[0])[:10]) for r in data)
+    first = f"{_d[0]:%B} {_d[0].day}"
+    last = (f"{_d[-1].day}, {_d[-1].year}" if _d[0].month == _d[-1].month else f"{_d[-1]:%B} {_d[-1].day}, {_d[-1].year}")
 
     L = []
     w = L.append
@@ -140,7 +142,7 @@ def main(path):
     # ---------------------------------------------------------------- 4.3
     w("## 4.3 Software Quality Evaluation Based on ISO/IEC 25010")
     w(f"P This section answers the fourth problem of the study. The evaluation questionnaire was answered online "
-      f"through Google Forms between {first} and {last} by {N} respondents who gave their informed consent. "
+      f"through Google Forms from {first} to {last} by {N} respondents who gave their informed consent. "
       f"None of the respondents was a patient of CodiSmile Dental Clinic, and no clinic records were used.")
     w("### 4.3.1 Respondents")
     w(f"P The respondents fall into two groups: {nPT} patient respondents, who evaluated the system from a "
@@ -174,7 +176,7 @@ def main(path):
       f"were answered by {n_man}. Of the respondents who gave their experience in their current field, "
       + ", ".join(f"{v} reported {k.lower()}" for k, v in exp.most_common()) + ".")
     w("### 4.3.2 Research Instrument")
-    w(f"P The instrument has eleven sections with {len(items)} statements, listed in Table {{tab:chars}}, plus "
+    w(f"P The instrument has eleven sections with {len(items)} statements, listed in Table {{tab:chars}} and reproduced in full in Appendix A, plus "
       f"three open-ended questions on what respondents liked, the difficulties they met, and the improvements "
       f"they suggest. Six sections follow the quality characteristics named in the fourth problem of the study, "
       f"three evaluate the system's main features, and two concern the current manual screening process and "
@@ -429,10 +431,115 @@ def main(path):
     w("3. Validate the models on photographs from other clinics and devices, and compare them with newer "
       "detection architectures and with segmentation-based approaches.")
 
+    # The instrument, scale and statistical treatment belong to the method (Chapter III).
+    i0 = L.index("### 4.3.2 Research Instrument")
+    i1 = L.index("### 4.3.5 Evaluation Results per Quality Characteristic")
+    method = L[i0:i1]
+    del L[i0:i1]
+    for old, new in (("### 4.3.5 ", "### 4.3.2 "), ("### 4.3.6 ", "### 4.3.3 "), ("### 4.3.7 ", "### 4.3.4 ")):
+        L = [new + x[len(old):] if x.startswith(old) else x for x in L]
+    method = [x.replace("### 4.3.2 ", "### 3.10.2 ").replace("### 4.3.3 ", "### 3.10.3 ")
+               .replace("### 4.3.4 ", "### 3.10.4 ") for x in method]
+    parts = {MANUAL: "Part A", CONSIST: "Part A"}
+    ch3 = [
+        f"P This section describes how the acceptability of Toothwise was evaluated (the fourth and fifth problems "
+        f"of the study): who the respondents were, the instrument they answered, how the data were gathered, and "
+        f"how the responses were treated. The results are presented in Sections 4.3 and 4.4.",
+        "### 3.10.1 Respondents and Data Gathering",
+        f"P The evaluation questionnaire was prepared in Google Forms and shared online. Participation was "
+        f"voluntary: the form opened with a statement explaining the purpose of the study and the handling of the "
+        f"data, and only respondents who agreed to it could continue. Each respondent first stated their group, "
+        f"either patient respondent (a member of the public evaluating the system from a patient's point of view) "
+        f"or IT expert (IT practitioner), and then answered the parts of the questionnaire intended for them. The "
+        f"software quality part (ISO/IEC 25010) was written for dentists, clinic staff, and IT experts, while the "
+        f"parts on the system's features were written for all respondents. Responses were collected from "
+        f"{first} to {last}, and {N} complete submissions were received.",
+    ] + method + [
+        "### 3.10.5 Ethical Considerations",
+        "P All respondents gave their informed consent before answering. The questionnaire asked for a name only "
+        "as an optional field; names are not reported anywhere in this paper, and results are presented only as "
+        "group statistics. No patient records or photographs from CodiSmile Dental Clinic were collected for the "
+        "evaluation, and all data were handled in accordance with the Data Privacy Act of 2012 (Republic Act No. "
+        "10173). The screening images shown in this paper are demonstration images.",
+    ]
+
+    abstract = [
+        "FRONTH ABSTRACT",
+        f"PN Dental screening at CodiSmile Dental Clinic relies on visual inspection, which makes early tartar, "
+        f"plaque, cavity, and gum inflammation hard to detect consistently, leaves no standardized visual record, "
+        f"and gives patients little finding-specific guidance. This study developed Toothwise, a web-based "
+        f"screening support system that detects these four conditions and healthy tooth in still intraoral "
+        f"photographs with a fused YOLOv8 and YOLOv12 ensemble, computes a 0–100 risk score and a low, medium, "
+        f"or high risk tier, and generates a personalized prevention plan with a K-Nearest Neighbors (KNN) "
+        f"classifier. The system was developed with an Agile methodology using React, FastAPI, and PostgreSQL, "
+        f"and deployed on cloud hosting. On a held-out test set of 2,930 images, YOLOv8 reached an mAP@50 of "
+        f"51.91% and YOLOv12 48.11%, and the fused ensemble 54.24%; cavity was detected best and plaque worst. "
+        f"The KNN classifier reproduced the clinical risk rule with 92.75% accuracy on 2,000 unseen cases, and "
+        f"all 117 automated backend tests passed. The system was evaluated through an online questionnaire "
+        f"answered by {N} respondents ({nPT} patient respondents and {nIT} IT experts) on a four-point scale. The "
+        f"six ISO/IEC 25010 quality characteristics (security, privacy, usability, reliability, performance "
+        f"efficiency, and data protection), rated by {n_iso} respondents, obtained an overall weighted mean of "
+        f"{f2(iso_mean)}, and the system's detection, results, and prevention-plan features, rated by all {N}, "
+        f"obtained {f2(feat_mean)}; both are interpreted as Highly Acceptable. The study concludes that Toothwise "
+        f"is an acceptable screening and documentation aid that supports, but does not replace, the dentist's "
+        f"diagnosis, and recommends more training data for weak classes such as plaque, a larger evaluation with "
+        f"dentists and clinic staff, and a controlled comparison of screening time and consistency.",
+        "PN ***Keywords:*** dental screening, YOLOv8, YOLOv12, ensemble object detection, K-Nearest Neighbors, "
+        "prevention plan, ISO/IEC 25010",
+        "PAGEBREAK",
+    ]
+
+    # Appendices
+    app = ["#APP APPENDIX A | Evaluation Questionnaire",
+           f"P The questionnaire was answered online through Google Forms. Each statement was rated on a four-point "
+           f"scale: Strongly Agree (4), Agree (3), Disagree (2), and Strongly Disagree (1)."]
+    part_of = lambda sec: ("Part A. Current Process and Expected Effect" if sec in (MANUAL, CONSIST) else
+                           "Part B3. Software Quality Evaluation (ISO/IEC 25010) — for dentists, clinic staff, and IT experts"
+                           if sec in ISO else "Part B. System Features — for all respondents")
+    last_part = None
+    for sec, its in by_sec.items():
+        if part_of(sec) != last_part:
+            last_part = part_of(sec)
+            app.append(f"PN **{last_part}**")
+        app.append(f"PN *{label(sec)}*")
+        for it in its:
+            app.append(f"- {it['code']}. {it['stmt']}")
+    app.append("PN **Part C. Open-ended Questions**")
+    for q in ("What did you like most about Toothwise?", "What problems or difficulties did you encounter while "
+              "using Toothwise?", "What improvements or additional features would you suggest?"):
+        app.append(f"- {q}")
+    app.append("#APP APPENDIX B | Frequency Distribution of Responses")
+    app.append("P The table lists, for every statement, how many respondents chose each rating, the number of "
+               "respondents who answered it (N), and the weighted mean (WM). Respondent names are not included.")
+    app.append("TABLE freq | Frequency Distribution of Responses per Statement")
+    app.append("W 0.6,0.8,0.65,0.75,0.75,0.8,0.55,0.6")
+    app.append("| Code | Strongly Agree (4) | Agree (3) | Disagree (2) | Strongly Disagree (1) | N | WM | Section |")
+    for it in items:
+        xs = it["all"]["xs"]
+        app.append(f"| {it['code']} | {xs.count(4)} | {xs.count(3)} | {xs.count(2)} | {xs.count(1)} | {len(xs)} | "
+                   f"{f2(it['all']['wm'])} | {CODES[it['section']]} |")
+    app.append("ENDTABLE")
+    app.append("NOTE Section codes: " + "; ".join(f"{CODES[s]} = {label(s)}" for s in by_sec) + ".")
+    app.append("#APP APPENDIX C | Letter of Approval from CodiSmile Dental Clinic")
+    app.append("FIG letter1 | appendix_letter_1.png | 5.4 | Letter Requesting Approval to Conduct the Study (page 1 of 2)")
+    app.append("FIG letter2 | appendix_letter_2.png | 5.4 | Letter Requesting Approval to Conduct the Study (page 2 of 2)")
+
     text = CONTENT.read_text(encoding="utf-8")
+    # abstract: between TITLEPAGE and TOC
+    a = text.index("TITLEPAGE") + len("TITLEPAGE")
+    b = text.index("\nTOC")
+    text = text[:a] + "\n" + "\n".join(abstract) + text[b:]
+    # Chapter III evaluation procedure
+    a = text.index("## 3.10 Evaluation Procedure")
+    b = text.index("## 3.11 Full Current System Screenshots")
+    text = text[:a] + "## 3.10 Evaluation Procedure\n" + "\n".join(ch3) + "\n\n" + text[b:]
+    # 4.3 to Chapter V
     a = text.index("## 4.3 Software Quality Evaluation")
     b = text.index("#CH REFERENCES")
     text = text[:a] + "\n".join(L) + "\n\n" + text[b:]
+    # appendices at the end
+    a = text.find("#APP ")
+    text = (text if a < 0 else text[:a]).rstrip("\n") + "\n\n" + "\n".join(app) + "\n"
     CONTENT.write_text(text, encoding="utf-8")
     out = {"N": N, "it": nIT, "patients": nPT, "n_iso": n_iso, "n_features": n_feat, "n_manual": n_man,
            "iso_mean": round(iso_mean, 2), "feature_mean": round(feat_mean, 2),
