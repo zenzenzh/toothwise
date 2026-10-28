@@ -5,7 +5,7 @@
 | File | Role |
 |---|---|
 | `content.txt` | The paper text in a small markup (see the docstring of `build_paper.py`). Edit this to change the paper. |
-| `old_text.txt` | Paragraphs extracted from the earlier `ToothWise_Chapters_1-4_corrected.pdf`; `content.txt` pulls unchanged ones in with `=`. |
+| `old_text.txt` | Paragraphs extracted from the earlier `ToothWise_Chapters_1-4_corrected.pdf` (removed from the repo; still in git history); `content.txt` pulls unchanged ones in with `=`. |
 | `figures/` | Every figure, as opaque RGB PNGs sized for print. |
 | `assets/letterhead.png` | The UDM header, logos and frame lines placed behind every page. |
 | `build_paper.py` | Builds the .docx with python-docx, exports the PDF with LibreOffice, then fills in the table of contents from the PDF. |
