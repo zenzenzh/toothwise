@@ -430,20 +430,22 @@ def main(path):
     w("3. Validate the models on photographs from other clinics and devices, and compare them with newer "
       "detection architectures and with segmentation-based approaches.")
     w("4. Train the detection models on more and larger datasets. The current models learned from four public "
-      "datasets in which plaque appears in only one source and healthy tooth has only 42 test instances, which "
-      "explains much of the weak plaque result. Adding more public datasets, consented and dentist-annotated "
-      "photographs from clinics such as CodiSmile Dental Clinic, and a more balanced number of examples per "
-      "condition should raise accuracy, especially for the weakest classes.")
+      "datasets in which plaque appears in only one source, which explains much of the weak plaque result. "
+      "More public datasets, consented and dentist-annotated clinic photographs, and a more balanced number "
+      "of examples per condition should raise accuracy.")
     w("5. Add an oral diagnosis form to the system: a digital examination form in which the dentist records "
       "the clinical findings for each tooth (for example, on a tooth chart), the final diagnosis, and the "
-      "treatment plan, next to the AI detections. This would make Toothwise a fuller clinical record, and the "
-      "dentist's recorded diagnoses could be compared with the detections to measure accuracy in real use and "
-      "to supply labeled cases for retraining.")
+      "treatment plan, next to the AI detections. The recorded diagnoses could then be compared with the "
+      "detections to measure accuracy in real use and supply labeled cases for retraining.")
     w("6. Extend the system to detect more classes. The source datasets already contain conditions that this "
-      "study left out of scope, such as missing teeth, malalignment (maligned teeth), spacing, tooth stains and "
+      "study left out, such as missing teeth, malalignment, spacing, tooth stains and "
       "discoloration, oral ulcers, and hypodontia, and orthodontic braces could be added as their own class "
-      "instead of being filtered out. Each new class needs enough annotated examples and its own severity "
-      "weight in the risk engine and its own advice in the prevention plan.")
+      "instead of being filtered out. Each new class needs enough annotated examples, a risk weight, and its "
+      "own advice.")
+    w("7. Use an intraoral camera to capture the images for detection. Smartphone photographs vary in "
+      "lighting and angle and cannot clearly show the back teeth; an intraoral camera gives close, well-lit, "
+      "and consistent views of each tooth. Future researchers could connect one to the screening page and "
+      "retrain the models on its images.")
 
     # The instrument, scale and statistical treatment belong to the method (Chapter III).
     i0 = L.index("### 4.3.2 Research Instrument")
@@ -496,7 +498,7 @@ def main(path):
         f"{f2(iso_mean)}, and the system's detection, results, and prevention-plan features, rated by all {N}, "
         f"obtained {f2(feat_mean)}; both are interpreted as Highly Acceptable. The study concludes that Toothwise "
         f"is an acceptable screening and documentation aid that supports, but does not replace, the dentist's "
-        f"diagnosis, and recommends more training data for weak classes such as plaque, a larger evaluation with "
+        f"diagnosis, and recommends more training data for weak classes such as plaque, the use of an intraoral camera for clearer images, a larger evaluation with "
         f"dentists and clinic staff, and a controlled comparison of screening time and consistency.",
         "PN ***Keywords:*** dental screening, YOLOv8, YOLOv12, ensemble object detection, K-Nearest Neighbors, "
         "prevention plan, ISO/IEC 25010",
