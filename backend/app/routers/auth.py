@@ -1,4 +1,6 @@
-from urllib.parse import urlencode
+import hmac
+import re
+from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
@@ -7,12 +9,10 @@ from app import models, schemas
 from app.audit import log_action
 from app.config import get_settings
 from app.database import get_db
-from app.notifications import send_email
 from app.rate_limit import limiter
 from app.security import (
     verify_password, hash_password, create_access_token,
     get_current_staff, get_current_patient,
-    create_password_reset_token, read_password_reset_token, reset_token_matches,
 )
 from app.utils.names import combine_name
 
@@ -125,72 +125,41 @@ def patient_me(current: models.Patient = Depends(get_current_patient)):
     return current
 
 
-# ---------- Forgot / reset / change password ----------
-FORGOT_PASSWORD_MESSAGE = (
-    "If an account exists for that email, a password reset link has been sent. "
-    "Check your inbox and spam folder."
-)
+# ---------- Forgot / change password ----------
+# Forgot password works without email: the user proves who they are with
+# details already stored on their account, then sets a new password right
+# away. Every failure returns the same message, so these endpoints can't be
+# used to find out which emails exist or which detail was wrong.
+RESET_FAILED_MESSAGE = "The details you entered do not match our records."
+RESET_DONE_MESSAGE = "Your password has been changed. You can now sign in."
 
 
 def _entity(account_type: str) -> str:
     return "dentist" if account_type == "staff" else "patient"
 
 
-def _send_reset_link(email: str, full_name: str, account_type: str, hashed_password: str):
-    """Emails a reset link. Returns the link only when it could not be
-    emailed outside production (so the flow can be demoed locally)."""
-    token = create_password_reset_token(email, account_type, hashed_password)
-    query = urlencode({"token": token, "type": account_type})
-    url = f"{settings.FRONTEND_URL.rstrip('/')}/reset-password?{query}"
-    body = (
-        f"Hi {full_name},\n\n"
-        f"We received a request to reset your {settings.CLINIC_NAME} ToothWise password.\n"
-        f"Open this link to choose a new password. It works once and expires in "
-        f"{settings.PASSWORD_RESET_EXPIRE_MINUTES} minutes:\n\n{url}\n\n"
-        "If you didn't ask for this, ignore this email. Your password won't change.\n"
-    )
-    sent = send_email(email, "Reset your ToothWise password", body)
-    if not sent and settings.ENV != "production":
-        return url
-    return None
+def _phone_key(value: Optional[str]) -> str:
+    """Last 10 digits, so 09171234567, +639171234567 and 0917-123-4567 match."""
+    return re.sub(r"\D", "", value or "")[-10:]
 
 
-def _forgot_password(account, account_type: str, email: str, db: Session):
-    dev_url = None
-    if account is not None and account.is_active and account.hashed_password:
-        dev_url = _send_reset_link(email, account.full_name, account_type, account.hashed_password)
-        log_action(
-            db, None, f"{account_type}.password_reset.requested",
-            _entity(account_type), account.id, actor_label=email,
-        )
+def _same(a: Optional[str], b: Optional[str]) -> bool:
+    return bool(a) and bool(b) and hmac.compare_digest(a, b)
+
+
+def _finish_reset(account, account_type: str, verified: bool, email: str, new_password: str, db: Session):
+    if not verified:
+        log_action(db, None, f"{account_type}.password_reset.failed", details=email, actor_label=email)
         db.commit()
-    # Same answer whether or not the account exists, so this endpoint can't
-    # be used to find out which emails are registered.
-    return schemas.ForgotPasswordResponse(message=FORGOT_PASSWORD_MESSAGE, dev_reset_url=dev_url)
-
-
-def _reset_password(model, account_type: str, payload: schemas.ResetPasswordRequest, db: Session):
-    invalid = HTTPException(
-        status.HTTP_400_BAD_REQUEST,
-        "This reset link is invalid or has expired. Please request a new one.",
-    )
-    data = read_password_reset_token(payload.token, account_type)
-    if data is None:
-        raise invalid
-    account = db.query(model).filter(model.email == data["sub"]).first()
-    if (
-        account is None or not account.is_active or not account.hashed_password
-        or not reset_token_matches(data, account.hashed_password)
-    ):
-        raise invalid
-    account.hashed_password = hash_password(payload.new_password)
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, RESET_FAILED_MESSAGE)
+    account.hashed_password = hash_password(new_password)
     log_action(
         db, account if account_type == "staff" else None,
         f"{account_type}.password_reset.completed",
-        _entity(account_type), account.id, actor_label=account.email,
+        _entity(account_type), account.id, actor_label=email,
     )
     db.commit()
-    return schemas.MessageResponse(message="Your password has been reset. You can now sign in.")
+    return schemas.MessageResponse(message=RESET_DONE_MESSAGE)
 
 
 def _change_password(account, actor, account_type: str, payload: schemas.ChangePasswordRequest, db: Session):
@@ -210,17 +179,17 @@ def _change_password(account, actor, account_type: str, payload: schemas.ChangeP
     return schemas.MessageResponse(message="Your password has been changed.")
 
 
-@router.post("/forgot-password", response_model=schemas.ForgotPasswordResponse)
-@limiter.limit("3/minute")
-def staff_forgot_password(request: Request, payload: schemas.ForgotPasswordRequest, db: Session = Depends(get_db)):
-    staff = db.query(models.Dentist).filter(models.Dentist.email == payload.email).first()
-    return _forgot_password(staff, "staff", payload.email, db)
-
-
-@router.post("/reset-password", response_model=schemas.MessageResponse)
+@router.post("/forgot-password", response_model=schemas.MessageResponse)
 @limiter.limit("5/minute")
-def staff_reset_password(request: Request, payload: schemas.ResetPasswordRequest, db: Session = Depends(get_db)):
-    return _reset_password(models.Dentist, "staff", payload, db)
+def staff_forgot_password(request: Request, payload: schemas.StaffForgotPassword, db: Session = Depends(get_db)):
+    """Staff reset: email + the PRC license number on file. Staff without a
+    license number ask the dentist/administrator to reset it for them."""
+    staff = db.query(models.Dentist).filter(models.Dentist.email == payload.email).first()
+    verified = (
+        staff is not None and staff.is_active
+        and _same((staff.license_no or "").strip().upper(), payload.license_no.strip().upper())
+    )
+    return _finish_reset(staff, "staff", verified, payload.email, payload.new_password, db)
 
 
 @router.post("/change-password", response_model=schemas.MessageResponse)
@@ -235,17 +204,18 @@ def staff_change_password(
     return _change_password(staff, staff, "staff", payload, db)
 
 
-@router.post("/patient/forgot-password", response_model=schemas.ForgotPasswordResponse)
-@limiter.limit("3/minute")
-def patient_forgot_password(request: Request, payload: schemas.ForgotPasswordRequest, db: Session = Depends(get_db)):
-    patient = db.query(models.Patient).filter(models.Patient.email == payload.email).first()
-    return _forgot_password(patient, "patient", payload.email, db)
-
-
-@router.post("/patient/reset-password", response_model=schemas.MessageResponse)
+@router.post("/patient/forgot-password", response_model=schemas.MessageResponse)
 @limiter.limit("5/minute")
-def patient_reset_password(request: Request, payload: schemas.ResetPasswordRequest, db: Session = Depends(get_db)):
-    return _reset_password(models.Patient, "patient", payload, db)
+def patient_forgot_password(request: Request, payload: schemas.PatientForgotPassword, db: Session = Depends(get_db)):
+    """Patient reset: email + the birthdate and mobile number on the account."""
+    patient = db.query(models.Patient).filter(models.Patient.email == payload.email).first()
+    verified = (
+        patient is not None and patient.is_active
+        and bool(patient.hashed_password)  # only portal accounts have a password
+        and patient.birthdate == payload.birthdate
+        and _same(_phone_key(patient.contact_number), _phone_key(payload.contact_number))
+    )
+    return _finish_reset(patient, "patient", verified, payload.email, payload.new_password, db)
 
 
 @router.post("/patient/change-password", response_model=schemas.MessageResponse)

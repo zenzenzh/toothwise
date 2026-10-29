@@ -172,8 +172,3 @@ select.auth6-input { appearance: auto; }
   background: oklch(95% .04 155); color: oklch(35% .08 155);
   font-size: 15px; line-height: 1.5;
 }
-.auth6-devlink {
-  padding: 14px 16px; border-radius: 14px; border: 1px dashed var(--a6-line);
-  font-size: 14px; line-height: 1.5; color: var(--a6-muted); overflow-wrap: anywhere;
-}
-.auth6-devlink a { color: var(--a6-plum); font-weight: 700; }

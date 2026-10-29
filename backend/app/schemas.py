@@ -131,22 +131,24 @@ Token.model_rebuild()
 
 
 # ---------- Password recovery / change (staff and patients) ----------
-class ForgotPasswordRequest(BaseModel):
+class PatientForgotPassword(BaseModel):
+    """Email-free reset: the patient proves who they are with the birthdate
+    and mobile number already on their account."""
     email: EmailStr
+    birthdate: date
+    contact_number: str = Field(min_length=1, max_length=30)
+    new_password: str = Field(min_length=PASSWORD_MIN_LENGTH, max_length=PASSWORD_MAX_LENGTH)
 
     _normalize_email = field_validator("email")(_normalize_email)
 
 
-class ForgotPasswordResponse(BaseModel):
-    message: str
-    # Only filled in development when no SMTP server is configured, so the
-    # flow can be demoed without email. Always None in production.
-    dev_reset_url: Optional[str] = None
-
-
-class ResetPasswordRequest(BaseModel):
-    token: str = Field(min_length=1, max_length=2048)
+class StaffForgotPassword(BaseModel):
+    """Email-free reset for staff: email plus the PRC license number on file."""
+    email: EmailStr
+    license_no: str = Field(min_length=1, max_length=60)
     new_password: str = Field(min_length=PASSWORD_MIN_LENGTH, max_length=PASSWORD_MAX_LENGTH)
+
+    _normalize_email = field_validator("email")(_normalize_email)
 
 
 class ChangePasswordRequest(BaseModel):

@@ -25,12 +25,6 @@ class Settings(BaseSettings):
     # "Remember me" on a login form issues a longer-lived token so the
     # device stays signed in across browser restarts.
     REMEMBER_ME_EXPIRE_DAYS: int = 30
-    # Forgot-password links are single-use and expire after this long.
-    PASSWORD_RESET_EXPIRE_MINUTES: int = 30
-    # Public address of the React app. Password-reset emails link here, so
-    # it must be set in production (never taken from the request, which an
-    # attacker could spoof to steal reset links).
-    FRONTEND_URL: str = "http://localhost:3000"
 
     def model_post_init(self, __context) -> None:
         """Reject known-weak secrets in production."""
@@ -115,16 +109,8 @@ class Settings(BaseSettings):
     GEMINI_MODEL: str = "gemini-3.6-flash"
     GEMINI_TIMEOUT_SECONDS: float = 18.0
 
-    # --- Email (password-reset links) ---
-    # Leave SMTP_HOST/SMTP_USER blank to run in log-only mode (see
-    # app/notifications.py).
+    # --- Notifications ---
     CLINIC_NAME: str = "CodiSmile Dental Clinic"
-    SMTP_HOST: str = ""
-    SMTP_PORT: int = 587
-    SMTP_USER: str = ""
-    SMTP_PASSWORD: str = ""
-    SMTP_FROM: str = "no-reply@codismile.com"
-    SMTP_USE_TLS: bool = True
     SMS_API_KEY: str = ""
     SMS_SENDER_NAME: str = "CodiSmile"
 
