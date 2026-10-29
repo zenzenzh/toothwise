@@ -2,7 +2,7 @@
  "move": {
   "agile": 1,
   "usecase": 4,
-  "perclass": 1,
+  "perclass": 0,
   "dp": 1,
   "erd": 0
  },
@@ -27,7 +27,8 @@
   "s_pscreen": 6.0,
   "s_report": 2.95,
   "erd": 6.0,
-  "dfd1a": 5.0
+  "dfd1a": 5.0,
+  "perclass": 6.0
  },
  "break": [
   "s_landing",

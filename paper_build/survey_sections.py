@@ -141,14 +141,14 @@ def main(path):
 
     # ---------------------------------------------------------------- 4.3
     w("## 4.3 Software Quality Evaluation Based on ISO/IEC 25010")
-    w(f"P This section answers the fourth problem of the study. The evaluation questionnaire was answered online "
-      f"through Google Forms from {first} to {last} by {N} respondents who gave their informed consent. "
-      f"None of the respondents was a patient of CodiSmile Dental Clinic, and no clinic records were used.")
+    w(f"P This section answers the fourth problem: how acceptable is Toothwise to the people who used it? "
+      f"{N} respondents answered the online questionnaire (Google Forms) from {first} to {last}, after agreeing "
+      f"to take part. None of them was a patient of CodiSmile Dental Clinic, and no clinic records were used.")
     w("### 4.3.1 Respondents")
-    w(f"P The respondents fall into two groups: {nPT} patient respondents, who evaluated the system from a "
-      f"patient's point of view after using it, and {nIT} IT experts (IT practitioners). Table {{tab:resp}} "
-      f"presents their distribution. The questionnaire's parts were written for different respondent groups, "
-      f"so the number of respondents differs per section, as shown in Table {{tab:sectn}}.")
+    w(f"P The respondents were in two groups (Table {{tab:resp}}): {nPT} patient respondents, who tried the "
+      f"system from a patient's point of view, and {nIT} IT experts. Different parts of the questionnaire were "
+      f"meant for different groups, so not every section was answered by the same number of people (Table "
+      f"{{tab:sectn}}).")
     w("TABLE resp | Distribution of Respondents")
     w("W 2.8,1.4,1.4")
     w("| Respondent group | Frequency | Percentage |")
@@ -164,16 +164,15 @@ def main(path):
         i = S[sec]["it"]["n"] if S[sec]["it"] else 0
         w(f"| {label(sec)} | {p} | {i} | {p + i} |")
     w("ENDTABLE")
-    w(f"P All {N} respondents answered the three sections on the system's features (AI detection and risk "
-      f"classification, the results interface and patient records, and the prevention plan). The six ISO/IEC "
-      f"25010 quality sections (Part B3 of the instrument) were written for dentists, clinic staff, and IT "
-      f"experts, as the instructions of that part state, because many of their statements concern staff-side "
-      f"and technical features that a patient using the portal does not see, such as role-based access, the "
-      f"staff audit log, and data consistency between related records. All {it_iso} IT experts answered them; "
-      f"since no dentist or clinic staff member took part, the only other answers came from {pt_iso} patient "
-      f"respondents who completed the part although it was not meant for them, for a total of {n_iso}. The "
-      f"two sections on the manual screening process and on screening consistency and time "
-      f"were answered by {n_man}. Of the respondents who gave their experience in their current field, "
+    w(f"P All {N} respondents rated the system's three main features: AI detection and risk classification, "
+      f"the results and patient records, and the prevention plan. The six ISO/IEC 25010 quality sections (Part "
+      f"B3) were meant only for dentists, clinic staff, and IT experts, as the form's instructions say, because "
+      f"they ask about staff-side features that patients never see, such as user roles, the staff audit log, and "
+      f"how records stay consistent. All {it_iso} IT experts answered them. No dentist or clinic staff member "
+      f"took part, so the only other answers came from {pt_iso} patient respondents who answered the part "
+      f"anyway, for a total of {n_iso}. The two sections on the manual screening process and on screening "
+      f"consistency and time were answered by {n_man} respondents. Of the respondents who gave their work "
+      f"experience, "
       + ", ".join(f"{v} reported {k.lower()}" for k, v in exp.most_common()) + ".")
     w("### 4.3.2 Research Instrument")
     w(f"P The instrument has eleven sections with {len(items)} statements, listed in Table {{tab:chars}} and reproduced in full in Appendix A, plus "
@@ -214,8 +213,10 @@ def main(path):
       "average of the section means. The standard deviation (SD) of the ratings shows how closely the "
       "respondents agreed with one another: the smaller the SD, the more uniform the ratings.")
     w("### 4.3.5 Evaluation Results per Quality Characteristic")
-    w(f"P Tables {{tab:se}} to {{tab:dp}} present the results for the six quality characteristics, answered by "
-      f"{n_iso} respondents.")
+    w(f"P Tables {{tab:se}} to {{tab:dp}} show the results for the six quality characteristics, rated by "
+      f"{n_iso} respondents. In each table, WM is the average rating (4 = Strongly Agree, 1 = Strongly "
+      f"Disagree), and SD shows how much the answers varied: a small SD means the respondents mostly agreed "
+      f"with one another.")
     note_iso = f"N = {n_iso} ({it_iso} IT experts, {pt_iso} patient respondents). WM = weighted mean; SD = standard deviation."
     keys = {"1. Security": "se", "2. Privacy": "pr", "3. Usability": "us", "4. Reliability": "re",
             "5. Performance Efficiency": "pe", "6. Data Protection": "dp"}
@@ -223,39 +224,37 @@ def main(path):
         item_table(sec, keys[sec], f"Evaluation Results for {label(sec)}", note_iso)
         hi, lo = hilo(sec)
         a = S[sec]
-        txt = (f"P {label(sec)} obtained a mean of {f2(a['all']['wm'])} (SD {f2(a['all']['sd'])}), interpreted as "
-               f"{verbal(a['all']['wm'])}. ")
+        txt = (f"P {label(sec)} received an average rating of {f2(a['all']['wm'])} out of 4 (SD "
+               f"{f2(a['all']['sd'])}), which means {verbal(a['all']['wm'])}. ")
         if abs(hi["all"]["wm"] - lo["all"]["wm"]) < 0.005:
-            txt += "All statements in this section were rated equally. "
+            txt += "Every statement in this section received the same average. "
         else:
-            txt += (f"The highest-rated statement was {hi['code']}, “{hi['stmt'].rstrip('.')}” "
-                    f"({f2(hi['all']['wm'])}), and the lowest was {lo['code']}, “{lo['stmt'].rstrip('.')}” "
-                    f"({f2(lo['all']['wm'])}), which was still rated Strongly Agree. ")
+            txt += (f"The best-rated statement was {hi['code']}, “{hi['stmt'].rstrip('.')}” "
+                    f"({f2(hi['all']['wm'])}). The lowest was {lo['code']}, “{lo['stmt'].rstrip('.')}” "
+                    f"({f2(lo['all']['wm'])}), which is still Strongly Agree. ")
         if a["it"] and a["pt"]:
-            txt += (f"The IT experts were more critical than the patient respondents "
+            txt += (f"IT experts gave lower ratings than patient respondents "
                     f"({f2(a['it']['wm'])} against {f2(a['pt']['wm'])}). "
                     if a["it"]["wm"] < a["pt"]["wm"] - 0.05 else
-                    f"The IT experts and the patient respondents gave similar ratings "
+                    f"IT experts and patient respondents gave about the same ratings "
                     f"({f2(a['it']['wm'])} and {f2(a['pt']['wm'])}). ")
         neg = sum(1 for it in by_sec[sec] for x in it["all"]["xs"] if x <= 2)
-        txt += ("No respondent disagreed with any statement in this section." if neg == 0 else
-                f"Only {neg} of the ratings in this section were Disagree or Strongly Disagree.")
+        txt += ("Nobody disagreed with any statement in this section." if neg == 0 else
+                f"Only {neg} of the answers in this section were Disagree or Strongly Disagree.")
         extra = {
-            "4. Reliability": " RE1 was also the statement the IT experts rated lowest. In the open-ended answers, "
-                              "two respondents mentioned slow first loading and performance bugs that had to be "
-                              "patched; the "
-                              "free hosting tier used for the study sleeps after 15 minutes without requests "
-                              "(Chapter I, Limitations).",
-            "1. Security": " One respondent suggested an additional security measure for authorized personnel, "
-                           "which is taken up in the recommendations.",
-            "3. Usability": " In the open-ended answers, ease of use and the interface were the most often "
-                            "mentioned strengths, while a few respondents found some pages long or some features "
-                            "hard to find.",
+            "4. Reliability": " IT experts also rated RE1 lowest. In the written comments, two respondents mentioned "
+                              "slow first loading and bugs that had to be fixed; one reason is that the free server "
+                              "used for the study goes to sleep after 15 minutes without use and takes time to "
+                              "wake up (Chapter I, Limitations).",
+            "1. Security": " One respondent suggested an extra security step for staff accounts, which is included in "
+                           "the recommendations.",
+            "3. Usability": " In the written comments, ease of use and the look of the interface were praised most, "
+                            "while a few respondents found some pages too long or some features hard to find.",
         }
         w(txt + extra.get(sec, ""))
     w("### 4.3.6 Evaluation Results for the System Features")
-    w(f"P Tables {{tab:ad}} to {{tab:pp}} present the results for the three sections on the system's main "
-      f"features, answered by all {N} respondents.")
+    w(f"P Tables {{tab:ad}} to {{tab:pp}} show the results for the system's three main features, rated by all "
+      f"{N} respondents.")
     note_f = f"N = {N} ({nIT} IT experts, {nPT} patient respondents). WM = weighted mean; SD = standard deviation."
     for sec, key in zip(FEATURE, ("ad", "ri", "pp")):
         item_table(sec, key, f"Evaluation Results for {sec}", note_f)
@@ -263,22 +262,22 @@ def main(path):
         a = S[sec]
         neg = sum(1 for it in by_sec[sec] for x in it["all"]["xs"] if x <= 2)
         total = sum(len(it["all"]["xs"]) for it in by_sec[sec])
-        txt = (f"P {sec} obtained a mean of {f2(a['all']['wm'])} (SD {f2(a['all']['sd'])}), interpreted as "
-               f"{verbal(a['all']['wm'])}. The highest-rated statement was {hi['code']}, "
+        txt = (f"P {sec} received an average rating of {f2(a['all']['wm'])} out of 4 (SD {f2(a['all']['sd'])}), "
+               f"which means {verbal(a['all']['wm'])}. The best-rated statement was {hi['code']}, "
                f"“{hi['stmt'].rstrip('.')}” ({f2(hi['all']['wm'])}), and the lowest was {lo['code']}, "
-               f"“{lo['stmt'].rstrip('.')}” ({f2(lo['all']['wm'])}). Only {neg} of the {total} ratings in this "
+               f"“{lo['stmt'].rstrip('.')}” ({f2(lo['all']['wm'])}). Only {neg} of the {total} answers in this "
                f"section were Disagree or Strongly Disagree. ")
         extra = {
-            FEATURE[0]: "Although the respondents rated detection highly, this is a perception measure taken "
-                        "while using the system, not a measure of accuracy; the measured accuracy in Section "
-                        "4.1 is moderate, and plaque in particular is often missed. One respondent noted that "
-                        "results may be wrong when the photograph is blurry and should still be checked by a "
-                        "dentist, which agrees with the design of the system.",
-            FEATURE[1]: "Respondents singled out the plain-language descriptions and the clear presentation of "
-                        "the results in their open-ended answers.",
-            FEATURE[2]: "This was the highest-rated of the three feature sections. Respondents wrote that the "
-                        "tips were clear and helped them remember to care for their teeth, and several asked "
-                        "for more dental health tips, check-up reminders, and short videos.",
+            FEATURE[0]: "Note that this rating shows how accurate the detection seemed to the respondents, not "
+                        "how accurate it measured: the measured accuracy in Section 4.1 is moderate, and plaque "
+                        "is often missed. One respondent wrote that results may be wrong when the photograph is "
+                        "blurry and should still be checked by a dentist, which is how the system is meant to "
+                        "be used.",
+            FEATURE[1]: "In their written comments, respondents especially liked the plain-language "
+                        "explanations and how clearly the results are shown.",
+            FEATURE[2]: "This was the best-rated of the three features. Respondents wrote that the tips were "
+                        "clear and reminded them to care for their teeth, and several asked for more dental "
+                        "tips, check-up reminders, and short videos.",
         }
         w(txt + extra[sec])
     w("### 4.3.7 Summary of the Evaluation")
@@ -294,52 +293,52 @@ def main(path):
     w(f"| System features (mean of three) |  |  | {f2(feat_mean)} | {f2(feat_sd)} | {accept(feat_mean)} |")
     w("ENDTABLE")
     w(f"NOTE Quality characteristics: N = {n_iso}; system features: N = {N}.")
-    w(f"P All nine sections were rated Strongly Agree and are therefore interpreted as Highly Acceptable. The "
-      f"six quality characteristics obtained an overall mean of {f2(iso_mean)} and the three feature sections "
+    w(f"P All nine sections were rated Strongly Agree, so Toothwise is Highly Acceptable to its respondents. "
+      f"The six quality characteristics averaged {f2(iso_mean)} out of 4, and the three features "
       f"{f2(feat_mean)}. Among the quality characteristics, {label(iso_rank[0])} was rated highest "
       f"({f2(S[iso_rank[0]]['all']['wm'])}) and {label(iso_rank[-1])} lowest "
-      f"({f2(S[iso_rank[-1]]['all']['wm'])}). The IT experts rated every section lower than the patient "
-      f"respondents, but still within Strongly Agree, which is expected of evaluators who judge the system "
-      f"against technical standards. Disagreement was rare: {neg_iso} of {len(allx)} quality ratings and "
-      f"{neg_feat} of {len(featx)} feature ratings were Disagree or Strongly Disagree.")
-    w(f"P Two cautions apply. First, the six quality sections were answered by only {n_iso} of the {N} "
-      f"respondents, and only {nIT} of the respondents were IT experts, so the quality ratings rest on a small "
-      f"group. This follows from the design of the instrument, which directed the quality evaluation to dentists, "
-      f"clinic staff, and IT experts, and from the absence of dentists and clinic staff among the respondents. "
-      f"Second, the ratings express how the "
-      f"respondents perceived the system, and are read together with the measured results in Sections 4.1 and "
-      f"4.2. In the open-ended answers, the respondents most often praised the system's ease of use, clear "
-      f"interface, and understandable explanations; the difficulties they reported were slow first loading, "
-      f"pages with much information at once, some features being hard to find, and inaccurate results from "
-      f"blurry photographs; and their suggestions were reminders for brushing and check-ups, more dental tips "
-      f"and short videos, a faster and easier search, more detectable conditions with better accuracy, and an "
-      f"additional security measure for authorized personnel.")
+      f"({f2(S[iso_rank[-1]]['all']['wm'])}). IT experts gave lower ratings than patient respondents in every "
+      f"section, but still Strongly Agree; this is expected, because IT experts judge the system against "
+      f"technical standards. Disagreement was rare: {neg_iso} of {len(allx)} quality answers and "
+      f"{neg_feat} of {len(featx)} feature answers were Disagree or Strongly Disagree.")
+    w(f"P Two cautions apply. First, only {n_iso} of the {N} respondents rated the six quality "
+      f"characteristics, and only {nIT} were IT experts, so these ratings come from a small group. This is "
+      f"because that part was meant for dentists, clinic staff, and IT experts, and no dentists or clinic staff "
+      f"took part. Second, the ratings show what the respondents thought of the system; they should be read "
+      f"together with the measured results in Sections 4.1 and 4.2.")
+    w("P In the written comments, respondents most often praised how easy the system is to use, its clear "
+      "design, and its simple explanations. The problems they mentioned were slow loading the first time, pages "
+      "with too much information at once, some features being hard to find, and wrong results from blurry "
+      "photographs. Their suggestions were reminders for brushing and check-ups, more dental tips and short "
+      "videos, an easier search, more conditions to detect with better accuracy, and an extra security step for "
+      "staff accounts.")
 
     # ---------------------------------------------------------------- 4.4
     w("## 4.4 Screening Consistency and Screening Time")
-    w(f"P This section answers the fifth problem of the study. The planned controlled comparison, in which the "
-      f"same patients would be screened and timed with and without Toothwise against the dentist's findings, "
-      f"could not be carried out because the study did not involve the clinic's patients. The fifth problem is "
-      f"therefore answered through the respondents' assessment of the current manual process and of "
-      f"Toothwise's effect on screening consistency and time (Tables {{tab:ms}} and {{tab:sc}}), together with "
-      f"the measured processing time in Section 4.1.6.")
-    note_m = (f"N = {n_man}. These two sections were optional and were answered by only {n_man} respondents, so "
-              f"the results are reported for completeness and are not generalized.")
+    w(f"P This section answers the fifth problem: does Toothwise make screening more consistent and faster? "
+      f"The original plan was to time the same patients' screenings with and without Toothwise and compare both "
+      f"with the dentist's findings, but this could not be done because the study did not involve the clinic's "
+      f"patients. Instead, this section uses the respondents' ratings of the current manual process and of "
+      f"Toothwise (Tables {{tab:ms}} and {{tab:sc}}), together with the measured processing time in Section "
+      f"4.1.6.")
+    note_m = (f"N = {n_man}. These two sections were answered by only {n_man} respondents, so the results are "
+              f"shown for completeness and should not be generalized.")
     item_table(MANUAL, "ms", "Respondents' Assessment of the Current Manual Screening Process", note_m)
     item_table(CONSIST, "sc", "Respondents' Assessment of Screening Consistency and Time with Toothwise", note_m)
     m, c = S[MANUAL]["all"], S[CONSIST]["all"]
     ms_lo = min(by_sec[MANUAL], key=lambda i: i["all"]["wm"])
-    w(f"P The {n_man} respondents agreed that the current visual-only process has the limitations identified "
-      f"in the first problem (mean {f2(m['wm'])}): findings can differ between examinations, lighting and angle "
-      f"affect what can be seen, and a tool that supports consistent early screening would be useful. The only "
-      f"statement rated Disagree was {ms_lo['code']}, “{ms_lo['stmt'].rstrip('.')}” ({f2(ms_lo['all']['wm'])}). "
-      f"They also agreed that Toothwise makes results more consistent, reduces the time needed to complete and "
-      f"document a screening, and agrees with the dentist's own findings (mean {f2(c['wm'])}), and they would "
-      f"recommend its continued use. Because only {n_man} respondents answered these sections and no screening "
-      f"was timed, these results indicate a direction rather than a measured effect. The measured part of the "
-      f"answer is the processing time: the deployed system completes a screening, with both models, in about 3 "
-      f"to 4 seconds (Section 4.1.6), and it records every finding, the risk result, and the prevention plan "
-      f"automatically, so the documentation of a screening no longer has to be written by hand.")
+    w(f"P The {n_man} respondents agreed that checking teeth by eye alone has the problems described in the "
+      f"first problem (average {f2(m['wm'])}): results can differ from one examination to the next, lighting "
+      f"and angle affect what can be seen, and a tool for consistent early screening would be useful. The only "
+      f"statement they disagreed with was {ms_lo['code']}, “{ms_lo['stmt'].rstrip('.')}” "
+      f"({f2(ms_lo['all']['wm'])}). They also agreed that Toothwise makes results more consistent, saves time in "
+      f"completing and recording a screening, and agrees with the dentist's own findings (average "
+      f"{f2(c['wm'])}), and they would recommend that the clinic keep using it.")
+    w(f"P Because only {n_man} respondents answered these sections and no screening was timed, these results "
+      f"show a likely direction, not a measured effect. What was measured is the processing time: the live "
+      f"system finishes a screening with both models in about 3 to 4 seconds (Section 4.1.6), and it records "
+      f"every finding, the risk result, and the prevention plan automatically, so the screening no longer has "
+      f"to be written up by hand.")
 
     # ---------------------------------------------------------------- Chapter V
     ad, ri, pp = (S[s]["all"]["wm"] for s in FEATURE)
