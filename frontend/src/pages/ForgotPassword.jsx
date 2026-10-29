@@ -1,11 +1,12 @@
-import { useEffect, useRef, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import AuthLayout from '../components/AuthLayout';
 import SEO from '../components/SEO';
+import ForgotPasswordForm from '../components/ForgotPasswordForm';
 import { authAPI, patientAuthAPI } from '../api';
-import { validateEmail, LIMITS } from '../utils/validation';
 
 // One page for both account types: ?type=staff (default) or ?type=patient.
+// No email is sent: the user confirms details already on their account and
+// sets a new password right here.
 export function accountTypeFrom(params) {
   return params.get('type') === 'patient' ? 'patient' : 'staff';
 }
@@ -16,77 +17,29 @@ export function loginPathFor(type) {
 
 export default function ForgotPassword() {
   const [params] = useSearchParams();
+  const navigate = useNavigate();
   const type = accountTypeFrom(params);
-  const [email, setEmail] = useState('');
-  const [error, setError] = useState(null);
-  const [formError, setFormError] = useState(null);
-  const [submitting, setSubmitting] = useState(false);
-  const [result, setResult] = useState(null);
-  const emailRef = useRef(null);
-
-  useEffect(() => { emailRef.current?.focus(); }, []);
-
-  async function handleSubmit(e) {
-    e.preventDefault();
-    if (submitting) return;
-    const check = validateEmail(email);
-    if (!check.valid) { setError(check.message); emailRef.current?.focus(); return; }
-    setError(null);
-    setFormError(null);
-    setSubmitting(true);
-    try {
-      const api = type === 'patient' ? patientAuthAPI : authAPI;
-      const { data } = await api.forgotPassword(check.value);
-      setResult(data);
-    } catch (err) {
-      setFormError(err.friendlyMessage || 'Could not send the reset link. Please try again.');
-    } finally {
-      setSubmitting(false);
-    }
-  }
+  const isPatient = type === 'patient';
 
   return (
     <>
       <SEO title="Forgot Password | ToothWise" description="Reset your ToothWise account password." noIndex />
       <AuthLayout>
         <div className="auth6-head">
-          <h1>Forgot your password?</h1>
+          <h1>Reset your password</h1>
           <p>
-            Enter the email you use for your {type === 'patient' ? 'patient portal' : 'staff'} account.
-            We'll send you a link to choose a new password.
+            {isPatient
+              ? 'Enter the birthdate and mobile number on your patient account, then choose a new password.'
+              : 'Enter your email and the PRC license number on your staff account, then choose a new password. No license number on file? Ask the clinic dentist to reset it for you.'}
           </p>
         </div>
 
-        {result ? (
-          <div className="auth6-form">
-            <div className="auth6-success" role="status">{result.message}</div>
-            {result.dev_reset_url && (
-              <div className="auth6-devlink">
-                Email isn't set up on this server, so here is the reset link for testing:{' '}
-                <a href={result.dev_reset_url}>Open reset link</a>
-              </div>
-            )}
-            <Link to={loginPathFor(type)} className="auth6-submit" style={{ textDecoration: 'none' }}>Back to sign in</Link>
-          </div>
-        ) : (
-          <form onSubmit={handleSubmit} className="auth6-form" noValidate>
-            {formError && <div className="auth6-alert" role="alert">{formError}</div>}
-            <div className="auth6-field">
-              <label htmlFor="forgot-email" className="auth6-label">Email address</label>
-              <input
-                id="forgot-email" ref={emailRef} className="auth6-input" type="email" value={email}
-                onChange={e => { setEmail(e.target.value); if (error) setError(null); if (formError) setFormError(null); }}
-                maxLength={LIMITS.EMAIL_MAX} autoComplete="email" required
-                aria-invalid={!!error} aria-describedby={error ? 'forgot-email-error' : undefined}
-              />
-              {error && <p id="forgot-email-error" className="auth6-error" role="alert">{error}</p>}
-            </div>
-            <button type="submit" className="auth6-submit" disabled={submitting} aria-busy={submitting}>
-              {submitting ? <span className="auth6-spinner" aria-hidden="true" /> : null}
-              {submitting ? 'Sending…' : 'Send reset link'}
-            </button>
-          </form>
-        )}
+        <ForgotPasswordForm
+          key={type}
+          kind={type}
+          submit={isPatient ? patientAuthAPI.forgotPassword : authAPI.forgotPassword}
+          onDone={() => navigate(loginPathFor(type), { replace: true })}
+        />
 
         <div className="auth6-note">
           Remembered it?

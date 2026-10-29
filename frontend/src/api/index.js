@@ -48,7 +48,7 @@ api.interceptors.response.use(r => r, err => {
     const isLoginPage = window.location.pathname === '/login';
     // Auth form requests (login, change-password, etc.) report their own
     // errors instead of bouncing the user to the login page.
-    const isAuthFormRequest = /\/auth\/(login|change-password|forgot-password|reset-password)/.test(err.config?.url || '');
+    const isAuthFormRequest = /\/auth\/(login|change-password|forgot-password)/.test(err.config?.url || '');
     if (!isLoginPage && !isAuthFormRequest) {
       // Only clear the staff session, not a patient session that might
       // also be active in the same browser (separate token/localStorage
@@ -65,8 +65,8 @@ api.interceptors.response.use(r => r, err => {
 export const authAPI = {
   login: (d) => api.post('/auth/login', d),
   me: () => api.get('/auth/me'),
-  forgotPassword: (email) => api.post('/auth/forgot-password', { email }),
-  resetPassword: (token, newPassword) => api.post('/auth/reset-password', { token, new_password: newPassword }),
+  // Email-free reset: { email, license_no, new_password }
+  forgotPassword: (d) => api.post('/auth/forgot-password', d),
   changePassword: (currentPassword, newPassword) =>
     api.post('/auth/change-password', { current_password: currentPassword, new_password: newPassword }),
 };
@@ -178,9 +178,8 @@ export const patientAuthAPI = {
   register: (d) => patientApi.post('/auth/patient/register', d),
   login: (d) => patientApi.post('/auth/patient/login', d),
   me: () => patientApi.get('/auth/patient/me'),
-  forgotPassword: (email) => patientApi.post('/auth/patient/forgot-password', { email }),
-  resetPassword: (token, newPassword) =>
-    patientApi.post('/auth/patient/reset-password', { token, new_password: newPassword }),
+  // Email-free reset: { email, birthdate, contact_number, new_password }
+  forgotPassword: (d) => patientApi.post('/auth/patient/forgot-password', d),
   changePassword: (currentPassword, newPassword) =>
     patientApi.post('/auth/patient/change-password', { current_password: currentPassword, new_password: newPassword }),
 };
