@@ -40,5 +40,6 @@ REPLACED = could not be found, so it was replaced or removed · ADDED = cited in
 | Yue et al. (2021) | ADDED | *IEEE/CAA J. Autom. Sinica 8*(4), 701–717 ([journal](https://jas.ia.ac.cn/article/doi/10.1109/JAS.2021.1003919)) |
 | António et al. (2024) | ADDED | *Technologies 12*(8), 127 ([MDPI](https://doi.org/10.3390/technologies12080127)) |
 | Ultralytics (2023) | FIXED | Same work as Jocher et al. (2023); citation changed. |
+| Etikan et al. (2016) | ADDED | Supports the sampling techniques in Section 3.10.1. *Am. J. Theor. Appl. Stat. 5*(1), 1–4 ([publisher](https://www.sciencepublishinggroup.com/article/10.11648/j.ajtas.20160501.11)) |
 
 After the changes, every in-text citation has a reference entry and every entry is cited at least once (checked automatically).

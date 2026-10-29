@@ -470,6 +470,16 @@ def main(path):
         f"software quality part (ISO/IEC 25010) was written for dentists, clinic staff, and IT experts, while the "
         f"parts on the system's features were written for all respondents. Responses were collected from "
         f"{first} to {last}, and {N} complete submissions were received.",
+        f"P The study used non-probability sampling, since there was no fixed list of the people who could "
+        f"evaluate the system from which a random sample could be drawn. Patient respondents were reached "
+        f"through convenience sampling: the link to the form was shared online, for example on social media "
+        f"and in group chats, and anyone who received it and agreed to take part could answer. IT experts were "
+        f"chosen through purposive sampling: the researchers personally invited people who work in information "
+        f"technology, because the software quality part of the questionnaire calls for technical knowledge "
+        f"(Etikan et al., 2016). Because the population was not fixed, no sample-size formula was applied, and "
+        f"since the respondents were not randomly selected, the results describe the respondents of this study "
+        f"and are not generalized to all patients or all IT practitioners. Tables {{tab:resp}} and {{tab:sectn}} show how many "
+        f"respondents answered each section.",
     ] + method + [
         "### 3.10.5 Ethical Considerations",
         "P All respondents gave their informed consent before answering. The questionnaire asked for a name only "
