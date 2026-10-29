@@ -430,6 +430,21 @@ def main(path):
       "clinic staff, the groups for which the quality evaluation was designed.")
     w("3. Validate the models on photographs from other clinics and devices, and compare them with newer "
       "detection architectures and with segmentation-based approaches.")
+    w("4. Train the detection models on more and larger datasets. The current models learned from four public "
+      "datasets in which plaque appears in only one source and healthy tooth has only 42 test instances, which "
+      "explains much of the weak plaque result. Adding more public datasets, consented and dentist-annotated "
+      "photographs from clinics such as CodiSmile Dental Clinic, and a more balanced number of examples per "
+      "condition should raise accuracy, especially for the weakest classes.")
+    w("5. Add an oral diagnosis form to the system: a digital examination form in which the dentist records "
+      "the clinical findings for each tooth (for example, on a tooth chart), the final diagnosis, and the "
+      "treatment plan, next to the AI detections. This would make Toothwise a fuller clinical record, and the "
+      "dentist's recorded diagnoses could be compared with the detections to measure accuracy in real use and "
+      "to supply labeled cases for retraining.")
+    w("6. Extend the system to detect more classes. The source datasets already contain conditions that this "
+      "study left out of scope, such as missing teeth, malalignment (maligned teeth), spacing, tooth stains and "
+      "discoloration, oral ulcers, and hypodontia, and orthodontic braces could be added as their own class "
+      "instead of being filtered out. Each new class needs enough annotated examples and its own severity "
+      "weight in the risk engine and its own advice in the prevention plan.")
 
     # The instrument, scale and statistical treatment belong to the method (Chapter III).
     i0 = L.index("### 4.3.2 Research Instrument")
