@@ -213,7 +213,6 @@ ENDTABLE
 FIG usecase | fig_use_case.png | 6.0 | Use Case Diagram
 ###+ 3.5.2 Entity Relationship Diagram (ERD)
 P Figure {fig:erd} presents the Entity Relationship Diagram of the Toothwise PostgreSQL database, verified against the current database/schema.sql and backend/app/models.py. The database contains eight tables: dentists, patients, screenings, screening_images, detections, recommendations, clinical_notes, and audit_logs, related through foreign keys as shown below. The screening_images table was added for the cloud deployment: it keeps a copy of each screening photograph in the database, because the hosting service clears its local disk whenever it restarts. Every field of each table is listed in the diagram.
-FIG erd | fig_erd.png | 6.0 | Entity Relationship Diagram (ERD)
 P Table {tab:schema} consolidates the eight entities of the Toothwise database into a single database schema, summarizing each table's primary key, purpose, classification, and relationships to the other entities.
 TABLE schema | Toothwise Database Schema Data Dictionary
 W 1.2,0.95,1.05,1.6,1.24
@@ -227,6 +226,7 @@ W 1.2,0.95,1.05,1.6,1.24
 | clinical_notes | id | Fact Detail Table | Stores dentist-authored clinical notes attached to a screening. | screenings, dentists |
 | audit_logs | id | System Table | Append-only record of sensitive staff actions, kept for administrative review. | dentists |
 ENDTABLE
+FIG erd | fig_erd.png | 6.0 | Entity Relationship Diagram (ERD)
 ###+ 3.5.3 Data Flow Diagram Level 0
 = Figure 4 presents the Level 0 (context)
 FIG dfd0 | fig_dfd0.png | 6.0 | Data Flow Diagram Level 0
