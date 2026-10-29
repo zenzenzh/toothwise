@@ -20,13 +20,6 @@ PATIENT = {"email": "liza.garcia@gmail.com", "password": "Patient@2026"}
 SAMPLE = sys.argv[3] if len(sys.argv) > 3 else "frontend/public/codismile/services/cosmetic-whitening.jpg"
 
 
-def reset_link():
-    """Ask for a staff reset e-mail and read the link from the backend log."""
-    httpx.post(API + "/auth/forgot-password", json={"email": STAFF["email"]})
-    links = re.findall(r"https?://\S+reset-password\?token=[\w.\-]+", open(BACKEND_LOG).read())
-    return links[-1].replace("http://localhost:3000", APP)
-
-
 with sync_playwright() as p:
     b = p.chromium.launch(executable_path="/opt/pw-browsers/chromium")
     ctx = b.new_context(viewport={"width": 1440, "height": 900}, device_scale_factor=2, color_scheme="light")
@@ -49,16 +42,21 @@ with sync_playwright() as p:
     pg.fill("input[type=password]", STAFF["password"])
     pg.get_by_label("Remember me on this device").check()
     shot("login")
+    # Forgot password: no email; the user confirms details on file and sets a new password.
     pg.get_by_text("Forgot password?").click()
     pg.wait_for_load_state("networkidle")
     pg.fill("input[type=email]", STAFF["email"])
-    shot("forgot_password")
-    pg.get_by_role("button").filter(has_text=re.compile("send|reset", re.I)).first.click()
-    shot("forgot_password_sent", None, 2000)
-    shot("reset_password", reset_link().replace(APP, ""), 1500)
+    pg.locator("input:not([type=email]):not([type=password]):not([type=checkbox])").first.fill("PRC-0123456")
     for el in pg.locator("input[type=password]").all():
         el.fill("NewStaff@2026pass")
-    shot("reset_password_filled", None, 500)
+    shot("forgot_staff", None, 800, full=True)
+    pg.goto(APP + "/forgot-password?type=patient", wait_until="networkidle")
+    pg.fill("input[type=email]", PATIENT["email"])
+    pg.locator("input[type=date]").first.fill("1995-02-15")
+    pg.fill("input[type=tel]", "09451234560")
+    for el in pg.locator("input[type=password]").all():
+        el.fill("NewPatient@2026")
+    shot("forgot_patient", None, 800, full=True)
 
     # Staff workspace ("remember me" session lives in localStorage).
     t = httpx.post(API + "/auth/login", json={**STAFF, "remember_me": True}).json()

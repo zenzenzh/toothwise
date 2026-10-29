@@ -376,7 +376,7 @@ def main(path):
       f"({f2(S[iso_rank[-1]]['all']['wm'])}). The three feature sections, answered by all {N} respondents, "
       f"obtained an overall mean of {f2(feat_mean)} (Highly Acceptable). IT experts rated every section lower "
       f"than patient respondents, but still Strongly Agree. Technically, the web application scored 100 in "
-      f"Lighthouse accessibility and best practices on all audited pages and passed all 117 automated backend "
+      f"Lighthouse accessibility and best practices on all audited pages and passed all 119 automated backend "
       f"tests.")
     w(f"5. **Screening consistency and time (Problem 5).** A controlled, timed comparison against the dentist's "
       f"findings was not conducted. The {n_man} respondents who answered the related section agreed that "
@@ -490,7 +490,7 @@ def main(path):
         f"and deployed on cloud hosting. On a held-out test set of 2,930 images, YOLOv8 reached an mAP@50 of "
         f"51.91% and YOLOv12 48.11%, and the fused ensemble 54.24%; cavity was detected best and plaque worst. "
         f"The KNN classifier reproduced the clinical risk rule with 92.75% accuracy on 2,000 unseen cases, and "
-        f"all 117 automated backend tests passed. The system was evaluated through an online questionnaire "
+        f"all 119 automated backend tests passed. The system was evaluated through an online questionnaire "
         f"answered by {N} respondents ({nPT} patient respondents and {nIT} IT experts) on a four-point scale. The "
         f"six ISO/IEC 25010 quality characteristics (security, privacy, usability, reliability, performance "
         f"efficiency, and data protection), rated by {n_iso} respondents, obtained an overall weighted mean of "
