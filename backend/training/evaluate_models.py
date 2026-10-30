@@ -33,14 +33,18 @@ import json
 import time
 from pathlib import Path
 
-def evaluate(weights_path: str, data_yaml: str, split: str) -> dict:
+def evaluate(weights_path: str, data_yaml: str, split: str,
+             tta: bool = False, imgsz: int = 640) -> dict:
     from ultralytics import YOLO
 
     model = YOLO(weights_path)
 
     # model.val() runs the standard YOLO validation loop: computes
     # precision, recall, mAP50, mAP50-95 against the labeled split.
-    metrics = model.val(data=data_yaml, split=split, verbose=False)
+    # augment=True is test-time augmentation (flips + rescales, merged).
+    # Report it as its own row - it is slower and not what the live app runs.
+    metrics = model.val(data=data_yaml, split=split, imgsz=imgsz,
+                        augment=tta, verbose=False)
 
     precision = float(metrics.box.mp)       # mean precision across classes
     recall = float(metrics.box.mr)          # mean recall across classes
@@ -78,13 +82,16 @@ def main():
     parser.add_argument("--yolov8", required=True, help="Path to trained YOLOv8 .pt weights")
     parser.add_argument("--yolov12", required=True, help="Path to trained YOLOv12 .pt weights")
     parser.add_argument("--split", default="test", choices=["train", "val", "test"])
+    parser.add_argument("--tta", action="store_true",
+                        help="Evaluate with test-time augmentation")
+    parser.add_argument("--imgsz", type=int, default=640)
     args = parser.parse_args()
 
     print(f"Evaluating YOLOv8 ({args.yolov8}) on '{args.split}' split...")
-    v8 = evaluate(args.yolov8, args.data, args.split)
+    v8 = evaluate(args.yolov8, args.data, args.split, args.tta, args.imgsz)
 
     print(f"Evaluating YOLOv12 ({args.yolov12}) on '{args.split}' split...")
-    v12 = evaluate(args.yolov12, args.data, args.split)
+    v12 = evaluate(args.yolov12, args.data, args.split, args.tta, args.imgsz)
 
     table = (
         "| Model | mAP50 | mAP50-95 | Precision | Recall | F1 Score | Avg Inference |\n"
@@ -98,7 +105,8 @@ def main():
     out = Path("comparison_results.md")
     out.write_text(
         f"# Toothwise Model Comparison — YOLOv8 vs YOLOv12\n\n"
-        f"Evaluated on the `{args.split}` split of `{args.data}`.\n\n"
+        f"Evaluated on the `{args.split}` split of `{args.data}` "
+        f"(imgsz {args.imgsz}, TTA {'on' if args.tta else 'off'}).\n\n"
         f"{table}\n"
         f"Raw metrics (JSON):\n\n```json\n{json.dumps({'yolov8': v8, 'yolov12': v12}, indent=2)}\n```\n"
     )
