@@ -63,6 +63,7 @@ FUSED_CAP = 0.98
 # threshold we report, and dropping them keeps the fusion loop fast.
 KEEP_FLOOR = 0.05
 MAX_DETS_PER_MODEL = 100
+PREDICT_CHUNK = 32  # images per predict() call; bounds RAM use
 
 HEALTHY = "healthy_tooth"
 ANY_FINDING = "any_finding"
@@ -152,17 +153,23 @@ def predict(weights: str, images: list[Path], imgsz: int, tta: bool) -> dict:
 
     model = YOLO(weights)
     out = {}
-    for done, r in enumerate(model.predict([str(p) for p in images], conf=KEEP_FLOOR,
-                                           imgsz=imgsz, augment=tta, stream=True,
-                                           verbose=False), 1):
-        dets = []
-        if r.boxes is not None and len(r.boxes):
-            for c, s, b in zip(r.boxes.cls.tolist(), r.boxes.conf.tolist(),
-                               r.boxes.xyxyn.tolist()):
-                dets.append([int(c), float(s), *b])
-        dets.sort(key=lambda d: d[1], reverse=True)
-        out[str(Path(r.path))] = dets[:MAX_DETS_PER_MODEL]
-        if done % 100 == 0 or done == len(images):
+    # Ultralytics decodes a list source into memory all at once, which runs
+    # Colab out of RAM on a few thousand photos - so feed it small chunks.
+    # Results come back in input order; key by our own path, not r.path.
+    for start in range(0, len(images), PREDICT_CHUNK):
+        chunk = images[start:start + PREDICT_CHUNK]
+        results = model.predict([str(p) for p in chunk], conf=KEEP_FLOOR,
+                                imgsz=imgsz, augment=tta, verbose=False)
+        for img, r in zip(chunk, results):
+            dets = []
+            if r.boxes is not None and len(r.boxes):
+                for c, s, b in zip(r.boxes.cls.tolist(), r.boxes.conf.tolist(),
+                                   r.boxes.xyxyn.tolist()):
+                    dets.append([int(c), float(s), *b])
+            dets.sort(key=lambda d: d[1], reverse=True)
+            out[str(img)] = dets[:MAX_DETS_PER_MODEL]
+        done = start + len(chunk)
+        if done % 320 == 0 or done == len(images):
             print(f"  {Path(weights).name}: {done}/{len(images)}", flush=True)
     return out
 

@@ -141,6 +141,49 @@ with tempfile.TemporaryDirectory() as tmp:
     ns["main"]()
     check(len(calls) == n, f"cache not used: {calls}")
 
+# --- predict() feeds Ultralytics small chunks ------------------------------
+# A list source is decoded into RAM all at once; passing every image in one
+# call crashed Colab on the 5,299-image val split.
+import types
+
+
+class _Boxes:
+    def __init__(self, k):
+        self.cls, self.conf = _L([k % 5]), _L([0.5])
+        self.xyxyn = _L([[0.1, 0.1, 0.2, 0.2]])
+
+    def __len__(self):
+        return 1
+
+
+class _L(list):
+    def tolist(self):
+        return list(self)
+
+
+chunk_sizes = []
+
+
+class _YOLO:
+    def __init__(self, w):
+        pass
+
+    def predict(self, source, **kw):
+        chunk_sizes.append(len(source))
+        return [types.SimpleNamespace(boxes=_Boxes(int(Path(s).stem)), path="image0.jpg")
+                for s in source]
+
+
+sys.modules["ultralytics"] = types.SimpleNamespace(YOLO=_YOLO)
+fresh = {"__name__": "evaluate_image_level_predict", "__file__": str(SCRIPT)}
+exec(compile(SCRIPT.read_text(encoding="utf-8"), str(SCRIPT), "exec"), fresh)
+imgs = [Path(f"/x/{i}.jpg") for i in range(100)]
+got = fresh["predict"]("w.pt", imgs, 640, False)
+check(max(chunk_sizes) <= fresh["PREDICT_CHUNK"] and sum(chunk_sizes) == 100,
+      f"chunk sizes {chunk_sizes}")
+check(len(got) == 100 and got[str(imgs[7])][0][0] == 7,
+      "predictions keyed by our own path, in order")
+
 if failures:
     print("FAIL")
     for f in failures:
