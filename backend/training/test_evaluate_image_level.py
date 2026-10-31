@@ -149,7 +149,7 @@ import types
 
 class _Boxes:
     def __init__(self, k):
-        self.cls, self.conf = _L([k % 5]), _L([0.5])
+        self.cls, self.conf = _L([k]), _L([0.5])
         self.xyxyn = _L([[0.1, 0.1, 0.2, 0.2]])
 
     def __len__(self):
