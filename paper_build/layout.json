@@ -17,13 +17,13 @@
   "s_detail": 5.3,
   "s_upload": 5.78,
   "s_preview": 5.78,
-  "s_result": 4.8,
-  "s_staff": 6.0,
-  "s_audit": 6.0,
+  "s_result": 3.78,
+  "s_staff": 5.95,
+  "s_audit": 5.95,
   "s_phome": 3.6,
   "s_pscreen": 6.0,
   "s_report": 2.95,
-  "s_rel": 6.0
+  "s_rel": 4.72
  },
  "break": [
   "s_privacy",
@@ -33,8 +33,7 @@
   "s_patients",
   "s_upload",
   "s_result",
-  "s_rel",
-  "s_audit",
+  "s_staff",
   "s_phome",
   "s_pscreen"
  ]

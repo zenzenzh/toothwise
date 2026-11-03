@@ -960,19 +960,12 @@ body.dark-mode .sd-risk--MEDIUM { color: var(--tw-warning); }
 .sd-rel-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--s-2); flex-wrap: wrap; }
 .sd-rel-head .sd-sec-title { display: inline-flex; align-items: center; gap: 6px; }
 .sd-rel-source { font-size: 13px; color: var(--tw-muted); }
-.sd-rel-found { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
-.sd-rel-found li { display: flex; flex-direction: column; gap: 6px; padding: 12px 14px; border-radius: var(--r-md); background: var(--tw-bg); border: 1px solid var(--tw-border); }
-.sd-rel-found li.sd-rel-found--low { border-color: var(--tw-warning-bg); }
-.sd-rel-found-name { font-weight: 700; text-transform: capitalize; color: var(--tw-text); }
-.sd-rel-found-text { font-size: var(--fs-sm); line-height: 1.5; color: var(--tw-text); }
-.sd-rel-found .tw-pill { align-self: flex-start; }
 .sd-rel-table-wrap { overflow-x: auto; }
 .sd-rel-table { width: 100%; border-collapse: collapse; font-size: var(--fs-sm); font-variant-numeric: tabular-nums; }
 .sd-rel-table th, .sd-rel-table td { padding: 8px 10px; text-align: right; border-bottom: 1px solid var(--tw-border); white-space: nowrap; background: transparent; text-transform: none; letter-spacing: normal; }
 .sd-rel-table thead th { font-size: 13px; font-weight: 700; color: var(--tw-muted); }
-.sd-rel-table th[scope="row"], .sd-rel-table thead th:first-child { text-align: left; text-transform: capitalize; font-weight: 600; color: var(--tw-text); }
-.sd-rel-table tr.is-found th, .sd-rel-table tr.is-found td { background: var(--tw-bg); }
-.sd-rel-table tr.is-found th[scope="row"] { font-weight: 800; box-shadow: inset 3px 0 0 var(--tw-text); }
+.sd-rel-table th[scope="row"], .sd-rel-table thead th:first-child { text-align: left; font-weight: 600; color: var(--tw-text); }
+.sd-rel-table th[scope="row"] { text-transform: capitalize; }
 .sd-rel-table thead th:first-child { color: var(--tw-muted); font-weight: 700; }
 .sd-rel-table th[scope="row"] { position: sticky; left: 0; background: var(--tw-surface); }
 .sd-rel-note { margin: 0; font-size: 13px; line-height: 1.5; color: var(--tw-muted); }
@@ -980,3 +973,4 @@ body.dark-mode .sd-risk--MEDIUM { color: var(--tw-warning); }
 .sd-rel-yes { font-weight: 700; color: var(--tw-text); }
 .sd-rel-no { color: var(--tw-muted); }
 .sd-rel-marks { font-weight: 400; color: var(--tw-muted); }
+.sd-rel-table th .sd-rel-low { text-transform: none; display: block; width: fit-content; margin-top: 4px; font-weight: 600; white-space: nowrap; }
