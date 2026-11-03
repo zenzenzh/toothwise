@@ -103,20 +103,13 @@ class TestForgotPassword:
         })
         assert resp.status_code == 422
 
-    def test_staff_reset_with_license(self, client, seed_admin):
+    def test_staff_self_service_reset_removed(self, client, seed_admin):
+        # Staff passwords are reset by the dentist from the Staff page, not
+        # by a public endpoint, so there is no staff forgot-password route.
         resp = client.post("/api/auth/forgot-password", json={
-            "email": "admin@codismile.com", "license_no": " test-001 ", "new_password": "NewPass123!",
+            "email": "admin@codismile.com", "license_no": "TEST-001", "new_password": "NewPass123!",
         })
-        assert resp.status_code == 200
-        assert client.post("/api/auth/login", json={"email": "admin@codismile.com", "password": seed_admin}).status_code == 401
-        assert client.post("/api/auth/login", json={"email": "admin@codismile.com", "password": "NewPass123!"}).status_code == 200
-
-    def test_staff_wrong_license_rejected(self, client, seed_admin):
-        resp = client.post("/api/auth/forgot-password", json={
-            "email": "admin@codismile.com", "license_no": "WRONG", "new_password": "NewPass123!",
-        })
-        assert resp.status_code == 400
-        assert resp.json()["detail"] == BAD_DETAILS
+        assert resp.status_code in (404, 405)
         assert client.post("/api/auth/login", json={"email": "admin@codismile.com", "password": seed_admin}).status_code == 200
 
 

@@ -126,9 +126,10 @@ def patient_me(current: models.Patient = Depends(get_current_patient)):
 
 
 # ---------- Forgot / change password ----------
-# Forgot password works without email: the user proves who they are with
-# details already stored on their account, then sets a new password right
-# away. Every failure returns the same message, so these endpoints can't be
+# Patient forgot password works without email: the patient proves who they
+# are with details already stored on their account, then sets a new password
+# right away. Staff have no self-service reset - the dentist (administrator)
+# resets staff passwords from the Staff page (PUT /dentists/{id}/password). Every failure returns the same message, so these endpoints can't be
 # used to find out which emails exist or which detail was wrong.
 RESET_FAILED_MESSAGE = "The details you entered do not match our records."
 RESET_DONE_MESSAGE = "Your password has been changed. You can now sign in."
@@ -177,19 +178,6 @@ def _change_password(account, actor, account_type: str, payload: schemas.ChangeP
     )
     db.commit()
     return schemas.MessageResponse(message="Your password has been changed.")
-
-
-@router.post("/forgot-password", response_model=schemas.MessageResponse)
-@limiter.limit("5/minute")
-def staff_forgot_password(request: Request, payload: schemas.StaffForgotPassword, db: Session = Depends(get_db)):
-    """Staff reset: email + the PRC license number on file. Staff without a
-    license number ask the dentist/administrator to reset it for them."""
-    staff = db.query(models.Dentist).filter(models.Dentist.email == payload.email).first()
-    verified = (
-        staff is not None and staff.is_active
-        and _same((staff.license_no or "").strip().upper(), payload.license_no.strip().upper())
-    )
-    return _finish_reset(staff, "staff", verified, payload.email, payload.new_password, db)
 
 
 @router.post("/change-password", response_model=schemas.MessageResponse)

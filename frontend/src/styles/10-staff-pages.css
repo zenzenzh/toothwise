@@ -132,6 +132,7 @@ body.dark-mode .scr-step--current .scr-step-dot { color: var(--tw-bg); }
 .scr-image { position: relative; width: 100%; max-width: 520px; border-radius: var(--r-md); overflow: hidden; border: 1px solid var(--tw-border); background: var(--tw-bg); }
 .scr-image img { display: block; width: 100%; max-height: 60vh; object-fit: contain; }
 .scr-image.is-analysing img { filter: saturate(.6) brightness(.92); }
+.scr-preview-placeholder { margin: 0; padding: 48px 20px; text-align: center; color: var(--tw-muted, #64748b); font-size: .92rem; }
 .scr-scan { position: absolute; inset: 0; overflow: hidden; }
 .scr-scan-line {
   position: absolute; left: 0; right: 0; top: 0; height: 30%;

@@ -65,8 +65,6 @@ api.interceptors.response.use(r => r, err => {
 export const authAPI = {
   login: (d) => api.post('/auth/login', d),
   me: () => api.get('/auth/me'),
-  // Email-free reset: { email, license_no, new_password }
-  forgotPassword: (d) => api.post('/auth/forgot-password', d),
   changePassword: (currentPassword, newPassword) =>
     api.post('/auth/change-password', { current_password: currentPassword, new_password: newPassword }),
 };
