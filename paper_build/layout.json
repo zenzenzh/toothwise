@@ -1,13 +1,11 @@
 {
  "move": {
-  "agile": 1,
-  "usecase": 4,
-  "perclass": 0,
-  "dp": 1,
-  "erd": 0
+  "erd": 2,
+  "inst": 1,
+  "speed": 1
  },
  "width": {
-  "usecase": 4.8,
+  "curves": 5.05,
   "s_landing": 6.0,
   "s_login": 1.95,
   "s_plogin": 1.95,
@@ -25,10 +23,7 @@
   "s_audit": 5.95,
   "s_phome": 3.6,
   "s_pscreen": 6.0,
-  "s_report": 2.95,
-  "erd": 6.0,
-  "dfd1a": 5.0,
-  "perclass": 6.0
+  "s_report": 2.95
  },
  "break": [
   "s_login",
