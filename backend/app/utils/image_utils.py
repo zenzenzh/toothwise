@@ -4,16 +4,31 @@ from io import BytesIO
 
 from fastapi import HTTPException, UploadFile, status
 from PIL import Image
+from pillow_heif import register_heif_opener
 
 from app.config import get_settings
 
 settings = get_settings()
 
-ALLOWED_CONTENT_TYPES = {"image/jpeg", "image/png", "image/webp"}
+# Lets Pillow open HEIC/HEIF photos (the default camera format on iPhones
+# and many Android phones), which keep more detail than a phone's JPEG.
+register_heif_opener()
+
+ALLOWED_CONTENT_TYPES = {"image/jpeg", "image/png", "image/webp", "image/heic", "image/heif"}
+
+# Some browsers (e.g. Chrome on Windows) don't know the HEIC type and send
+# a blank or generic Content-Type, so those are let through by extension.
+# The real check is still the decode in _validate_and_decode().
+_HEIC_EXTENSIONS = (".heic", ".heif")
+_GENERIC_CONTENT_TYPES = {"", "application/octet-stream"}
 
 # Canonical extension derived from PIL's own detected format, never from
 # the client-supplied filename - see the validation step below.
 _FORMAT_EXTENSIONS = {"JPEG": ".jpg", "PNG": ".png", "WEBP": ".webp"}
+
+# HEIC can't be shown by most browsers, so it is stored as a full-resolution
+# JPEG at near-lossless settings (quality 95, no chroma subsampling).
+_HEIF_FORMATS = {"HEIF", "HEIC", "AVIF"}
 
 # Hard ceiling on pixel dimensions. Rejects decompression-bomb style
 # uploads (a tiny file that decodes into a gigantic bitmap and exhausts
@@ -67,10 +82,14 @@ def _read_and_check_content_type(file: UploadFile, max_mb: int) -> bytes:
     # is attacker-controlled and easily spoofed, so it's a cheap early
     # reject for the common case, NOT the real security boundary - that's
     # _validate_and_decode() above, which actually parses the bytes.
-    if file.content_type not in ALLOWED_CONTENT_TYPES:
+    content_type = (file.content_type or "").lower()
+    is_heic_by_name = (file.filename or "").lower().endswith(_HEIC_EXTENSIONS)
+    if content_type not in ALLOWED_CONTENT_TYPES and not (
+        is_heic_by_name and content_type in _GENERIC_CONTENT_TYPES
+    ):
         raise HTTPException(
             status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-            detail="Only JPEG, PNG or WEBP images are accepted.",
+            detail="Only HEIC, JPEG, PNG or WEBP images are accepted.",
         )
     contents = file.file.read()
     max_bytes = max_mb * 1024 * 1024
@@ -91,7 +110,15 @@ def save_upload(file: UploadFile, patient_id: int) -> tuple[str, int, int]:
 
     clean_buffer = BytesIO()
     save_kwargs = {}
-    if pil_format == "JPEG":
+    if pil_format in _HEIF_FORMATS:
+        icc = img.info.get("icc_profile")
+        if img.mode != "RGB":
+            img = img.convert("RGB")
+        pil_format = "JPEG"
+        save_kwargs = {"quality": 95, "subsampling": 0}
+        if icc:
+            save_kwargs["icc_profile"] = icc
+    elif pil_format == "JPEG":
         if img.mode not in ("RGB", "L"):
             img = img.convert("RGB")
         save_kwargs = {"quality": 92}

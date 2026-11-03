@@ -142,15 +142,6 @@ class PatientForgotPassword(BaseModel):
     _normalize_email = field_validator("email")(_normalize_email)
 
 
-class StaffForgotPassword(BaseModel):
-    """Email-free reset for staff: email plus the PRC license number on file."""
-    email: EmailStr
-    license_no: str = Field(min_length=1, max_length=60)
-    new_password: str = Field(min_length=PASSWORD_MIN_LENGTH, max_length=PASSWORD_MAX_LENGTH)
-
-    _normalize_email = field_validator("email")(_normalize_email)
-
-
 class ChangePasswordRequest(BaseModel):
     current_password: str = Field(min_length=1, max_length=PASSWORD_MAX_LENGTH)
     new_password: str = Field(min_length=PASSWORD_MIN_LENGTH, max_length=PASSWORD_MAX_LENGTH)

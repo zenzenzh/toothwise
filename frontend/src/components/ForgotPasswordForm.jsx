@@ -4,15 +4,13 @@ import PasswordField from './PasswordField';
 import { validateEmail, validatePassword, validatePHMobile, LIMITS } from '../utils/validation';
 
 /**
- * Email-free password reset. The user proves who they are with details
- * already on their account, then sets a new password right here.
- *
- * kind="patient": email + birthdate + mobile number
- * kind="staff":   email + PRC license number
+ * Email-free password reset for patients. The patient proves who they are
+ * with the email, birthdate and mobile number already on their account,
+ * then sets a new password right here. (Staff passwords are reset by the
+ * clinic dentist from the Staff page.)
  */
-export default function ForgotPasswordForm({ kind, submit, onDone }) {
-  const isPatient = kind === 'patient';
-  const [form, setForm] = useState({ email: '', birthdate: '', contact_number: '', license_no: '', new_password: '', confirm_password: '' });
+export default function ForgotPasswordForm({ submit, onDone }) {
+  const [form, setForm] = useState({ email: '', birthdate: '', contact_number: '', new_password: '', confirm_password: '' });
   const [errors, setErrors] = useState({});
   const [formError, setFormError] = useState(null);
   const [busy, setBusy] = useState(false);
@@ -28,26 +26,19 @@ export default function ForgotPasswordForm({ kind, submit, onDone }) {
     if (busy) return;
     const emailCheck = validateEmail(form.email);
     const pwCheck = validatePassword(form.new_password);
-    const phoneCheck = isPatient ? validatePHMobile(form.contact_number, { required: true }) : null;
+    const phoneCheck = validatePHMobile(form.contact_number, { required: true });
 
     const next = {};
     if (!emailCheck.valid) next.email = emailCheck.message;
-    if (isPatient) {
-      if (!form.birthdate) next.birthdate = 'Birthdate is required.';
-      if (!phoneCheck.valid) next.contact_number = phoneCheck.message;
-    } else if (!form.license_no.trim()) {
-      next.license_no = 'License number is required.';
-    }
+    if (!form.birthdate) next.birthdate = 'Birthdate is required.';
+    if (!phoneCheck.valid) next.contact_number = phoneCheck.message;
     if (!pwCheck.valid) next.new_password = pwCheck.message;
     if (form.new_password !== form.confirm_password) next.confirm_password = 'Passwords do not match.';
     if (Object.keys(next).length) { setErrors(next); return; }
 
     setBusy(true);
     try {
-      const body = isPatient
-        ? { email: emailCheck.value, birthdate: form.birthdate, contact_number: phoneCheck.value, new_password: form.new_password }
-        : { email: emailCheck.value, license_no: form.license_no.trim(), new_password: form.new_password };
-      await submit(body);
+      await submit({ email: emailCheck.value, birthdate: form.birthdate, contact_number: phoneCheck.value, new_password: form.new_password });
       toast.success('Password changed. You can now sign in.');
       onDone();
     } catch (err) {
@@ -74,15 +65,9 @@ export default function ForgotPasswordForm({ kind, submit, onDone }) {
   return (
     <form onSubmit={handleSubmit} className="auth6-form" noValidate>
       {formError && <div className="auth6-alert" role="alert">{formError}</div>}
-      {field(`${kind}-fp-email`, 'email', 'Email address', { type: 'email', maxLength: LIMITS.EMAIL_MAX, autoComplete: 'username' })}
-      {isPatient ? (
-        <>
-          {field('patient-fp-birthdate', 'birthdate', 'Birthdate', { type: 'date', autoComplete: 'bday' })}
-          {field('patient-fp-phone', 'contact_number', 'Mobile number on your account', { type: 'tel', inputMode: 'numeric', placeholder: '09XXXXXXXXX', maxLength: LIMITS.PHONE_MAX, autoComplete: 'tel' })}
-        </>
-      ) : (
-        field('staff-fp-license', 'license_no', 'PRC license number', { maxLength: 60, autoComplete: 'off' })
-      )}
+      {field('patient-fp-email', 'email', 'Email address', { type: 'email', maxLength: LIMITS.EMAIL_MAX, autoComplete: 'username' })}
+      {field('patient-fp-birthdate', 'birthdate', 'Birthdate', { type: 'date', autoComplete: 'bday' })}
+      {field('patient-fp-phone', 'contact_number', 'Mobile number on your account', { type: 'tel', inputMode: 'numeric', placeholder: '09XXXXXXXXX', maxLength: LIMITS.PHONE_MAX, autoComplete: 'tel' })}
       <PasswordField
         value={form.new_password}
         onChange={v => set('new_password', v)}

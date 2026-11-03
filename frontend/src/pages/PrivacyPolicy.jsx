@@ -7,6 +7,8 @@ const SECTIONS = [
   ['Information we may process', 'Depending on the workflow, this can include account details, birthdate and age, dental screening images, screening results, clinical notes, and audit information.'],
   ['Access and security', 'Access is restricted by authentication and user role. Sensitive information should not be shared outside authorized clinic workflows. The system also uses server-side validation and access controls to protect records.'],
   ['AI-assisted screening', 'AI output is intended to assist screening workflows. It should not be presented as a definitive diagnosis or as a substitute for professional dental evaluation.'],
+  ['Your rights under the Data Privacy Act', 'Under the Data Privacy Act of 2012 (Republic Act No. 10173), you have the right to be informed, to access, correct, object to, and request deletion of your personal data, and to file a complaint with the National Privacy Commission.'],
+  ['Consent', 'Everyone who uses ToothWise is asked to read and agree to the Data Privacy Notice before using the system.'],
   ['Your questions', 'For questions about how your information is collected, used, corrected, retained, or deleted, contact the clinic through its official privacy/contact channel.'],
 ];
 
