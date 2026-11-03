@@ -415,7 +415,7 @@ FIGPAIR s_pscreen | shot_portal_screening.png | 2.75 | Patient Portal — Screen
 #CH CHAPTER IV | RESULTS AND DISCUSSION
 P This chapter presents the results of the study. It follows the five problems in Chapter I: how well the trained models detect the five dental conditions (Section 4.1, Problem 1), how the finished system records findings and gives prevention advice (Section 4.2, Problems 2 and 3), how the respondents rated the system (Section 4.3, Problem 4), and how the respondents judged its effect on screening consistency and time (Section 4.4, Problem 5). Sections 4.3 and 4.4 are based on the answers of 103 respondents.
 ## 4.1 Results of the Trained Datasets
-P This section addresses the first problem: it measures how accurately the trained models identify tartar, plaque, cavity, gum inflammation, and healthy tooth in ordinary photographs of the teeth, and compares YOLOv8, YOLOv12, and their fused ensemble. The image-level results (Sections 4.1.4 and 4.1.5) are the primary results; the standard YOLO box-level results (Sections 4.1.6 to 4.1.8) are secondary.
+P This section answers the first problem: how well can the trained models tell whether a photograph of the teeth shows tartar, plaque, cavity, gum inflammation, or a healthy tooth, and which model, YOLOv8 or YOLOv12, does it better? The main results are scored per photograph (Sections 4.1.4 and 4.1.5). The standard YOLO scores follow as supporting results (Section 4.1.6).
 ### 4.1.1 Dataset Preparation
 P The models learned from four free, public collections of dental photographs in which the conditions had already been marked by hand. Each collection named its conditions differently, so every condition was matched to one of the five Toothwise classes, and conditions outside the study (for example, missing teeth, crooked teeth, gaps, ulcers, and missing tooth buds) were left out. Some collections outlined each condition as a shape instead of a box, so those outlines were turned into boxes, which is the format both models use. Table {tab:remap} shows how each collection's conditions were matched.
 TABLE remap | Source Datasets and Class Remapping to the Toothwise Taxonomy
@@ -437,29 +437,7 @@ W 1.4,1.4,1.9,1.3
 | Total | 48,500 | 14,691 | 100.0% |
 ENDTABLE
 NOTE Label rows written during the merge: 86,028 bounding boxes and 7,457 polygons converted to boxes (93,485 in total). Test background count taken from the rebuilt test split.
-P Table {tab:inst} shows how many examples of each condition the full test split contains, before the duplicate check described below. The numbers are very uneven, from 42 healthy-tooth examples to 2,716 cavity examples, and this unevenness affects the results later in this section.
-TABLE inst | Labeled Instances per Class (Full Test Split, 2,930 Images)
-W 1.8,1.6,1.4,1.2
-| Class | Images containing the class | Labeled instances | Share of instances |
-| Healthy tooth | 39 | 42 | 0.6% |
-| Cavity | 1,190 | 2,716 | 39.6% |
-| Gum inflammation | 297 | 1,544 | 22.5% |
-| Plaque | 147 | 554 | 8.1% |
-| Tartar | 558 | 2,009 | 29.3% |
-| Total | — | 6,865 | 100.0% |
-ENDTABLE
-NOTE Counted from the rebuilt test split (same source order, class remap, and polygon-to-box conversion as the training notebook).
-P Because the four collections were gathered by different people and partly from the same sources, the same photograph can appear in more than one of them, and Roboflow saves several edited copies (flipped, rotated, or brightened) of each training photograph. A photograph that appears in both the training set and the test set would let a model be tested on a picture it has already learned from, which makes the results look better than they are. Every test photograph was therefore checked against every training and validation photograph in three ways: an identical file, the same original photograph (Roboflow keeps the original file name in every edited copy), and a near-identical image (a perceptual image fingerprint that also catches resized, re-saved, brightened, or mirrored copies). Table {tab:dedup} shows the result.
-TABLE dedup | Test Photographs Also Found in the Training or Validation Split
-W 2.6,1.7,1.7
-| Type of match | Found in the training split | Found in the validation split |
-| Identical file | 18 | 0 |
-| Same original photograph (augmented copy) | 259 | 48 |
-| Near-identical image | 497 | 288 |
-| Total test photographs flagged | 774 | 336 |
-ENDTABLE
-NOTE Source: check_test_leakage.py. A photograph flagged in both splits is counted once when removed: 849 test photographs were removed in total.
-P Of the 2,930 test photographs, 774 (26.4%) also appeared in the training split and 336 (11.5%) in the validation split. All 849 flagged photographs were removed, leaving a **clean test split of 2,081 photographs** that were not found in the training or validation splits. All primary results in this section, and the overall box-level results, are reported on this clean split. The check also showed that the 48,500 images were made from 11,744 original photographs in the training split, 2,876 in the validation split, and 2,129 in the test split; the rest are edited copies. Table {tab:clean} compares the test split before and after the duplicates were removed.
+P **Removing duplicate photographs.** Some of the photo collections were taken partly from the same sources, so some test photographs were copies of training photographs. A model tested on a photograph it has already learned from would look better than it really is. Every test photograph was therefore compared with every training and validation photograph, looking for identical files, edited copies of the same original photograph, and near-identical images. Of the 2,930 test photographs, 774 (26.4%) were found in the training set and 336 (11.5%) in the validation set. All 849 of them were removed, leaving a **clean test set of 2,081 photographs**. All results in this section use the clean test set. Table {tab:clean} shows the test set before and after.
 TABLE clean | Test Split Before and After Duplicate Removal
 W 2.6,1.7,1.7
 | Images containing | Full test split | Clean test split |
@@ -474,9 +452,9 @@ W 2.6,1.7,1.7
 | Labeled instances | 6,865 | 3,733 |
 ENDTABLE
 NOTE An image can contain more than one condition, so the condition rows do not add up to the total.
-P Gum inflammation lost the most photographs: 213 of its 297 test photographs were copies of training or validation photographs, so only 84 remain. Its results on the clean split are therefore the most different from the full split.
+P Gum inflammation lost the most photographs: 213 of its 297 test photographs were copies, so only 84 remain.
 ### 4.1.2 Training Configuration
-P Both models were trained on the same data with the same settings, so that the comparison between them is fair. Training ran on Google Colab with an NVIDIA Tesla T4 graphics card, and whenever the Colab session disconnected, training continued from the last saved point. Table {tab:train} lists the settings, read directly from the saved models.
+P Both models were trained on the same data with the same settings, so that the comparison between them is fair. Training ran on Google Colab with an NVIDIA Tesla T4 graphics card. Table {tab:train} lists the settings.
 TABLE train | Training Configuration of the Two Detection Models
 W 2.0,2.0,2.0
 | Parameter | YOLOv8 | YOLOv12 |
@@ -494,14 +472,20 @@ W 2.0,2.0,2.0
 | Training hardware | Google Colab, NVIDIA Tesla T4 (15 GB) | Google Colab, NVIDIA Tesla T4 (15 GB) |
 | Checkpoint date (UTC) | 2026-09-10 | 2026-09-23 |
 ENDTABLE
-### 4.1.3 Evaluation Measures
-P The models were scored in two ways: an image-level evaluation, which is the primary measure of this study, and the standard box-level YOLO evaluation, which is reported as a secondary measure.
-P **Image-level evaluation (primary).** Each photograph is judged as a whole, for each condition: does the photograph show the condition, and did the model report it? A condition counts as reported when the model's highest confidence for that condition anywhere in the photograph reaches a set threshold. Comparing the report with the hand-made labels gives four counts per condition: true positives (shown and reported), false positives (reported but not shown), false negatives (shown but not reported), and true negatives (neither). Six measures follow from them. **Accuracy** is the share of photographs judged correctly. **Precision** is the share of reported photographs that really show the condition. **Recall** (sensitivity) is the share of photographs showing the condition that the model reported. **Specificity** is the share of photographs without the condition that the model correctly left unreported. The **F1-score** combines precision and recall. **AUROC** (area under the ROC curve) measures how well the model's confidence separates photographs with the condition from photographs without it at every possible threshold, so it does not depend on the threshold chosen. An extra row, **any finding**, asks whether the photograph shows at least one of the four conditions (cavity, gum inflammation, plaque, or tartar); this is the screening decision that Toothwise supports.
-P Two sets of thresholds were used. **Validation-tuned thresholds:** for each condition and model, the threshold from 0.05 to 0.95 (in steps of 0.05) that gave the highest F1-score on the validation split was chosen and then applied unchanged to the clean test split; thresholds were never chosen on the test photographs, since that would make the results look better than they are. **Deployed thresholds:** the settings the live system uses (0.25 for every condition and 0.50 for cavity), applied to each model before the two are combined. The fused ensemble is scored with the same combining rule as the live system (Section 4.1.10).
-P **Box-level evaluation (secondary).** The standard YOLO measures judge every box. **Precision** is the share of the model's boxes that are correct, and **recall** is the share of hand-drawn boxes that the model found. **mAP@50** (mean average precision) counts a finding as found only when the model's box overlaps the hand-drawn box by at least half, and averages the result over the five conditions; **mAP@50-95** uses stricter overlap rules, so it is always lower.
-P Image-level evaluation is used as the primary measure because it matches the purpose of Toothwise. The system is a screening aid: its job is to tell the dentist whether a photograph shows a cavity, tartar, or another condition so that the dentist looks closer, not to outline each finding exactly. The box-level measures are much stricter. For conditions without sharp edges, such as plaque and gum inflammation, two annotators would rarely draw the same box, and a correct finding whose box is drawn differently from the hand-made box counts as both a false alarm and a missed finding. Both evaluations are reported so that the reader can see the models' performance from both points of view.
-### 4.1.4 Image-Level Screening Performance
-P Table {tab:imgany} gives the main result of this study: how well each model identifies photographs that show at least one dental condition, on the 2,081 clean test photographs, with validation-tuned thresholds.
+FIG curves | fig_training_curves.png | 6.0 | mAP@50 and mAP@50-95 per Training Epoch for YOLOv8 and YOLOv12
+P Figure {fig:curves} shows how the scores grew during training. Both models improved quickly in the first ten rounds (epochs) and then levelled off. This means that training longer would not help much; better results need more and better training photographs.
+### 4.1.3 How the Models Were Scored
+P The main scores are given per photograph. For each photograph and each condition, two things are compared: does the photograph show the condition, and did the model report it? Six scores come from this:
+- **Accuracy:** how many photographs were judged correctly.
+- **Precision:** when the model says a condition is there, how often it is right.
+- **Recall:** of the photographs that show the condition, how many the model found.
+- **Specificity:** of the photographs without the condition, how many the model correctly left unmarked.
+- **F1-score:** one number that combines precision and recall.
+- **AUROC:** how well the model's confidence separates photographs with the condition from photographs without it, without depending on a cut-off.
+P **Any finding** asks whether the photograph shows at least one of the four conditions (cavity, gum inflammation, plaque, or tartar). This is the main question a screening tool answers. A model reports a condition when its confidence reaches a cut-off. For each condition, the cut-off that gave the best F1-score on the validation set was chosen and then used unchanged on the test set. The live system currently uses fixed cut-offs (0.25, and 0.50 for cavity), and results at those cut-offs are also shown.
+P The standard YOLO score, mAP@50, is stricter: it counts a finding only when the model's box overlaps the hand-drawn box by at least half. It is given as a supporting result, because the job of Toothwise is to tell the dentist whether a condition is present, not to draw its exact outline.
+### 4.1.4 Results for Any Finding
+P Table {tab:imgany} gives the main result of this study.
 TABLE imgany | Image-Level Performance for Any Finding (Clean Test Split, Validation-Tuned Thresholds)
 W 1.5,0.75,0.75,0.75,0.75,0.75,0.79
 | Model | Accuracy | Precision | Recall | Specificity | F1-score | AUROC |
@@ -509,9 +493,9 @@ W 1.5,0.75,0.75,0.75,0.75,0.75,0.79
 | YOLOv12 | 84.3% | 87.5% | 85.0% | 83.4% | 86.3% | 89.8% |
 | Fused ensemble | 85.3% | 86.7% | 88.0% | 81.5% | 87.4% | 90.7% |
 ENDTABLE
-NOTE N = 2,081 photographs, of which 1,204 show at least one condition. Thresholds: 0.20 (YOLOv8), 0.20 (YOLOv12), 0.30 (ensemble). Source: evaluate_image_level.py.
-P All three exceeded 80% on all six measures. Of every 100 photographs that showed a dental condition, YOLOv8 reported 85.5, YOLOv12 85.0, and the fused ensemble 88.0; and of the photographs each model reported, 86.7% to 87.9% really showed a condition. The ensemble caught the most findings (recall 88.0%) and had the best F1-score (87.4%) and AUROC (90.7%), at the cost of slightly more false alarms (specificity 81.5% against 83.9% for YOLOv8). YOLOv8 was slightly better than YOLOv12 on every measure, by less than one percentage point.
-P Table {tab:imgdep} shows the same screening decision, and cavity, at the thresholds that the live system uses today.
+NOTE N = 2,081 photographs, of which 1,204 show at least one condition. Cut-offs: 0.20 (YOLOv8), 0.20 (YOLOv12), 0.30 (ensemble), chosen on the validation set. Source: evaluate_image_level.py.
+P All three scored above 80% on all six measures. In simple terms, of every 100 photographs that showed a dental problem, YOLOv8 found about 86, YOLOv12 about 85, and the combined models 88. When a model said that a problem was present, it was right about 87 to 88 times out of 100. YOLOv8 was slightly better than YOLOv12, by less than one percentage point on every measure. The combined models found the most problems, with slightly more false alarms.
+P Table {tab:imgdep} shows the results at the cut-offs that the live system uses today.
 TABLE imgdep | Image-Level Performance at the Deployed Thresholds (Clean Test Split)
 W 1.25,1.0,0.76,0.76,0.76,0.76,0.76
 | Model | Condition | Accuracy | Precision | Recall | Specificity | F1-score |
@@ -522,52 +506,37 @@ W 1.25,1.0,0.76,0.76,0.76,0.76,0.76
 | YOLOv12 | Cavity | 87.0% | 89.8% | 76.9% | 94.0% | 82.9% |
 | Fused ensemble | Cavity | 88.1% | 88.1% | 81.9% | 92.4% | 84.9% |
 ENDTABLE
-NOTE Deployed thresholds: 0.25, and 0.50 for cavity, applied to each model before fusion. AUROC does not depend on the threshold and is given in Tables {tab:imgany} to {tab:imgens}.
-P The deployed thresholds favor precision: when a single model reports a finding, it is right about 90% of the time or more (precision 89.8% to 92.4%), but it misses more findings (recall 76% to 78%). The fused ensemble, which is what the live system actually shows the dentist, exceeded 80% on all five measures for both any finding and cavity. Because a missed finding matters more than a false alarm in screening, moving the live system to the validation-tuned thresholds would raise recall further.
-### 4.1.5 Per-Condition Image-Level Results
-P Tables {tab:img8}, {tab:img12}, and {tab:imgens} break the image-level results down by condition, with validation-tuned thresholds.
-TABLE img8 | Image-Level Performance of YOLOv8 per Condition (Clean Test Split)
-W 1.3,0.6,0.5,0.58,0.58,0.58,0.58,0.58,0.68
-| Condition | Photos | Thr. | Acc. | Prec. | Rec. | Spec. | F1 | AUROC |
-| Healthy tooth | 34 | 0.60 | 98.9% | 63.4% | 76.5% | 99.3% | 69.3% | 96.7% |
-| Cavity | 850 | 0.30 | 88.9% | 86.2% | 86.6% | 90.4% | 86.4% | 92.8% |
-| Gum inflammation | 84 | 0.20 | 96.6% | 58.0% | 60.7% | 98.1% | 59.3% | 91.7% |
-| Plaque | 98 | 0.05 | 95.1% | 46.0% | 23.5% | 98.6% | 31.1% | 61.1% |
-| Tartar | 345 | 0.20 | 92.2% | 79.6% | 71.3% | 96.4% | 75.2% | 89.7% |
-| Any finding | 1,204 | 0.20 | 84.8% | 87.9% | 85.5% | 83.9% | 86.7% | 90.0% |
-| Mean of the five classes | — | — | 94.3% | 66.6% | 63.7% | 96.6% | 64.3% | 86.4% |
+NOTE Deployed cut-offs: 0.25, and 0.50 for cavity, applied to each model before the two are combined. AUROC does not depend on the cut-off and is given in Tables {tab:imgany} and {tab:imgcond}.
+P At these cut-offs the models are more careful: when they report a problem, they are right 88% to 92% of the time, but they miss a few more. The combined result is above 80% on every measure for both any finding and cavity. The live system adds two rules that are not included here: it keeps a cavity only when both models find it, and it removes braces brackets (Section 4.2.1).
+### 4.1.5 Results per Condition
+P Table {tab:imgcond} shows the results for each condition with the two models combined, and Table {tab:imgf1} compares the F1-score of YOLOv8, YOLOv12, and the combined models. The full tables for each model are in Appendix D.
+TABLE imgcond | Results per Condition, Fused Ensemble (Clean Test Set)
+W 1.15,0.6,0.72,0.75,0.6,0.78,0.7,0.7
+| Condition | Photos | Accuracy | Precision | Recall | Specificity | F1-score | AUROC |
+| Healthy tooth | 34 | 98.8% | 60.9% | 82.4% | 99.1% | 70.0% | 98.2% |
+| Cavity | 850 | 89.0% | 87.6% | 85.1% | 91.7% | 86.3% | 93.8% |
+| Gum inflammation | 84 | 96.1% | 51.7% | 53.6% | 97.9% | 52.6% | 93.5% |
+| Plaque | 98 | 95.2% | 48.8% | 20.4% | 98.9% | 28.8% | 61.9% |
+| Tartar | 345 | 92.0% | 75.8% | 76.2% | 95.2% | 76.0% | 90.4% |
+| Any finding | 1,204 | 85.3% | 86.7% | 88.0% | 81.5% | 87.4% | 90.7% |
 ENDTABLE
-NOTE Photos: test photographs that show the condition (out of 2,081). Thr.: validation-tuned threshold. Acc.: accuracy; Prec.: precision; Rec.: recall; Spec.: specificity; F1: F1-score.
-TABLE img12 | Image-Level Performance of YOLOv12 per Condition (Clean Test Split)
-W 1.3,0.6,0.5,0.58,0.58,0.58,0.58,0.58,0.68
-| Condition | Photos | Thr. | Acc. | Prec. | Rec. | Spec. | F1 | AUROC |
-| Healthy tooth | 34 | 0.60 | 98.9% | 62.8% | 79.4% | 99.2% | 70.1% | 92.3% |
-| Cavity | 850 | 0.25 | 88.0% | 84.5% | 86.6% | 89.0% | 85.5% | 93.0% |
-| Gum inflammation | 84 | 0.25 | 95.6% | 44.4% | 38.1% | 98.0% | 41.0% | 90.4% |
-| Plaque | 98 | 0.15 | 95.4% | 53.8% | 14.3% | 99.4% | 22.6% | 57.2% |
-| Tartar | 345 | 0.15 | 91.4% | 74.3% | 73.0% | 95.0% | 73.7% | 88.6% |
-| Any finding | 1,204 | 0.20 | 84.3% | 87.5% | 85.0% | 83.4% | 86.3% | 89.8% |
-| Mean of the five classes | — | — | 93.8% | 64.0% | 58.3% | 96.1% | 58.6% | 84.3% |
+NOTE Photos: test photographs that show the condition (out of 2,081). Cut-offs chosen on the validation set.
+TABLE imgf1 | F1-Score per Condition for Each Model (Clean Test Set)
+W 2.4,1.2,1.2,1.24
+| Condition | YOLOv8 | YOLOv12 | Fused ensemble |
+| Healthy tooth | 69.3% | 70.1% | 70.0% |
+| Cavity | 86.4% | 85.5% | 86.3% |
+| Gum inflammation | 59.3% | 41.0% | 52.6% |
+| Plaque | 31.1% | 22.6% | 28.8% |
+| Tartar | 75.2% | 73.7% | 76.0% |
+| Any finding | 86.7% | 86.3% | 87.4% |
 ENDTABLE
-NOTE Photos: test photographs that show the condition (out of 2,081). Thr.: validation-tuned threshold. Acc.: accuracy; Prec.: precision; Rec.: recall; Spec.: specificity; F1: F1-score.
-TABLE imgens | Image-Level Performance of the Fused Ensemble per Condition (Clean Test Split)
-W 1.3,0.6,0.5,0.58,0.58,0.58,0.58,0.58,0.68
-| Condition | Photos | Thr. | Acc. | Prec. | Rec. | Spec. | F1 | AUROC |
-| Healthy tooth | 34 | 0.70 | 98.8% | 60.9% | 82.4% | 99.1% | 70.0% | 98.2% |
-| Cavity | 850 | 0.50 | 89.0% | 87.6% | 85.1% | 91.7% | 86.3% | 93.8% |
-| Gum inflammation | 84 | 0.35 | 96.1% | 51.7% | 53.6% | 97.9% | 52.6% | 93.5% |
-| Plaque | 98 | 0.10 | 95.2% | 48.8% | 20.4% | 98.9% | 28.8% | 61.9% |
-| Tartar | 345 | 0.25 | 92.0% | 75.8% | 76.2% | 95.2% | 76.0% | 90.4% |
-| Any finding | 1,204 | 0.30 | 85.3% | 86.7% | 88.0% | 81.5% | 87.4% | 90.7% |
-| Mean of the five classes | — | — | 94.2% | 65.0% | 63.5% | 96.6% | 62.7% | 87.5% |
-ENDTABLE
-NOTE Photos: test photographs that show the condition (out of 2,081). Thr.: validation-tuned threshold. Acc.: accuracy; Prec.: precision; Rec.: recall; Spec.: specificity; F1: F1-score.
-P **Cavity**, the most serious condition and the one with the most examples, exceeded 80% on all six measures for all three models (F1-score 85.5% to 86.4%, AUROC 92.8% to 93.8%). **Tartar** came close (F1-score 73.7% to 76.0%, recall up to 76.2%). **Healthy tooth** reached recall of 76.5% to 82.4%, but with only 34 test photographs that result is uncertain. **Gum inflammation** was weaker (F1-score 41.0% to 59.3%), and **plaque** was the weakest (recall 14.3% to 23.5%): the models missed most plaque photographs.
-P Accuracy should be read together with the other measures. Most photographs do not show a given rare condition, so a model that reports it rarely still scores a high accuracy; plaque, for example, has an accuracy above 95% even though most plaque photographs are missed. This is why precision, recall, and F1-score are reported for every condition, and why the any-finding row and cavity, which have many positive photographs, are the most reliable results.
-P The AUROC of gum inflammation (90.4% to 93.5%) is much higher than its F1-score. This means that the models do rank photographs with gum inflammation above those without it, but with only 84 clean test photographs, a single threshold separates them poorly. Plaque has a low AUROC as well (57.2% to 61.9%), close to chance, which shows that the models have not learned plaque from the current data.
-### 4.1.6 Box-Level Detection Performance
-P The standard YOLO box-level measures are reported as the secondary evaluation. Table {tab:overall} gives them on the validation split, scored at the end of training, and on the clean test split.
-TABLE overall | Box-Level Detection Performance of YOLOv8 and YOLOv12
+P **Cavity**, the most serious condition, scored above 80% on all six measures for all three (see also Appendix D). **Tartar** came close, with an F1-score of about 74% to 76%. **Healthy tooth** scored well, but there are only 34 such test photographs, so that result is less certain. **Gum inflammation** (F1-score 41% to 59%) and **plaque** (23% to 31%) were weak; the models missed most plaque photographs.
+P Plaque is the main weakness. Plaque is a thin, pale film that is hard to tell apart from the tooth and from tartar in an ordinary photograph; only one of the four photo collections marked plaque at all; and there are far fewer plaque examples than cavity examples. These are the same reasons why plaque is hard to judge by eye. Gum inflammation has only 84 clean test photographs, so its results are less certain.
+P Accuracy should be read together with the other scores. Most photographs do not show a given rare condition, so a model that rarely reports it still scores a high accuracy: plaque has an accuracy above 95% even though most plaque photographs are missed. This is why precision, recall, and F1-score are shown for every condition.
+### 4.1.6 Standard YOLO Scores (Supporting Results)
+P Table {tab:overall} gives the standard YOLO box-level scores at the end of training (validation set) and on the clean test set.
+TABLE overall | Standard YOLO (Box-Level) Scores of YOLOv8 and YOLOv12
 W 1.4,1.15,1.15,1.15,1.15
 | Metric | YOLOv8 (validation) | YOLOv12 (validation) | YOLOv8 (clean test) | YOLOv12 (clean test) |
 | Precision | 53.96% | 49.43% | 51.08% | 53.27% |
@@ -576,65 +545,10 @@ W 1.4,1.15,1.15,1.15,1.15
 | mAP@50 | 46.83% | 45.02% | 49.99% | 49.81% |
 | mAP@50-95 | 26.80% | 25.87% | 29.07% | 28.67% |
 ENDTABLE
-NOTE Validation: train_metrics stored in the checkpoints (epoch 60). Clean test: evaluate_models.py on the 2,081-image clean test split (Ultralytics validation, image size 640). On the full 2,930-image test split, mAP@50 was 51.91% (YOLOv8) and 48.11% (YOLOv12).
-P On the clean test split, the two models were almost equal at the box level: YOLOv8 had a slightly higher mAP@50 (49.99% against 49.81%), recall, and F1-score, while YOLOv12 had a higher precision (53.27% against 51.08%). In simple terms, about half of the hand-drawn boxes were matched by a box from the model. Removing the duplicates changed mAP@50 by less than two percentage points, which suggests that the models had not simply memorized the duplicated photographs. YOLOv12 is the smaller model: it reached these results with about 24% fewer parameters (19.66 million against 25.86 million), which makes it lighter to run.
-FIG curves | fig_training_curves.png | 6.0 | mAP@50 and mAP@50-95 per Training Epoch for YOLOv8 and YOLOv12
-FIG final | fig_final_metrics.png | 6.0 | Final Validation Metrics of YOLOv8 and YOLOv12
-P Figure {fig:curves} shows how the scores grew during training. Both models improved quickly in the first ten rounds of training (epochs) and then levelled off; after about round 25, the score rose by only about two more percentage points. This means that training longer would not help much; better results need more and better training photographs.
-### 4.1.7 Per-Class Box-Level Results
-P Tables {tab:pc8} and {tab:pc12} break the box-level scores down by condition, and Figure {fig:perclass} compares the two models and the combined (fused) result for each condition. These per-class box-level results, the box-level detection accuracy in Section 4.1.8, and the box-level fusion comparison in Section 4.1.10 were computed on the full 2,930-image test split, before the duplicates were removed, so they are slightly optimistic; the clean-split totals are in Table {tab:overall}.
-TABLE pc8 | Per-Class Box-Level Performance of YOLOv8 (Full Test Split)
-W 1.45,0.85,0.95,0.85,0.9,0.9,0.95
-| Class | Instances | Precision | Recall | F1-score | mAP@50 | mAP@50-95 |
-| Healthy tooth | 42 | 42.86% | 83.33% | 56.60% | 80.54% | 62.37% |
-| Cavity | 2,716 | 65.55% | 69.43% | 67.43% | 66.33% | 33.11% |
-| Gum inflammation | 1,544 | 61.01% | 49.85% | 54.87% | 52.35% | 21.97% |
-| Plaque | 554 | 42.84% | 7.04% | 12.09% | 7.36% | 3.06% |
-| Tartar | 2,009 | 59.33% | 52.07% | 55.46% | 52.97% | 22.15% |
-| All classes | 6,865 | 54.32% | 52.34% | 53.31% | 51.91% | 28.53% |
-ENDTABLE
-NOTE Source: test-split evaluation pass, scored with the Ultralytics matching rule.
-TABLE pc12 | Per-Class Box-Level Performance of YOLOv12 (Full Test Split)
-W 1.45,0.85,0.95,0.85,0.9,0.9,0.95
-| Class | Instances | Precision | Recall | F1-score | mAP@50 | mAP@50-95 |
-| Healthy tooth | 42 | 43.40% | 78.57% | 55.91% | 70.13% | 54.83% |
-| Cavity | 2,716 | 62.82% | 69.26% | 65.88% | 64.50% | 32.27% |
-| Gum inflammation | 1,544 | 60.59% | 45.60% | 52.04% | 48.95% | 20.16% |
-| Plaque | 554 | 39.55% | 8.30% | 13.73% | 7.15% | 3.52% |
-| Tartar | 2,009 | 58.34% | 48.59% | 53.03% | 49.82% | 20.62% |
-| All classes | 6,865 | 52.94% | 50.06% | 51.46% | 48.11% | 26.28% |
-ENDTABLE
-NOTE Source: test-split evaluation pass, scored with the Ultralytics matching rule.
-FIG perclass | fig_perclass_map50.png | 6.0 | Per-Class mAP@50 on the Full Test Split
-P The models are much better at some conditions than others. Among the conditions with many examples, cavity was found best (mAP@50 of 66.33% for YOLOv8 and 64.50% for YOLOv12) and plaque worst (7.36% and 7.15%). From best to worst, the order was healthy tooth, cavity, tartar, gum inflammation, and plaque. Healthy tooth scored highest (80.54% and 70.13%), but the test set has only 42 healthy-tooth examples, so that score is less certain than the others.
-P Plaque is the main weakness of the models. Of the 554 plaque examples in the test set, YOLOv8 found only 7.04% and YOLOv12 8.30%. There are several reasons. Plaque is a thin, pale film that is hard to tell apart from the tooth and from tartar in an ordinary photograph; its edges are hard to mark consistently, so the model's box rarely overlaps the marked box enough to count; only one of the four photo collections marked plaque at all; and there are about five times fewer plaque examples (554) than cavity examples (2,716). These are the same reasons, named in the first problem of this study, why plaque is hard to judge by eye. The image-level results in Section 4.1.5 confirm that plaque is a weakness of the models and not only of the box-level scoring.
-### 4.1.8 Box-Level Detection Accuracy and Confusion Matrix
-P Detection has no single built-in accuracy score, because a model can go wrong in three ways: it can give a finding the wrong name, mark a spot where there is nothing (a false alarm), or miss a finding completely. At the box level, **detection accuracy** is the number of findings that were found and named correctly, divided by all four outcomes together (correct, wrong name, false alarm, and missed). The counts were taken at the same confidence setting that the live system uses (0.25). Tables {tab:acc} and {tab:accclass} give the results, and Figure {fig:cm} shows the confusion matrices, which show how often each condition was mistaken for another.
-TABLE acc | Box-Level Detection Accuracy on the Full Test Split (Confidence 0.25, IoU 0.45)
-W 1.4,0.9,0.9,0.95,0.9,1.0
-| Model | Correct | Wrong class | False alarms | Missed | Detection accuracy |
-| YOLOv8 | 3,877 | 114 | 1,992 | 2,874 | 43.77% |
-| YOLOv12 | 3,726 | 119 | 2,039 | 3,020 | 41.85% |
-| Fused ensemble | 4,491 | 158 | 3,574 | 2,216 | 43.02% |
-ENDTABLE
-NOTE Detection accuracy = Correct / (Correct + Wrong class + False alarms + Missed).
-TABLE accclass | Box-Level Detection Accuracy per Class on the Full Test Split
-W 1.8,1.4,1.4,1.4
-| Class | YOLOv8 | YOLOv12 | Fused ensemble |
-| Healthy tooth | 38.20% | 39.29% | 33.94% |
-| Cavity | 52.87% | 51.38% | 49.83% |
-| Gum inflammation | 40.53% | 37.16% | 42.25% |
-| Plaque | 6.46% | 7.58% | 10.46% |
-| Tartar | 40.52% | 38.01% | 39.54% |
-ENDTABLE
-NOTE Per class: correct detections of the class divided by all detections and labels of that class (correct + wrong + false alarms + missed).
-FIG cm | fig_confusion_matrices.png | 6.0 | Confusion Matrices on the Full Test Split (Columns Normalized by True Class)
-P Box-level detection accuracy was 43.77% for YOLOv8, 41.85% for YOLOv12, and 43.02% for the combined result. For both models, the most common mistake was missing a finding. Giving a finding the wrong name was rare, so when a model does find a condition, it usually names it correctly. The most common mix-up between two conditions was tartar being called a cavity.
-P The combined result had slightly lower accuracy than YOLOv8 even though its mAP@50 was higher (Section 4.1.10). The reason is that it keeps a finding when either model reports it. It therefore missed fewer findings (2,216 against 2,874) but raised more false alarms (3,574 against 1,992). Detection accuracy counts both kinds of mistake equally, while mAP rewards placing correct findings ahead of wrong ones.
-P Two cautions apply. First, the four photo collections did not all mark the same conditions; for example, a photograph from a collection without a gum-inflammation label may show inflamed gums that nobody marked. When the model correctly finds them, the count treats it as a false alarm, so the real accuracy is probably somewhat higher. Second, the counts depend on the confidence setting: a lower setting finds more but also raises more false alarms.
-P For a screening tool, a missed finding is the more serious mistake: a false alarm is simply checked and dismissed by the dentist, but a missed finding might not be looked at. The box-level detection accuracy is much lower than the image-level accuracy in Section 4.1.4 because every box must match a hand-drawn box, while the screening decision only asks whether the condition is present. This is also why Toothwise presents its detections as suggestions and keeps the dentist's own examination as the final word.
-### 4.1.9 Inference Speed
-P Speed was measured on an ordinary computer without a graphics card, like the computers in a clinic. Each model analyzed four sample photographs five times each, after one warm-up run. Table {tab:speed} gives the average time per photograph.
+NOTE Validation: scores saved in the models at the end of training (epoch 60). Clean test: evaluate_models.py on the 2,081 clean test photographs. Before the duplicates were removed, mAP@50 on the test set was 51.91% (YOLOv8) and 48.11% (YOLOv12).
+P Both models scored about 50% mAP@50 on the clean test set: YOLOv8 49.99% and YOLOv12 49.81%. In simple terms, about half of the hand-drawn boxes were matched by a box from the model. This is much lower than the per-photograph scores because the box must be placed almost exactly, and for conditions with soft edges, such as plaque and gum inflammation, even two people marking the same photograph would draw different boxes. Removing the duplicates changed mAP@50 by less than two percentage points. YOLOv12 reached its score with about 24% fewer parameters than YOLOv8 (19.66 million against 25.86 million), which makes it lighter to run.
+### 4.1.7 Inference Speed
+P Speed was measured on an ordinary computer without a graphics card, like the computers in a clinic. Table {tab:speed} gives the average time per photograph.
 TABLE speed | Inference Time per Image on CPU
 W 2.2,1.3,1.2,1.3
 | Configuration | Mean time per image | Standard deviation | Model forward pass only |
@@ -643,36 +557,19 @@ W 2.2,1.3,1.2,1.3
 | Both models (ensemble, run in sequence) | 506.8 ms | 138.7 ms | — |
 ENDTABLE
 NOTE Machine: Intel Core i7-13620H, 16 GB RAM, CPU only (PyTorch 2.14 CPU, Ultralytics 8.4.116); n = 20 timed predictions per configuration.
-P Each model analyzed a photograph in about one fifth of a second; YOLOv12 was about 4% faster than YOLOv8. Running both models one after the other took about half a second. This is fast enough for a dentist to upload a photograph and see the results right away.
+P Each model analyzed a photograph in about one fifth of a second, and running both took about half a second. This is fast enough for a dentist to upload a photograph and see the results right away.
 P The live system runs on a smaller, free cloud server with only 512 MB of memory. To fit, it uses a lighter copy of the same two models (ONNX format) and loads each model only while it is working. On that server, a full screening with both models takes about 3 to 4 seconds, and the system uses about 210 MB of memory at rest and about 400 MB at its busiest. The lighter models gave exactly the same results as the originals on 22 test photographs, so the accuracy results in this chapter also apply to the live system. A wait of a few seconds is acceptable because a photograph is uploaded only once per screening.
-### 4.1.10 Ensemble Fusion
-P In the live system, both models look at every photograph and their results are combined into one set of findings. When the two models mark the same condition in about the same place (their boxes overlap by at least half), the two boxes are merged into one. A finding that both models agree on is given a slightly higher confidence (plus 0.08, up to 0.98), because two separately trained models agreeing is stronger evidence than one model alone.
-P To see whether combining helps at the box level, the whole test set was run through both models, and the YOLOv8 results, the YOLOv12 results, and the combined results were scored the same way. Table {tab:fusion} shows the result.
-TABLE fusion | Box-Level Results of YOLOv8, YOLOv12, and the Fused Ensemble on the Full Test Split
-W 2.3,1.25,1.25,1.25
-| Metric | YOLOv8 | YOLOv12 | Fused ensemble |
-| Precision | 54.32% | 52.94% | 53.51% |
-| Recall | 52.34% | 50.06% | 55.77% |
-| F1-score | 53.31% | 51.46% | 54.62% |
-| mAP@50 | 51.91% | 48.11% | 54.24% |
-| mAP@50-95 | 28.53% | 26.28% | 29.31% |
-| mAP@50 – healthy tooth | 80.54% | 70.13% | 83.11% |
-| mAP@50 – cavity | 66.33% | 64.50% | 66.72% |
-| mAP@50 – gum inflammation | 52.35% | 48.95% | 56.36% |
-| mAP@50 – plaque | 7.36% | 7.15% | 9.45% |
-| mAP@50 – tartar | 52.97% | 49.82% | 55.58% |
-ENDTABLE
-NOTE Same prediction pass as Tables {tab:overall} to {tab:pc12}; the single-model columns repeat those results.
-P Combining the two models gave the best mAP@50, 54.24%, compared with 51.91% for the better single model, YOLOv8, an improvement of 2.34 percentage points, and it was better than YOLOv8 on all five conditions. It found more of the real findings (recall 55.77% against 52.34%) at almost the same precision (53.51% against 54.32%). It missed fewer findings (2,216 against 2,874) but raised more false alarms (3,574 against 1,992).
-P In other words, each model catches some findings that the other misses, and when both agree, the finding is more trustworthy. The image-level results agree: on the clean test split, the ensemble had the highest recall (88.0%), F1-score (87.4%), and AUROC (90.7%) for any finding, and it had the highest AUROC of the three for every condition (Tables {tab:img8} to {tab:imgens}). This supports the decision to run both models in the live system instead of choosing just one.
-### 4.1.11 Summary of the Model Comparison
-P To address the first problem: in the primary, image-level evaluation on 2,081 clean test photographs, YOLOv8, YOLOv12, and the fused ensemble each exceeded 80% on all six measures (accuracy, precision, recall, specificity, F1-score, and AUROC) in identifying photographs that show a dental condition (F1-score 86.3% to 87.4%) and photographs that show a cavity (F1-score 85.5% to 86.4%). Tartar came close to that level (F1-score about 74% to 76%), gum inflammation was weaker (41% to 59%), and plaque was the weakest (23% to 31%), mainly because of too few and inconsistently labeled training examples. YOLOv8 was slightly better than YOLOv12 on most image-level measures and on box-level mAP@50 (49.99% against 49.81%), while YOLOv12 was smaller and slightly faster on CPU (about 206 ms against 216 ms per photograph). The fused ensemble found the most conditions and had the best F1-score and AUROC. In the secondary, box-level evaluation, about half of the hand-drawn boxes were matched exactly, which reflects the strictness of box placement more than the screening decision. These results confirm what Chapter I states: Toothwise is a screening aid, not a replacement for the dentist. Its findings are suggestions that the dentist confirms or corrects.
+### 4.1.8 Combining the Two Models
+P In the live system, both models look at every photograph and their findings are combined. When both models mark the same condition in about the same place, the two marks become one, and the finding gets a slightly higher confidence (plus 0.08, up to 0.98), because two models agreeing is stronger evidence than one.
+P The combined models found the most problems: for any finding, their recall was 88.0% against 85.5% for YOLOv8, with the best F1-score (87.4%) and AUROC (90.7%). They also had the highest AUROC of the three for every condition (Table {tab:imgcond} and Appendix D). The cost is slightly more false alarms (specificity 81.5% against 83.9% for YOLOv8). Since a missed finding matters more in screening than a false alarm that the dentist can dismiss, this supports running both models.
+### 4.1.9 Summary of the Model Comparison
+P To answer the first problem: on 2,081 clean test photographs, YOLOv8, YOLOv12, and the combined models all scored above 80% on all six per-photograph measures for finding any dental problem and for finding cavities. Tartar came close, while gum inflammation and plaque were weak because of too few and inconsistently marked training photographs. YOLOv8 was slightly better than YOLOv12, YOLOv12 was smaller and slightly faster, and combining them found the most problems. On the stricter standard YOLO score, both reached about 50% mAP@50. Toothwise is therefore a screening aid, not a replacement for the dentist: its findings are suggestions that the dentist confirms or corrects.
 
 ## 4.2 Specialization and Technical Results
 P This section describes how the finished system works and how well it performed: the screening steps, the risk score, the prevention plan, the patient records, user roles and security, the chatbot, and the speed and accessibility of the website.
 ### 4.2.1 AI Detection Pipeline
-P When staff upload a photograph of a patient's teeth, the system goes through six steps: (1) it checks that the file is a JPEG, PNG, or WebP image of at most 15 MB; (2) it runs YOLOv8 and YOLOv12; (3) it combines their findings (Section 4.1.10) and removes braces brackets that the models mistake for findings; (4) it computes a risk score and risk level; (5) it writes a prevention plan; and (6) it saves the photograph, every finding with its box and confidence, the risk result, and the plan in the patient's record. The live system also keeps a copy of each photograph in the database, because the free server erases its own files whenever it restarts; the copy is used to restore the photograph for viewing and for the PDF report.
-P Neither model learned what braces look like, so in early testing the metal brackets on teeth with braces were reported as urgent cavities. The system now ignores any cavity, plaque, or tartar box in which 8% or more of the pixels are metal-grey, reports a cavity only when its confidence is at least 0.50, and keeps a cavity only when both models find it. When two or more brackets are seen, the prevention plan adds a note that braces were detected and that a dentist or orthodontist should check those teeth in person. These rules were added after the accuracy tests in Section 4.1, so Tables {tab:acc}, {tab:accclass}, and {tab:fusion} show the results before the rules.
+P When staff upload a photograph of a patient's teeth, the system goes through six steps: (1) it checks that the file is a JPEG, PNG, or WebP image of at most 15 MB; (2) it runs YOLOv8 and YOLOv12; (3) it combines their findings (Section 4.1.8) and removes braces brackets that the models mistake for findings; (4) it computes a risk score and risk level; (5) it writes a prevention plan; and (6) it saves the photograph, every finding with its box and confidence, the risk result, and the plan in the patient's record. The live system also keeps a copy of each photograph in the database, because the free server erases its own files whenever it restarts; the copy is used to restore the photograph for viewing and for the PDF report.
+P Neither model learned what braces look like, so in early testing the metal brackets on teeth with braces were reported as urgent cavities. The system now ignores any cavity, plaque, or tartar box in which 8% or more of the pixels are metal-grey, reports a cavity only when its confidence is at least 0.50, and keeps a cavity only when both models find it. When two or more brackets are seen, the prevention plan adds a note that braces were detected and that a dentist or orthodontist should check those teeth in person. The results in Section 4.1 do not include these rules.
 ### 4.2.2 Risk Scoring Engine
 P The risk score follows a fixed rule, so that every score can be explained to the patient and checked by the dentist. Each condition has a severity weight, cavity being the most serious (Table {tab:risk}). For each finding, the weight is multiplied by the model's confidence; the score is the highest of these values, plus 6 points for each additional finding (up to five more), with a maximum of 100. The score then decides the risk level: LOW, MEDIUM, or HIGH.
 TABLE risk | Risk Scoring Weights and Tier Thresholds
@@ -888,7 +785,7 @@ P All nine sections were rated Strongly Agree, so Toothwise is Highly Acceptable
 P Two cautions apply. First, only 12 of the 103 respondents rated the six quality characteristics, and only 5 were IT experts, so these ratings come from a small group. This is because that part was meant for dentists, clinic staff, and IT experts, and no dentists or clinic staff took part. Second, the ratings show what the respondents thought of the system; they should be read together with the measured results in Sections 4.1 and 4.2.
 P In the written comments, respondents most often praised how easy the system is to use, its clear design, and its simple explanations. The problems they mentioned were slow loading the first time, pages with too much information at once, some features being hard to find, and wrong results from blurry photographs. Their suggestions were reminders for brushing and check-ups, more dental tips and short videos, an easier search, more conditions to detect with better accuracy, and an extra security step for staff accounts.
 ## 4.4 Screening Consistency and Screening Time
-P This section answers the fifth problem: does Toothwise make screening more consistent and faster? The original plan was to time the same patients' screenings with and without Toothwise and compare both with the dentist's findings, but this could not be done because the study did not involve the clinic's patients. Instead, this section uses the respondents' ratings of the current manual process and of Toothwise (Tables {tab:ms} and {tab:sc}), together with the measured processing time in Section 4.1.9.
+P This section answers the fifth problem: does Toothwise make screening more consistent and faster? The original plan was to time the same patients' screenings with and without Toothwise and compare both with the dentist's findings, but this could not be done because the study did not involve the clinic's patients. Instead, this section uses the respondents' ratings of the current manual process and of Toothwise (Tables {tab:ms} and {tab:sc}), together with the measured processing time in Section 4.1.7.
 TABLE ms | Respondents' Assessment of the Current Manual Screening Process
 W 0.55,3.25,0.6,0.6,1.3
 | Code | Statement | WM | SD | Verbal interpretation |
@@ -914,7 +811,7 @@ W 0.55,3.25,0.6,0.6,1.3
 ENDTABLE
 NOTE N = 2. These two sections were answered by only 2 respondents, so the results are shown for completeness and should not be generalized.
 P The 2 respondents agreed that checking teeth by eye alone has the problems described in the first problem (average 3.21): results can differ from one examination to the next, lighting and angle affect what can be seen, and a tool for consistent early screening would be useful. The only statement they disagreed with was MS6, “Patients rarely receive preventive guidance that is specific to their own screening findings” (2.50). They also agreed that Toothwise makes results more consistent, saves time in completing and recording a screening, and agrees with the dentist's own findings (average 3.40), and they would recommend that the clinic keep using it.
-P Because only 2 respondents answered these sections and no screening was timed, these results show a likely direction, not a measured effect. What was measured is the processing time: the live system finishes a screening with both models in about 3 to 4 seconds (Section 4.1.9), and it records every finding, the risk result, and the prevention plan automatically, so the screening no longer has to be written up by hand.
+P Because only 2 respondents answered these sections and no screening was timed, these results show a likely direction, not a measured effect. What was measured is the processing time: the live system finishes a screening with both models in about 3 to 4 seconds (Section 4.1.7), and it records every finding, the risk result, and the prevention plan automatically, so the screening no longer has to be written up by hand.
 #CH CHAPTER V | SUMMARY OF FINDINGS, CONCLUSIONS, AND RECOMMENDATIONS
 P This chapter summarizes the findings of the study, states the conclusions drawn from them, and presents recommendations for CodiSmile Dental Clinic, for the further development of Toothwise, and for future researchers.
 ## 5.1 Summary of Findings
@@ -1103,3 +1000,29 @@ NOTE Section codes: MS = Current Manual Screening Process; SC = Screening Consis
 #APP APPENDIX C | Letter of Approval from CodiSmile Dental Clinic
 FIG letter1 | appendix_letter_1.png | 5.4 | Letter Requesting Approval to Conduct the Study (page 1 of 2)
 FIG letter2 | appendix_letter_2.png | 5.4 | Letter Requesting Approval to Conduct the Study (page 2 of 2)
+#APP APPENDIX D | Detailed Image-Level Results per Model
+P The tables below give the per-condition results of each model on the 2,081 clean test photographs. The results of the two models combined are in Table {tab:imgcond}.
+TABLE img8 | Image-Level Performance of YOLOv8 per Condition (Clean Test Split)
+W 1.3,0.6,0.5,0.58,0.58,0.58,0.58,0.58,0.68
+| Condition | Photos | Thr. | Acc. | Prec. | Rec. | Spec. | F1 | AUROC |
+| Healthy tooth | 34 | 0.60 | 98.9% | 63.4% | 76.5% | 99.3% | 69.3% | 96.7% |
+| Cavity | 850 | 0.30 | 88.9% | 86.2% | 86.6% | 90.4% | 86.4% | 92.8% |
+| Gum inflammation | 84 | 0.20 | 96.6% | 58.0% | 60.7% | 98.1% | 59.3% | 91.7% |
+| Plaque | 98 | 0.05 | 95.1% | 46.0% | 23.5% | 98.6% | 31.1% | 61.1% |
+| Tartar | 345 | 0.20 | 92.2% | 79.6% | 71.3% | 96.4% | 75.2% | 89.7% |
+| Any finding | 1,204 | 0.20 | 84.8% | 87.9% | 85.5% | 83.9% | 86.7% | 90.0% |
+| Mean of the five classes | — | — | 94.3% | 66.6% | 63.7% | 96.6% | 64.3% | 86.4% |
+ENDTABLE
+NOTE Photos: test photographs that show the condition (out of 2,081). Thr.: validation-tuned threshold. Acc.: accuracy; Prec.: precision; Rec.: recall; Spec.: specificity; F1: F1-score.
+TABLE img12 | Image-Level Performance of YOLOv12 per Condition (Clean Test Split)
+W 1.3,0.6,0.5,0.58,0.58,0.58,0.58,0.58,0.68
+| Condition | Photos | Thr. | Acc. | Prec. | Rec. | Spec. | F1 | AUROC |
+| Healthy tooth | 34 | 0.60 | 98.9% | 62.8% | 79.4% | 99.2% | 70.1% | 92.3% |
+| Cavity | 850 | 0.25 | 88.0% | 84.5% | 86.6% | 89.0% | 85.5% | 93.0% |
+| Gum inflammation | 84 | 0.25 | 95.6% | 44.4% | 38.1% | 98.0% | 41.0% | 90.4% |
+| Plaque | 98 | 0.15 | 95.4% | 53.8% | 14.3% | 99.4% | 22.6% | 57.2% |
+| Tartar | 345 | 0.15 | 91.4% | 74.3% | 73.0% | 95.0% | 73.7% | 88.6% |
+| Any finding | 1,204 | 0.20 | 84.3% | 87.5% | 85.0% | 83.4% | 86.3% | 89.8% |
+| Mean of the five classes | — | — | 93.8% | 64.0% | 58.3% | 96.1% | 58.6% | 84.3% |
+ENDTABLE
+NOTE Photos: test photographs that show the condition (out of 2,081). Thr.: validation-tuned threshold. Acc.: accuracy; Prec.: precision; Rec.: recall; Spec.: specificity; F1: F1-score.

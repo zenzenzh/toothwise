@@ -24,7 +24,9 @@ Two threshold settings are reported, never mixed:
 
 The ensemble reproduces app/ml/yolo_detector.py::_fuse (same-label boxes
 with IoU >= 0.5 merge; +0.08 confidence when both models agree, cap 0.98).
-The app's braces-bracket filter needs pixel colours and is not applied.
+In the deployed setting a fused cavity is kept only when both models
+found it, as in the app (CAVITY_REQUIRE_AGREEMENT). The app's braces-bracket
+filter needs pixel colours and is not applied.
 
 What to write in Chapter 4: state that these are image-level metrics, the
 split, the number of images and positives per class (the table prints them),
@@ -56,6 +58,7 @@ IMG_EXT = {".jpg", ".jpeg", ".png", ".bmp", ".webp", ".tif", ".tiff"}
 DEPLOYED_CONF = 0.25
 DEPLOYED_CLASS_CONF = {"cavity": 0.5}
 ENSEMBLE_IOU = 0.5
+CAVITY_NEEDS_AGREEMENT = {"cavity"}  # app: CAVITY_REQUIRE_AGREEMENT = True
 AGREEMENT_BOOST = 0.08
 FUSED_CAP = 0.98
 
@@ -185,7 +188,8 @@ def _iou(a, b) -> float:
 
 
 def fuse(d8: list, d12: list) -> list:
-    """Same rule as app/ml/yolo_detector.py::_fuse, on [cls, conf, box] rows."""
+    """Same rule as app/ml/yolo_detector.py::_fuse, on [cls, conf, box] rows.
+    Each fused row gets a 7th field: True when both models found it."""
     pool = [(d, "v8") for d in d8] + [(d, "v12") for d in d12]
     pool.sort(key=lambda t: t[0][1], reverse=True)
     used = [False] * len(pool)
@@ -200,8 +204,9 @@ def fuse(d8: list, d12: list) -> list:
             if not used[j] and other[0] == det[0] and _iou(det, other) >= ENSEMBLE_IOU:
                 used[j] = True
                 sources.add(osrc)
-        conf = min(det[1] + (AGREEMENT_BOOST if len(sources) > 1 else 0.0), FUSED_CAP)
-        fused.append([det[0], conf, *det[2:]])
+        agreed = len(sources) > 1
+        conf = min(det[1] + (AGREEMENT_BOOST if agreed else 0.0), FUSED_CAP)
+        fused.append([det[0], conf, *det[2:6], agreed])
     return fused
 
 
@@ -357,8 +362,13 @@ def model_scores(preds: dict, images: list[Path], names: list[str],
     nc = len(names)
     out = {m: [class_scores(d, nc) for d in dets] for m, dets in keyed.items()}
     if "YOLOv8" in keyed and "YOLOv12" in keyed:
-        out["Ensemble"] = [class_scores(fuse(a, b), nc)
-                           for a, b in zip(keyed["YOLOv8"], keyed["YOLOv12"])]
+        fused = [fuse(a, b) for a, b in zip(keyed["YOLOv8"], keyed["YOLOv12"])]
+        if deployed:
+            # The app keeps a fused cavity only when both models found it
+            # (CAVITY_REQUIRE_AGREEMENT in app/config.py).
+            fused = [[d for d in f if names[d[0]] not in CAVITY_NEEDS_AGREEMENT or d[6]]
+                     for f in fused]
+        out["Ensemble"] = [class_scores(f, nc) for f in fused]
     return out
 
 

@@ -57,6 +57,19 @@ check(len(f) == 2, "different labels never merge")
 f = ns["fuse"]([[1, 0.60, *box]], [[1, 0.50, 0.6, 0.6, 0.9, 0.9]])
 check(len(f) == 2 and close(max(d[1] for d in f), 0.60), "no overlap, no boost")
 
+# --- deployed ensemble keeps a cavity only when both models found it ------
+img = Path("/x/a.jpg")
+sc = ns["model_scores"]({"YOLOv8": {str(img): [[1, 0.9, *box], [4, 0.9, *box]]},
+                         "YOLOv12": {str(img): []}}, [img], NAMES, deployed=True)
+check(sc["Ensemble"][0][1] == 0.0 and sc["Ensemble"][0][4] == 0.9,
+      f"deployed: lone cavity dropped, lone tartar kept {sc['Ensemble']}")
+sc = ns["model_scores"]({"YOLOv8": {str(img): [[1, 0.9, *box]]},
+                         "YOLOv12": {str(img): [[1, 0.6, *box]]}}, [img], NAMES, deployed=True)
+check(close(sc["Ensemble"][0][1], 0.98), f"deployed: agreed cavity kept {sc['Ensemble']}")
+sc = ns["model_scores"]({"YOLOv8": {str(img): [[1, 0.9, *box]]},
+                         "YOLOv12": {str(img): []}}, [img], NAMES, deployed=False)
+check(close(sc["Ensemble"][0][1], 0.9), "tuned: no agreement rule")
+
 # --- deployed filter: cavity needs 0.5, others 0.25 -----------------------
 kept = ns["deployed_filter"]([[1, 0.45, *box], [1, 0.55, *box], [4, 0.26, *box],
                               [4, 0.20, *box]], NAMES)

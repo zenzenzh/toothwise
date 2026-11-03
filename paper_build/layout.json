@@ -1,11 +1,9 @@
 {
  "move": {
   "erd": 2,
-  "inst": 1,
-  "speed": 1
+  "ri": 1
  },
  "width": {
-  "curves": 5.05,
   "s_landing": 6.0,
   "s_login": 1.95,
   "s_plogin": 1.95,
