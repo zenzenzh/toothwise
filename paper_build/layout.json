@@ -1,7 +1,8 @@
 {
  "move": {
   "agile": 1,
-  "erd": 2
+  "erd": 2,
+  "sectn": 1
  },
  "width": {
   "s_landing": 6.0,
@@ -18,12 +19,12 @@
   "s_upload": 5.78,
   "s_preview": 5.78,
   "s_result": 3.78,
+  "s_rel": 4.72,
   "s_staff": 5.95,
   "s_audit": 5.95,
   "s_phome": 3.6,
   "s_pscreen": 6.0,
-  "s_report": 2.95,
-  "s_rel": 4.72
+  "s_report": 2.95
  },
  "break": [
   "s_privacy",
