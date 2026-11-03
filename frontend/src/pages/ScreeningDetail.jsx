@@ -10,6 +10,7 @@ import { useAuth } from '../context/AuthContext';
 import { can } from '../utils/permissions';
 import Button from '../components/ui/Button';
 import EmptyState from '../components/ui/EmptyState';
+import ModelReliability from '../components/ModelReliability';
 import toast from 'react-hot-toast';
 
 const TABS = [
@@ -398,6 +399,9 @@ export default function ScreeningDetail() {
           </section>
         </div>
       </div>
+
+      {/* HOW RELIABLE THE MODEL BEING VIEWED IS */}
+      <ModelReliability model={activeTab} detections={tabDetections} />
     </div>
   );
 }
