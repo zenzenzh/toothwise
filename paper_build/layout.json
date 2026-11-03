@@ -1,0 +1,40 @@
+{
+ "move": {
+  "agile": 1,
+  "erd": 2
+ },
+ "width": {
+  "s_landing": 6.0,
+  "s_privacy": 6.0,
+  "s_login": 1.95,
+  "s_plogin": 1.95,
+  "s_forgot": 1.95,
+  "s_fpat": 1.95,
+  "s_change": 1.95,
+  "s_preg": 1.95,
+  "s_dash": 6.0,
+  "s_patients": 5.3,
+  "s_detail": 5.3,
+  "s_upload": 5.78,
+  "s_preview": 5.78,
+  "s_result": 3.78,
+  "s_staff": 5.95,
+  "s_audit": 5.95,
+  "s_phome": 3.6,
+  "s_pscreen": 6.0,
+  "s_report": 2.95,
+  "s_rel": 4.72
+ },
+ "break": [
+  "s_privacy",
+  "s_login",
+  "s_fpat",
+  "s_dash",
+  "s_patients",
+  "s_upload",
+  "s_result",
+  "s_staff",
+  "s_phome",
+  "s_pscreen"
+ ]
+}

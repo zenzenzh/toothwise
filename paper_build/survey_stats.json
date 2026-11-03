@@ -1,0 +1,515 @@
+{
+ "N": 103,
+ "it": 5,
+ "patients": 98,
+ "n_iso": 12,
+ "n_features": 103,
+ "n_manual": 2,
+ "iso_mean": 3.68,
+ "feature_mean": 3.48,
+ "sections": {
+  "Current Manual Screening Process": {
+   "all": {
+    "wm": 3.21,
+    "sd": 0.56,
+    "n": 2
+   },
+   "it": null,
+   "pt": {
+    "wm": 3.21,
+    "sd": 0.56,
+    "n": 2
+   }
+  },
+  "Screening Consistency and Time": {
+   "all": {
+    "wm": 3.4,
+    "sd": 0.49,
+    "n": 2
+   },
+   "it": null,
+   "pt": {
+    "wm": 3.4,
+    "sd": 0.49,
+    "n": 2
+   }
+  },
+  "1. Security": {
+   "all": {
+    "wm": 3.69,
+    "sd": 0.46,
+    "n": 12
+   },
+   "it": {
+    "wm": 3.45,
+    "sd": 0.5,
+    "n": 5
+   },
+   "pt": {
+    "wm": 3.86,
+    "sd": 0.35,
+    "n": 7
+   }
+  },
+  "2. Privacy": {
+   "all": {
+    "wm": 3.72,
+    "sd": 0.45,
+    "n": 12
+   },
+   "it": {
+    "wm": 3.53,
+    "sd": 0.5,
+    "n": 5
+   },
+   "pt": {
+    "wm": 3.86,
+    "sd": 0.35,
+    "n": 7
+   }
+  },
+  "3. Usability": {
+   "all": {
+    "wm": 3.71,
+    "sd": 0.45,
+    "n": 12
+   },
+   "it": {
+    "wm": 3.5,
+    "sd": 0.5,
+    "n": 5
+   },
+   "pt": {
+    "wm": 3.86,
+    "sd": 0.35,
+    "n": 7
+   }
+  },
+  "4. Reliability": {
+   "all": {
+    "wm": 3.61,
+    "sd": 0.49,
+    "n": 12
+   },
+   "it": {
+    "wm": 3.27,
+    "sd": 0.44,
+    "n": 5
+   },
+   "pt": {
+    "wm": 3.86,
+    "sd": 0.35,
+    "n": 7
+   }
+  },
+  "5. Performance Efficiency": {
+   "all": {
+    "wm": 3.67,
+    "sd": 0.47,
+    "n": 12
+   },
+   "it": {
+    "wm": 3.4,
+    "sd": 0.49,
+    "n": 5
+   },
+   "pt": {
+    "wm": 3.86,
+    "sd": 0.35,
+    "n": 7
+   }
+  },
+  "6. Data Protection": {
+   "all": {
+    "wm": 3.69,
+    "sd": 0.46,
+    "n": 12
+   },
+   "it": {
+    "wm": 3.47,
+    "sd": 0.5,
+    "n": 5
+   },
+   "pt": {
+    "wm": 3.86,
+    "sd": 0.35,
+    "n": 7
+   }
+  },
+  "AI Detection and Risk Classification": {
+   "all": {
+    "wm": 3.45,
+    "sd": 0.53,
+    "n": 103
+   },
+   "it": {
+    "wm": 3.36,
+    "sd": 0.56,
+    "n": 5
+   },
+   "pt": {
+    "wm": 3.46,
+    "sd": 0.53,
+    "n": 98
+   }
+  },
+  "Results Interface and Patient Records": {
+   "all": {
+    "wm": 3.47,
+    "sd": 0.54,
+    "n": 103
+   },
+   "it": {
+    "wm": 3.36,
+    "sd": 0.48,
+    "n": 5
+   },
+   "pt": {
+    "wm": 3.48,
+    "sd": 0.54,
+    "n": 98
+   }
+  },
+  "KNN-Based Personalized Prevention Plan": {
+   "all": {
+    "wm": 3.5,
+    "sd": 0.51,
+    "n": 103
+   },
+   "it": {
+    "wm": 3.35,
+    "sd": 0.48,
+    "n": 5
+   },
+   "pt": {
+    "wm": 3.51,
+    "sd": 0.51,
+    "n": 98
+   }
+  }
+ },
+ "items": [
+  {
+   "code": "MS1",
+   "stmt": "Early-stage tartar, plaque, cavity, and gum inflammation are difficult to detect consistently through visual inspection alone.",
+   "n": 2,
+   "wm": 3,
+   "sd": 0.0
+  },
+  {
+   "code": "MS2",
+   "stmt": "Findings from visual-only screening can differ between examinations of the same patient.",
+   "n": 2,
+   "wm": 3.5,
+   "sd": 0.5
+  },
+  {
+   "code": "MS3",
+   "stmt": "Lighting, viewing angle, and condition stage affect how reliably dental conditions are identified by eye.",
+   "n": 2,
+   "wm": 3.5,
+   "sd": 0.5
+  },
+  {
+   "code": "MS4",
+   "stmt": "The clinic lacks a standardized visual record of screening findings that can be compared across visits.",
+   "n": 2,
+   "wm": 3,
+   "sd": 0.0
+  },
+  {
+   "code": "MS5",
+   "stmt": "Patients currently have no convenient way to review their own screening history.",
+   "n": 2,
+   "wm": 3.5,
+   "sd": 0.5
+  },
+  {
+   "code": "MS6",
+   "stmt": "Patients rarely receive preventive guidance that is specific to their own screening findings.",
+   "n": 2,
+   "wm": 2.5,
+   "sd": 0.5
+  },
+  {
+   "code": "MS7",
+   "stmt": "A tool that supports consistent early screening would be useful to the clinic.",
+   "n": 2,
+   "wm": 3.5,
+   "sd": 0.5
+  },
+  {
+   "code": "SC1",
+   "stmt": "Toothwise makes screening results more consistent than the manual visual-only process.",
+   "n": 2,
+   "wm": 3.5,
+   "sd": 0.5
+  },
+  {
+   "code": "SC2",
+   "stmt": "Toothwise reduces the time needed to complete and document a screening.",
+   "n": 2,
+   "wm": 3.5,
+   "sd": 0.5
+  },
+  {
+   "code": "SC3",
+   "stmt": "Toothwise's findings agree well with the dentist's own findings.",
+   "n": 2,
+   "wm": 3.5,
+   "sd": 0.5
+  },
+  {
+   "code": "SC4",
+   "stmt": "Toothwise fits smoothly into the clinic's existing screening workflow.",
+   "n": 2,
+   "wm": 3,
+   "sd": 0.0
+  },
+  {
+   "code": "SC5",
+   "stmt": "I would recommend the continued use of Toothwise at CodiSmile Dental Clinic.",
+   "n": 2,
+   "wm": 3.5,
+   "sd": 0.5
+  },
+  {
+   "code": "SE1",
+   "stmt": "Only authorized users can log in and access the system's functions.",
+   "n": 12,
+   "wm": 3.67,
+   "sd": 0.47
+  },
+  {
+   "code": "SE2",
+   "stmt": "Each role (Dentist, Receptionist, Dental Assistant, Patient) can only access the features permitted for that role.",
+   "n": 12,
+   "wm": 3.67,
+   "sd": 0.47
+  },
+  {
+   "code": "SE3",
+   "stmt": "Passwords and login sessions are handled securely.",
+   "n": 12,
+   "wm": 3.75,
+   "sd": 0.43
+  },
+  {
+   "code": "SE4",
+   "stmt": "Sensitive staff actions are recorded in the audit log for administrative review.",
+   "n": 12,
+   "wm": 3.67,
+   "sd": 0.47
+  },
+  {
+   "code": "PR1",
+   "stmt": "Screening images are not publicly exposed and can only be viewed by authorized users.",
+   "n": 12,
+   "wm": 3.75,
+   "sd": 0.43
+  },
+  {
+   "code": "PR2",
+   "stmt": "Patients can only view their own records through the patient portal.",
+   "n": 12,
+   "wm": 3.75,
+   "sd": 0.43
+  },
+  {
+   "code": "PR3",
+   "stmt": "The system handles personal and health information in line with the Data Privacy Act of 2012.",
+   "n": 12,
+   "wm": 3.67,
+   "sd": 0.47
+  },
+  {
+   "code": "US1",
+   "stmt": "The system is easy to learn and use, even for first-time users.",
+   "n": 12,
+   "wm": 3.67,
+   "sd": 0.47
+  },
+  {
+   "code": "US2",
+   "stmt": "Navigation between the dashboard, patient records, and screening pages is clear and logical.",
+   "n": 12,
+   "wm": 3.67,
+   "sd": 0.47
+  },
+  {
+   "code": "US3",
+   "stmt": "Labels, buttons, and messages are easy to understand.",
+   "n": 12,
+   "wm": 3.83,
+   "sd": 0.37
+  },
+  {
+   "code": "US4",
+   "stmt": "The layout and design of the interface are visually pleasing and organized.",
+   "n": 12,
+   "wm": 3.67,
+   "sd": 0.47
+  },
+  {
+   "code": "RE1",
+   "stmt": "The system runs consistently without unexpected crashes or failures.",
+   "n": 12,
+   "wm": 3.5,
+   "sd": 0.5
+  },
+  {
+   "code": "RE2",
+   "stmt": "When an error occurs, the system shows a clear message and recovers without losing data.",
+   "n": 12,
+   "wm": 3.75,
+   "sd": 0.43
+  },
+  {
+   "code": "RE3",
+   "stmt": "The system produces consistent results when the same image is screened again.",
+   "n": 12,
+   "wm": 3.58,
+   "sd": 0.49
+  },
+  {
+   "code": "PE1",
+   "stmt": "The system analyzes an uploaded image and displays the results within an acceptable time.",
+   "n": 12,
+   "wm": 3.67,
+   "sd": 0.47
+  },
+  {
+   "code": "PE2",
+   "stmt": "Pages and patient records load quickly.",
+   "n": 12,
+   "wm": 3.67,
+   "sd": 0.47
+  },
+  {
+   "code": "PE3",
+   "stmt": "The system remains responsive while performing AI detection.",
+   "n": 12,
+   "wm": 3.67,
+   "sd": 0.47
+  },
+  {
+   "code": "DP1",
+   "stmt": "Patient, screening, and detection records are stored accurately and completely.",
+   "n": 12,
+   "wm": 3.75,
+   "sd": 0.43
+  },
+  {
+   "code": "DP2",
+   "stmt": "Related records (patients, screenings, findings, recommendations, notes) remain consistent with one another.",
+   "n": 12,
+   "wm": 3.58,
+   "sd": 0.49
+  },
+  {
+   "code": "DP3",
+   "stmt": "The system prevents invalid or incomplete data from being saved.",
+   "n": 12,
+   "wm": 3.75,
+   "sd": 0.43
+  },
+  {
+   "code": "AD1",
+   "stmt": "Toothwise accurately detects tartar, plaque, cavity, gum inflammation, and healthy tooth from a still intraoral photograph.",
+   "n": 103,
+   "wm": 3.48,
+   "sd": 0.54
+  },
+  {
+   "code": "AD2",
+   "stmt": "Combining the YOLOv8 and YOLOv12 outputs produces dependable detection results.",
+   "n": 103,
+   "wm": 3.43,
+   "sd": 0.53
+  },
+  {
+   "code": "AD3",
+   "stmt": "The computed risk score and risk classification (Low, Medium, High) reflect the detected findings appropriately.",
+   "n": 103,
+   "wm": 3.5,
+   "sd": 0.5
+  },
+  {
+   "code": "AD4",
+   "stmt": "The system works well with photos taken using a standard device camera such as a smartphone or webcam.",
+   "n": 103,
+   "wm": 3.47,
+   "sd": 0.52
+  },
+  {
+   "code": "AD5",
+   "stmt": "The detection results are a helpful reference that supports, but does not replace, the dentist's judgment.",
+   "n": 103,
+   "wm": 3.4,
+   "sd": 0.56
+  },
+  {
+   "code": "RI1",
+   "stmt": "The bounding boxes and condition labels clearly show where each finding is located on the image.",
+   "n": 103,
+   "wm": 3.49,
+   "sd": 0.5
+  },
+  {
+   "code": "RI2",
+   "stmt": "The plain-language descriptions make the findings easy to understand.",
+   "n": 103,
+   "wm": 3.45,
+   "sd": 0.52
+  },
+  {
+   "code": "RI3",
+   "stmt": "The per-patient record makes it easy to review and compare findings across visits.",
+   "n": 103,
+   "wm": 3.48,
+   "sd": 0.54
+  },
+  {
+   "code": "RI4",
+   "stmt": "The downloadable PDF screening report is complete and useful for clinical recordkeeping.",
+   "n": 103,
+   "wm": 3.47,
+   "sd": 0.55
+  },
+  {
+   "code": "RI5",
+   "stmt": "The self-service patient portal lets patients conveniently view their own screening history and past findings.",
+   "n": 103,
+   "wm": 3.48,
+   "sd": 0.59
+  },
+  {
+   "code": "PP1",
+   "stmt": "The prevention plan is relevant to the patient's detected findings and risk classification.",
+   "n": 103,
+   "wm": 3.54,
+   "sd": 0.5
+  },
+  {
+   "code": "PP2",
+   "stmt": "The recommendations are clear and easy for patients to follow.",
+   "n": 103,
+   "wm": 3.47,
+   "sd": 0.52
+  },
+  {
+   "code": "PP3",
+   "stmt": "The prevention plan encourages earlier preventive action and better oral health awareness.",
+   "n": 103,
+   "wm": 3.51,
+   "sd": 0.52
+  },
+  {
+   "code": "PP4",
+   "stmt": "The prevention plan appropriately serves as guidance and not as a formal medical prescription.",
+   "n": 103,
+   "wm": 3.49,
+   "sd": 0.5
+  }
+ ]
+}

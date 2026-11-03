@@ -101,3 +101,21 @@ reports how many of those you have.
 
 `evaluate_models.py` measures a *trained model*; this measures the
 *dataset*. Run this first, then evaluate.
+
+## Image-level (per photo) metrics
+
+`evaluate_models.py` scores *boxes* (a finding counts only if its box
+overlaps the annotation at IoU >= 0.5). `evaluate_image_level.py` scores
+*photos*: "does this image show a cavity / gum inflammation / plaque /
+tartar / any finding?", and reports accuracy, precision, recall,
+specificity, F1 and AUROC for YOLOv8, YOLOv12 and the ensemble:
+
+```bash
+python evaluate_image_level.py --data /content/merged_dataset/data_5class.yaml \
+    --yolov8 /content/yolov8_dental.pt --yolov12 /content/yolov12_dental.pt --split test
+```
+
+It reports two threshold settings: the app's deployed thresholds, and
+per-class thresholds tuned on `val` and then applied to `test`. Say in the
+paper which metric (image-level vs box-level) and which setting each number
+uses. `python test_evaluate_image_level.py` is the self-check.
