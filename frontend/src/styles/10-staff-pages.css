@@ -976,3 +976,7 @@ body.dark-mode .sd-risk--MEDIUM { color: var(--tw-warning); }
 .sd-rel-table thead th:first-child { color: var(--tw-muted); font-weight: 700; }
 .sd-rel-table th[scope="row"] { position: sticky; left: 0; background: var(--tw-surface); }
 .sd-rel-note { margin: 0; font-size: 13px; line-height: 1.5; color: var(--tw-muted); }
+.sd-rel-table td.sd-rel-this, .sd-rel-table th.sd-rel-this { text-align: left; }
+.sd-rel-yes { font-weight: 700; color: var(--tw-text); }
+.sd-rel-no { color: var(--tw-muted); }
+.sd-rel-marks { font-weight: 400; color: var(--tw-muted); }
