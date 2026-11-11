@@ -99,8 +99,18 @@ export function validateOptionalText(rawValue, label, max) {
 
 // ---------- Image upload validation (dental screening photos) ----------
 
-export const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+// HEIC/HEIF is the default camera format on iPhones and many Android
+// phones and keeps more detail than JPEG, so it is the recommended format.
+export const ALLOWED_IMAGE_TYPES = ['image/heic', 'image/heif', 'image/jpeg', 'image/png', 'image/webp'];
+// Used for the file picker: some systems (e.g. Windows) don't report a type
+// for .heic files, so the extensions are listed too.
+export const IMAGE_ACCEPT = [...ALLOWED_IMAGE_TYPES, '.heic', '.heif'].join(',');
 export const MAX_IMAGE_BYTES = 15 * 1024 * 1024; // 15 MB
+
+export function isHeicFile(file) {
+  if (!file) return false;
+  return ['image/heic', 'image/heif'].includes(file.type) || /\.(heic|heif)$/i.test(file.name || '');
+}
 
 export function validateImageFile(file) {
   if (!file) return { valid: false, message: 'Please choose an image to upload.' };
@@ -111,8 +121,8 @@ export function validateImageFile(file) {
   // Note: this only checks the browser-reported MIME type, which a client
   // fully controls - it's a UX convenience, not a security check. The
   // backend independently validates the actual file bytes/signature.
-  if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
-    return { valid: false, message: 'Please upload a supported dental image (JPEG, PNG, or WEBP).' };
+  if (!ALLOWED_IMAGE_TYPES.includes(file.type) && !isHeicFile(file)) {
+    return { valid: false, message: 'Please upload a supported dental image (HEIC, JPEG, PNG, or WEBP).' };
   }
   return { valid: true };
 }

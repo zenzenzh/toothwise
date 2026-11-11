@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Upload, RefreshCw, ScanLine, CheckCircle2, ArrowLeft, ArrowRight, Info, Check } from 'lucide-react';
 import api, { patientsAPI, screeningsAPI } from '../api';
-import { validateImageFile, ALLOWED_IMAGE_TYPES, MAX_IMAGE_BYTES } from '../utils/validation';
+import { validateImageFile, IMAGE_ACCEPT, MAX_IMAGE_BYTES, isHeicFile } from '../utils/validation';
 import Button from '../components/ui/Button';
 import RiskBadge from '../components/ui/RiskBadge';
 import toast from 'react-hot-toast';
@@ -13,6 +13,16 @@ const STEPS = [
   { key: 'results', label: 'Results' },
 ];
 const MAX_MB = Math.round(MAX_IMAGE_BYTES / (1024 * 1024));
+
+// Most browsers (all but Safari) can't display HEIC, so the preview is
+// converted in the browser. The original HEIC file is what gets uploaded,
+// so the server still receives the full-quality photo.
+async function previewUrlFor(file) {
+  if (!isHeicFile(file)) return URL.createObjectURL(file);
+  const { default: heic2any } = await import('heic2any');
+  const out = await heic2any({ blob: file, toType: 'image/jpeg', quality: 0.9 });
+  return URL.createObjectURL(Array.isArray(out) ? out[0] : out);
+}
 
 function formatBytes(bytes) {
   return bytes >= 1024 * 1024 ? `${(bytes / (1024 * 1024)).toFixed(1)} MB` : `${Math.max(1, Math.round(bytes / 1024))} KB`;
@@ -49,6 +59,8 @@ export default function Screening() {
   const [isDragging, setIsDragging] = useState(false);
   const [fileError, setFileError] = useState(null);
   const [patientName, setPatientName] = useState(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const selectToken = useRef(0);
 
   // AI inference can be switched off server-side (DETECTION_ENABLED=false)
   // e.g. when presenting without the models. The health endpoint is the
@@ -67,7 +79,7 @@ export default function Screening() {
   // Object URLs are cheaper than data URLs for large photos; release them.
   useEffect(() => () => { if (previewUrl) URL.revokeObjectURL(previewUrl); }, [previewUrl]);
 
-  function handleFileSelect(file) {
+  async function handleFileSelect(file) {
     if (!file) return;
     const check = validateImageFile(file);
     if (!check.valid) {
@@ -77,8 +89,19 @@ export default function Screening() {
     }
     setFileError(null);
     setSelectedFile(file);
-    setPreviewUrl(URL.createObjectURL(file));
+    setPreviewUrl(null);
     setStep('preview');
+    const token = ++selectToken.current;
+    setPreviewLoading(true);
+    try {
+      const url = await previewUrlFor(file);
+      if (token === selectToken.current) setPreviewUrl(url);
+      else URL.revokeObjectURL(url);
+    } catch {
+      // Preview failed (unusual HEIC variant); the upload itself still works.
+    } finally {
+      if (token === selectToken.current) setPreviewLoading(false);
+    }
   }
 
   function openPicker() {
@@ -106,6 +129,8 @@ export default function Screening() {
   }
 
   function resetUpload() {
+    selectToken.current += 1;
+    setPreviewLoading(false);
     setSelectedFile(null);
     setPreviewUrl(null);
     setScreening(null);
@@ -182,7 +207,7 @@ export default function Screening() {
             <span className="scr-drop-icon" aria-hidden="true"><Upload size={26} strokeWidth={1.75} /></span>
             <span className="scr-drop-title">{isDragging ? 'Drop the image to upload' : 'Upload a dental image'}</span>
             <span id="scr-file-hint" className="scr-drop-hint">
-              Drag and drop here, or click to browse. JPEG, PNG or WebP, up to {MAX_MB} MB.
+              Drag and drop here, or click to browse. HEIC (recommended for best quality), JPEG, PNG or WebP, up to {MAX_MB} MB.
             </span>
             <span className="tw-btn tw-btn--primary scr-drop-btn" aria-hidden="true">Choose image</span>
           </div>
@@ -190,7 +215,7 @@ export default function Screening() {
           <input
             ref={fileInputRef}
             type="file"
-            accept={ALLOWED_IMAGE_TYPES.join(',')}
+            accept={IMAGE_ACCEPT}
             onChange={e => handleFileSelect(e.target.files?.[0])}
             hidden
           />
@@ -205,7 +230,13 @@ export default function Screening() {
           </div>
 
           <div className={`scr-image ${loading ? 'is-analysing' : ''}`.trim()}>
-            <img src={previewUrl} alt={`Teeth selected for screening${patientName ? ` of ${patientName}` : ''}`} />
+            {previewUrl ? (
+              <img src={previewUrl} alt={`Teeth selected for screening${patientName ? ` of ${patientName}` : ''}`} />
+            ) : (
+              <p className="scr-preview-placeholder">
+                {previewLoading ? 'Preparing preview…' : 'Preview not available for this file, but it can still be analysed.'}
+              </p>
+            )}
             {loading && (
               <div className="scr-scan" aria-hidden="true"><span className="scr-scan-line" /></div>
             )}

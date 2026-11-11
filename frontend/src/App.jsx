@@ -6,6 +6,7 @@ import { PatientAuthProvider } from './context/PatientAuthContext';
 import Landing from './pages/Landing';
 import Login from './pages/Login';
 import RouteFallback from './components/RouteFallback';
+import DataPrivacyGate from './components/DataPrivacyGate';
 
 import { can } from './utils/permissions';
 
@@ -95,6 +96,7 @@ export default function App() {
               error: { iconTheme: { primary: '#EF4444', secondary: '#181B23' } },
             }}
           />
+          <DataPrivacyGate>
           <Suspense fallback={<RouteFallback />}>
           <Routes>
             <Route path="/" element={<RootRoute />} />
@@ -117,6 +119,7 @@ export default function App() {
             <Route path="*" element={<NotFound />} />
           </Routes>
           </Suspense>
+          </DataPrivacyGate>
         </BrowserRouter>
       </PatientAuthProvider>
     </AuthProvider>

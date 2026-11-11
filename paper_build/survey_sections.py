@@ -235,9 +235,9 @@ def main(path):
     w("TABLE resp | Distribution of User Respondents")
     w("W 2.8,1.4,1.4")
     w("| Respondent group | Frequency | Percentage |")
-    w(f"| Patient respondents | {nPT} | {nPT / N:.2%} |")
-    w(f"| IT practitioners | {nIT} | {nIT / N:.2%} |")
-    w(f"| Total | {N} | 100.00% |")
+    w(f"| Patient respondents | {nPT} | {nPT / N:.1%} |")
+    w(f"| IT practitioners | {nIT} | {nIT / N:.1%} |")
+    w(f"| Total | {N} | 100.0% |")
     w("ENDTABLE")
     w("TABLE sectn | User Respondents per Survey Part")
     w("W 2.75,1.25,1.25,0.75")
@@ -253,15 +253,16 @@ def main(path):
       f"took part, so it was answered by {n_iso} respondents ({it_iso} IT practitioners and {pt_iso} patient "
       f"respondents), with an overall mean of {f2(iso_mean)} (Strongly Agree). Because these respondents were "
       f"not all IT experts, the software quality results in this section come from the IT Expert Evaluation "
-      f"Form; the Part B3 answers are listed in Appendices B and F. The two parts on the manual screening "
+      f"Form; the Part B3 answers are listed in Appendices B and G. The two parts on the manual screening "
       f"process and on screening consistency and time were answered by {n_man} respondents (Section 4.4).")
     w("### 4.3.2 Research Instrument")
-    w(f"P Two instruments were used; both are reproduced in Appendix A and shown as online forms in Appendix E. "
+    w(f"P Two instruments were used; both are reproduced in Appendix A and shown as online forms in Appendix F. "
       f"The IT Expert Evaluation Form asks for the evaluator's profile, then has {len(IT_ITEMS)} statements, five "
       f"for each of the six quality characteristics named in the fourth problem, and three open-ended questions "
       f"on the system's technical strengths, the problems found, and recommended improvements. The user survey "
       f"has {len(feat_items)} statements on the three main features, {len(by_sec[MANUAL]) + len(by_sec[CONSIST])} "
-      f"statements on the current manual process and on screening consistency and time (the fifth problem), a "
+      f"statements on the current manual process and on screening consistency and time (supporting information "
+      f"for the fifth problem), a "
       f"software quality part for clinic staff and IT practitioners, and three open-ended questions on what "
       f"respondents liked, the difficulties they met, and the improvements they suggest (Table {{tab:chars}}).")
     w("TABLE chars | Sections of the Evaluation Instruments")
@@ -273,7 +274,7 @@ def main(path):
     for sec, prob in zip(FEATURE, ("Problems 1 and 4", "Problems 2 and 4", "Problems 3 and 4")):
         k = len(by_sec[sec])
         w(f"| User Survey — {sec} | {CODES[sec]}1–{CODES[sec]}{k} | {k} | {prob} |")
-    for sec, prob in ((MANUAL, "Problem 1 (current process)"), (CONSIST, "Problem 5")):
+    for sec, prob in ((MANUAL, "Problem 1 (current process)"), (CONSIST, "Problem 5 (supporting)")):
         k = len(by_sec[sec])
         w(f"| User Survey — {sec} | {CODES[sec]}1–{CODES[sec]}{k} | {k} | {prob} |")
     k = sum(len(by_sec[s]) for s in ISO)
@@ -306,9 +307,8 @@ def main(path):
     keys = {"Security": "se", "Privacy": "pr", "Usability": "us", "Reliability": "re",
             "Performance Efficiency": "pe", "Data Protection": "dp"}
     extra = {
-        "Security": " No security concern was reported in the written comments.",
         "Usability": " In their comments, one expert recommended “less click less scroll”, and in the Messenger "
-                     "conversation (Appendix D) one found some white space uncomfortable and suggested a layout "
+                     "conversation (Appendix E) one found some white space uncomfortable and suggested a layout "
                      "that adapts to all screen sizes; these are included in the recommendations.",
         "Reliability": " This includes RE5, on the system working normally after the free server wakes from an idle "
                        "period, a limitation noted in Chapter I.",
@@ -382,8 +382,7 @@ def main(path):
       f"on Security. The user respondents rated the three features {f2(feat_mean)}, and only {neg_feat} of their "
       f"{len(featx):,} answers were Disagree or Strongly Disagree.")
     w(f"P Two cautions apply. First, the software quality results come from {n_itx} IT experts, so they "
-      f"describe the judgment of a small group; the {n_iso} user respondents who answered the quality part of "
-      f"the user survey gave a similar result ({f2(iso_mean)}). Second, the ratings show what the evaluators "
+      f"describe the judgment of a small group. Second, the ratings show what the evaluators "
       f"thought of the system; they should be read together with the measured results in Sections 4.1 and 4.2.")
     w("P In their written comments, the IT experts described the system as innovative and praised that it keeps "
       "the clinic's records in one place, shows each user only what they need, and is simple enough to use "
@@ -396,139 +395,26 @@ def main(path):
       "suggestions were reminders for brushing and check-ups, more dental tips and short videos, an easier "
       "search, more conditions to detect with better accuracy, and an extra security step for staff accounts.")
 
-    # ---------------------------------------------------------------- 4.4
-    w("## 4.4 Screening Consistency and Screening Time")
-    w(f"P This section answers the fifth problem: does Toothwise make screening more consistent and faster? "
-      f"The original plan was to time the same patients' screenings with and without Toothwise and compare both "
-      f"with the dentist's findings, but this could not be done because the study did not involve the clinic's "
-      f"patients. Instead, this section uses the respondents' ratings of the current manual process and of "
-      f"Toothwise (Tables {{tab:ms}} and {{tab:sc}}), together with the measured processing time in Section "
-      f"4.1.6.")
-    note_m = (f"N = {n_man}. These two sections were answered by only {n_man} respondents, so the results are "
-              f"shown for completeness and should not be generalized.")
-    item_table(MANUAL, "ms", "Respondents' Assessment of the Current Manual Screening Process", note_m)
-    item_table(CONSIST, "sc", "Respondents' Assessment of Screening Consistency and Time with Toothwise", note_m)
-    m, c = S[MANUAL]["all"], S[CONSIST]["all"]
-    ms_lo = min(by_sec[MANUAL], key=lambda i: i["all"]["wm"])
-    w(f"P The {n_man} respondents agreed that checking teeth by eye alone has the problems described in the "
-      f"first problem (average {f2(m['wm'])}): results can differ from one examination to the next, lighting "
-      f"and angle affect what can be seen, and a tool for consistent early screening would be useful. The only "
-      f"statement they disagreed with was {ms_lo['code']}, “{ms_lo['stmt'].rstrip('.')}” "
-      f"({f2(ms_lo['all']['wm'])}). They also agreed that Toothwise makes results more consistent, saves time in "
-      f"completing and recording a screening, and agrees with the dentist's own findings (average "
-      f"{f2(c['wm'])}), and they would recommend that the clinic keep using it.")
-    w(f"P Because only {n_man} respondents answered these sections and no screening was timed, these results "
-      f"show a likely direction, not a measured effect. What was measured is the processing time: the live "
-      f"system finishes a screening with both models in about 3 to 4 seconds (Section 4.1.6), and it records "
-      f"every finding, the risk result, and the prevention plan automatically, so the screening no longer has "
-      f"to be written up by hand.")
-
-    # ---------------------------------------------------------------- Chapter V
-    ad, ri, pp = (S[s]["all"]["wm"] for s in FEATURE)
-    w("#CH CHAPTER V | SUMMARY OF FINDINGS, CONCLUSIONS, AND RECOMMENDATIONS")
-    w("P This chapter summarizes the findings of the study, states the conclusions drawn from them, and presents "
-      "recommendations for CodiSmile Dental Clinic, for the further development of Toothwise, and for future "
-      "researchers.")
-    w("## 5.1 Summary of Findings")
-    w("P The findings are summarized according to the five problems stated in Chapter I.")
-    w("1. **Detection of the five conditions (Problem 1).** YOLOv8 and YOLOv12 were trained on 40,271 images "
-      "merged from four public datasets and tested on 2,930 unseen images. On the test split, YOLOv8 obtained a "
-      "precision of 54.32%, a recall of 52.34%, and an mAP@50 of 51.91%; YOLOv12 obtained 52.94%, 50.06%, and "
-      "48.11%, with about 24% fewer parameters and slightly faster inference (about 206 ms against 216 ms per "
-      "image on CPU). Fusing the two models raised the mAP@50 to 54.24%. Healthy tooth and cavity were detected "
-      "best, and plaque worst (mAP@50 below 10%). Detection accuracy at the deployed threshold was 43.77% for "
-      f"YOLOv8, 41.85% for YOLOv12, and 43.02% for the ensemble. In the deployed system, a screening takes about "
-      f"3 to 4 seconds, and metal brackets are filtered out so that they are not reported as cavities. The "
-      f"respondents who evaluated the current manual process agreed that it has the limitations described in "
-      f"the first problem (mean {f2(m['wm'])}).")
-    w(f"2. **Recording and access to findings (Problem 2).** Every screening is saved as a standardized visual "
-      f"record with the photograph, labeled bounding boxes, the risk result, the prevention plan, and the "
-      f"dentist's notes; it can be compared across visits, exported as a PDF report, and viewed by the patient "
-      f"through the self-service portal, which now also shows the latest results, a risk-over-time chart, and "
-      f"the next check-up date. Respondents rated the results interface and patient records {f2(ri)}, Strongly "
-      f"Agree.")
-    w(f"3. **Finding-specific preventive guidance (Problem 3).** The rule-based risk engine and the KNN "
-      f"classifier (K = 5) produce a risk tier and an ordered prevention plan for every screening. On 2,000 "
-      f"unseen synthetic cases, the classifier reproduced the clinical rule with 92.75% accuracy; its weakest "
-      f"tier was HIGH (recall 58.18%). Respondents rated the prevention plan {f2(pp)}, Strongly Agree, the "
-      f"highest of the three feature sections.")
-    w(f"4. **Acceptability (Problem 4).** The {n_itx} IT experts rated the six ISO/IEC 25010 quality "
-      f"characteristics with an overall mean of {f2(q_mean)} (Highly Acceptable): every characteristic received "
-      f"4.00 except Security ({f2(itS['Security']['wm'])}), where one expert chose Agree for two statements. The "
-      f"three feature sections, rated by all {N} user respondents, obtained an overall mean of {f2(feat_mean)} "
-      f"(Highly Acceptable). Technically, the web application scored 100 in Lighthouse accessibility and best "
-      f"practices on all audited pages and passed all 119 automated backend tests.")
-    w(f"5. **Screening consistency and time (Problem 5).** A controlled, timed comparison against the dentist's "
-      f"findings was not conducted. The {n_man} respondents who answered the related section agreed that "
-      f"Toothwise makes screening more consistent and faster to document (mean {f2(c['wm'])}), and the "
-      f"measured processing time of the deployed system is about 3 to 4 seconds per screening.")
-    w("## 5.2 Conclusions")
-    w("P Based on the findings, the following conclusions are drawn.")
-    w("1. YOLO-based detection on ordinary intraoral photographs can locate and label tartar, plaque, cavity, gum "
-      "inflammation, and healthy tooth, but with an mAP@50 of about 52% to 54% on unseen images and large "
-      "differences between conditions, it is suitable as a screening aid that directs the dentist's attention, "
-      "not as an independent diagnosis. This confirms the delimitation set in Chapter I.")
-    w("2. The difference between YOLOv8 and YOLOv12 is small compared with the differences between conditions, "
-      "so the quality, balance, and consistency of the training data matter more than the choice of "
-      "architecture. Combining both models improved detection over either model alone, which supports the "
-      "ensemble design.")
-    w("3. Storing each screening as a standardized visual record, with patient portal access, addresses the "
-      "absence of comparable records across visits identified in the second problem.")
-    w("4. Finding-specific prevention plans can be generated automatically for every screening without adding to "
-      "the dentist's work, and the respondents found them relevant and easy to follow.")
-    w(f"5. Toothwise is highly acceptable to its evaluators on all six quality characteristics and on its main "
-      f"features (overall means of {f2(q_mean)} and {f2(feat_mean)} on a four-point scale). Because the quality "
-      f"characteristics were rated by {n_itx} IT experts, this conclusion should be confirmed with a larger "
-      f"group of IT experts, dentists, and clinic staff.")
-    w("6. Toothwise shortens the documentation of a screening, since results, risk, and the prevention plan are "
-      "produced and recorded in seconds, and the respondents expect it to make screening more consistent. "
-      "Whether it improves agreement with the dentist and shortens the whole screening in practice could not be "
-      "established without a controlled comparison.")
-    w("## 5.3 Recommendations")
-    w("P In light of the findings and conclusions, the following are recommended.")
-    w("PN **For CodiSmile Dental Clinic**")
-    w("1. Use Toothwise as a screening and documentation aid, always with the dentist's review of the "
-      "detections and confirmation of the risk tier, and take clear, well-lit photographs, since blurry images "
-      "reduce accuracy.")
-    w("2. Confirm or correct the risk tier of every screening so that the KNN classifier is retrained on real, "
-      "dentist-labeled cases.")
-    w("3. Move the system from the free hosting tier to a plan that does not sleep, so that the first page "
-      "load is not delayed, before using it in daily operations.")
-    w("PN **For the further development of Toothwise**")
-    w("1. Improve detection of plaque and other weak classes by adding more and better-annotated photographs, "
-      "including consented photographs from the clinic, and add a braces class instead of filtering brackets.")
-    w("2. Add the features requested by respondents: reminders for brushing and check-ups, more dental health "
-      "tips and short videos, a faster and simpler search, and lighter pages for slow Internet connections.")
-    w("3. Add a second authentication factor for staff accounts, as one respondent suggested, and keep the "
-      "audit and privacy controls aligned with the Data Privacy Act of 2012.")
-    w("4. Simplify pages that present much information at once, reduce the clicks and scrolling needed to finish a "
-      "task, reduce unneeded white space, make the layout adapt to all screen sizes and aspect ratios, and make "
-      "less-used features easier to find, as the IT experts and user respondents suggested. In the longer term, "
-      "billing and inventory modules can be added, as one IT expert noted.")
-    w("PN **For future researchers**")
-    w("1. Conduct the controlled comparison planned for the fifth problem: time the same screenings with and "
-      "without Toothwise and measure agreement with the dentist's findings (for example, with Cohen's kappa).")
-    w("2. Repeat the ISO/IEC 25010 evaluation with a larger and more balanced group of IT experts, dentists, and "
-      "clinic staff, the groups for which the quality evaluation was designed.")
-    w("3. Validate the models on photographs from other clinics and devices, and compare them with newer "
-      "detection architectures and with segmentation-based approaches.")
-    w("4. Train the detection models on more and larger datasets. The current models learned from four public "
-      "datasets in which plaque appears in only one source, which explains much of the weak plaque result. "
-      "More public datasets, consented and dentist-annotated clinic photographs, and a more balanced number "
-      "of examples per condition should raise accuracy.")
-    w("5. Add an oral diagnosis form to the system: a digital examination form in which the dentist records "
-      "the clinical findings for each tooth (for example, on a tooth chart), the final diagnosis, and the "
-      "treatment plan, next to the AI detections. The recorded diagnoses could then be compared with the "
-      "detections to measure accuracy in real use and supply labeled cases for retraining.")
-    w("6. Extend the system to detect more classes. The source datasets already contain conditions that this "
-      "study left out, such as missing teeth, malalignment, spacing, tooth stains and "
-      "discoloration, oral ulcers, and hypodontia, and orthodontic braces could be added as their own class "
-      "instead of being filtered out. Each new class needs enough annotated examples, a risk weight, and its "
-      "own advice.")
-    w("7. Use an intraoral camera to capture the images for detection. Smartphone photographs vary in "
-      "lighting and angle and cannot clearly show the back teeth; an intraoral camera gives close, well-lit, "
-      "and consistent views of each tooth. Future researchers could connect one to the screening page and "
-      "retrain the models on its images.")
+    # Sentences placed into the hand-maintained Section 4.4, Chapter V, and abstract.
+    finding4 = (f"4. **Acceptability (Problem 4).** The {n_itx} IT experts rated the six ISO/IEC 25010 quality "
+                f"characteristics with an overall mean of {f2(q_mean)} (Highly Acceptable): every characteristic "
+                f"received 4.00 except Security ({f2(itS['Security']['wm'])}), where one expert chose Agree for two "
+                f"statements. The three feature sections, rated by all {N} user respondents, obtained an overall mean "
+                f"of {f2(feat_mean)} (Highly Acceptable).")
+    conclusion5 = (f"5. Toothwise is highly acceptable to its evaluators on all six quality characteristics and on its "
+                   f"main features (overall means of {f2(q_mean)} and {f2(feat_mean)} on a four-point scale). Because "
+                   f"the quality characteristics were rated by {n_itx} IT experts, this conclusion should be confirmed "
+                   f"with a larger group of IT experts, dentists, and clinic staff.")
+    rec_simplify = ("Simplify pages that present much information at once, reduce the clicks and scrolling needed to "
+                    "finish a task, reduce unneeded white space, make the layout adapt to all screen sizes and aspect "
+                    "ratios, and make less-used features easier to find, as the IT experts and user respondents "
+                    "suggested. In the longer term, billing and inventory modules can be added, as one IT expert noted.")
+    abstract_eval = (f"The system was evaluated through two online forms answered on a four-point scale. The six "
+                     f"ISO/IEC 25010 quality characteristics (security, privacy, usability, reliability, performance "
+                     f"efficiency, and data protection), rated by {n_itx} IT experts, obtained an overall weighted mean "
+                     f"of {f2(q_mean)}, and the system's detection, results, and prevention-plan features, rated by {N} "
+                     f"user respondents ({nPT} patient respondents and {nIT} IT practitioners), obtained "
+                     f"{f2(feat_mean)}; both are interpreted as Highly Acceptable.")
 
     # The instrument, scale and statistical treatment belong to the method (Chapter III).
     i0 = L.index("### 4.3.2 Research Instrument")
@@ -541,8 +427,8 @@ def main(path):
                .replace("### 4.3.4 ", "### 3.10.4 ") for x in method]
     parts = {MANUAL: "Part A", CONSIST: "Part A"}
     ch3 = [
-        f"P This section describes how the acceptability of Toothwise was evaluated (the fourth and fifth problems "
-        f"of the study): who the respondents were, the instrument they answered, how the data were gathered, and "
+        f"P This section describes how the acceptability of Toothwise was evaluated (the fourth problem of the "
+        f"study, with supporting information for the fifth): who the respondents were, the instrument they answered, how the data were gathered, and "
         f"how the responses were treated. The results are presented in Sections 4.3 and 4.4.",
         "### 3.10.1 Respondents and Data Gathering",
         f"P Two evaluation forms were prepared in Google Forms and answered online: the IT Expert Evaluation "
@@ -571,35 +457,9 @@ def main(path):
         "10173). The screening images shown in this paper are demonstration images.",
     ]
 
-    abstract = [
-        "FRONTH ABSTRACT",
-        f"PN Dental screening at CodiSmile Dental Clinic relies on visual inspection, which makes early tartar, "
-        f"plaque, cavity, and gum inflammation hard to detect consistently, leaves no standardized visual record, "
-        f"and gives patients little finding-specific guidance. This study developed Toothwise, a web-based "
-        f"screening support system that detects these four conditions and healthy tooth in still intraoral "
-        f"photographs with a fused YOLOv8 and YOLOv12 ensemble, computes a 0–100 risk score and a low, medium, "
-        f"or high risk tier, and generates a personalized prevention plan with a K-Nearest Neighbors (KNN) "
-        f"classifier. The system was developed with an Agile methodology using React, FastAPI, and PostgreSQL, "
-        f"and deployed on cloud hosting. On a held-out test set of 2,930 images, YOLOv8 reached an mAP@50 of "
-        f"51.91% and YOLOv12 48.11%, and the fused ensemble 54.24%; cavity was detected best and plaque worst. "
-        f"The KNN classifier reproduced the clinical risk rule with 92.75% accuracy on 2,000 unseen cases, and "
-        f"all 119 automated backend tests passed. The system was evaluated through two online forms "
-        f"answered on a four-point scale. The six ISO/IEC 25010 quality characteristics (security, privacy, "
-        f"usability, reliability, performance efficiency, and data protection), rated by {n_itx} IT experts, "
-        f"obtained an overall weighted mean of {f2(q_mean)}, and the system's detection, results, and "
-        f"prevention-plan features, rated by {N} user respondents ({nPT} patient respondents and {nIT} IT "
-        f"practitioners), obtained {f2(feat_mean)}; both are interpreted as Highly Acceptable. The study concludes that Toothwise "
-        f"is an acceptable screening and documentation aid that supports, but does not replace, the dentist's "
-        f"diagnosis, and recommends more training data for weak classes such as plaque, the use of an intraoral camera for clearer images, a larger evaluation with "
-        f"dentists and clinic staff, and a controlled comparison of screening time and consistency.",
-        "PN ***Keywords:*** dental screening, YOLOv8, YOLOv12, ensemble object detection, K-Nearest Neighbors, "
-        "prevention plan, ISO/IEC 25010",
-        "PAGEBREAK",
-    ]
-
     # Appendices
     app = ["#APP APPENDIX A | Evaluation Instruments",
-           f"P Both instruments were answered online through Google Forms (Appendix E). Each statement was rated on "
+           f"P Both instruments were answered online through Google Forms (Appendix F). Each statement was rated on "
            f"a four-point scale: Strongly Agree (4), Agree (3), Disagree (2), and Strongly Disagree (1).",
            "PN **IT Expert Evaluation Form: Software Quality Evaluation Based on ISO/IEC 25010**",
            "PN *Part I. Evaluator Profile*",
@@ -651,7 +511,7 @@ def main(path):
     app.append("#APP APPENDIX C | Letter of Approval from CodiSmile Dental Clinic")
     app.append("FIG letter1 | appendix_letter_1.png | 5.4 | Letter Requesting Approval to Conduct the Study (page 1 of 2)")
     app.append("FIG letter2 | appendix_letter_2.png | 5.4 | Letter Requesting Approval to Conduct the Study (page 2 of 2)")
-    app.append("#APP APPENDIX D | Evaluator Feedback and Panel Consultation")
+    app.append("#APP APPENDIX E | Evaluator Feedback and Panel Consultation")
     app.append("P The IT experts received a video demonstration of Toothwise and the evaluation form through Facebook "
                "Messenger and gave their feedback in the same conversations; their names and photos are blurred. "
                "Messages in Filipino are summarized in English in the captions.")
@@ -673,7 +533,7 @@ def main(path):
                "corrected and that the panel's advice to test on more datasets was followed, and saw no problem.")
 
     # Appendix E: the online forms, captured page by page without answers.
-    app.append("#APP APPENDIX E | Online Evaluation Forms")
+    app.append("#APP APPENDIX F | Online Evaluation Forms")
     app.append("P The evaluation forms were prepared in Google Forms. The figures show every page of each form as "
                "a respondent sees it, without answers; the main survey shows each part to the respondent groups "
                "named at the top of the part.")
@@ -696,7 +556,7 @@ def main(path):
             vals = [str(score(r[it["col"]]) or "–") for it in its]
             app.append("| " + " | ".join([rid[id(r)], typ(r)] + vals) + " |")
         app.append("ENDTABLE")
-    app.append("#APP APPENDIX F | Individual Responses")
+    app.append("#APP APPENDIX G | Individual Responses")
     app.append("P The tables list the user survey responses. Each row is one respondent, numbered in the order the "
                f"responses were received (R001 to R{len(data):03d}); names are not shown. Type: P = patient "
                "respondent, IT = IT practitioner. Ratings: 4 = Strongly Agree, 3 = Agree, 2 = Disagree, 1 = "
@@ -709,7 +569,7 @@ def main(path):
 
     # Appendix G: open-ended answers, verbatim.
     junk = {"", "-", ".", "none", "n/a", "na", "nothing", "wala", "no", "n.a.", "none so far", "not applicable"}
-    app.append("#APP APPENDIX G | Respondents' Comments and Suggestions")
+    app.append("#APP APPENDIX H | Respondents' Comments and Suggestions")
     app.append("P The answers to the three open-ended questions are reproduced as written, without corrections; "
                "blank answers and answers such as \"none\" are omitted.")
     app.append("PN **IT Expert Evaluation Form**")
@@ -730,21 +590,43 @@ def main(path):
                 app.append(f"- {rid[id(r)]} ({typ(r)}): “{v}”")
 
     text = CONTENT.read_text(encoding="utf-8")
-    # abstract: between TITLEPAGE and TOC
-    a = text.index("TITLEPAGE") + len("TITLEPAGE")
-    b = text.index("\nTOC")
-    text = text[:a] + "\n" + "\n".join(abstract) + text[b:]
+    # Section 4.4, Chapter V, the abstract, and Appendix D are maintained by hand in content.txt; only
+    # the survey-dependent sentences in them are replaced here.
+    a = text.index("The system was evaluated through")
+    b = text.index("Highly Acceptable.", a) + len("Highly Acceptable.")
+    text = text[:a] + abstract_eval + text[b:]
+    hand = [
+        (r"The \d+ respondents who rated the quality characteristics gave Performance Efficiency a mean of [\d.]+ "
+         r"and Reliability [\d.]+, both Highly Acceptable \(Section 4.3\)\.",
+         f"The {n_itx} IT experts rated Performance Efficiency {f2(itS['Performance Efficiency']['wm'])} and "
+         f"Reliability {f2(itS['Reliability']['wm'])}, both Highly Acceptable (Section 4.3)."),
+        (r"Respondents rated Performance Efficiency [\d.]+ and Reliability [\d.]+ \(Highly Acceptable\)\.",
+         f"The IT experts rated Performance Efficiency {f2(itS['Performance Efficiency']['wm'])} and Reliability "
+         f"{f2(itS['Reliability']['wm'])} (Highly Acceptable)."),
+        (r"(?m)^4\. \*\*Acceptability \(Problem 4\)\.\*\*.*$", finding4),
+        (r"(?m)^5\. Toothwise is highly acceptable to its evaluators.*$", conclusion5),
+        (r"(?m)^5\. Simplify pages that present much information at once.*$",
+         "5. " + rec_simplify),
+    ]
+    for pat, rep in hand:
+        text, k = re.subn(pat, lambda m: rep, text)
+        assert k == 1, pat
     # Chapter III evaluation procedure
     a = text.index("## 3.10 Evaluation Procedure")
     b = text.index("## 3.11 Full Current System Screenshots")
     text = text[:a] + "## 3.10 Evaluation Procedure\n" + "\n".join(ch3) + "\n\n" + text[b:]
-    # 4.3 to Chapter V
+    # Section 4.3 (Section 4.4 onward is kept)
     a = text.index("## 4.3 Software Quality Evaluation")
-    b = text.index("#CH REFERENCES")
+    b = text.index("## 4.4 ")
     text = text[:a] + "\n".join(L) + "\n\n" + text[b:]
-    # appendices at the end
+    # appendices: generated A-C, hand-maintained D (image-level results), generated E onward
     a = text.find("#APP ")
-    text = (text if a < 0 else text[:a]).rstrip("\n") + "\n\n" + "\n".join(app) + "\n"
+    d0 = text.index("#APP APPENDIX D | Detailed Image-Level")
+    d1 = text.find("#APP ", d0 + 5)
+    app_d = text[d0:d1 if d1 > 0 else len(text)].rstrip("\n").split("\n")
+    k = app.index(next(x for x in app if x.startswith("#APP APPENDIX E |")))
+    app = app[:k] + app_d + app[k:]
+    text = text[:a].rstrip("\n") + "\n\n" + "\n".join(app) + "\n"
     CONTENT.write_text(text, encoding="utf-8")
     out = {"N": N, "it": nIT, "patients": nPT, "n_iso": n_iso, "n_features": n_feat, "n_manual": n_man,
            "iso_mean": round(iso_mean, 2), "feature_mean": round(feat_mean, 2),
