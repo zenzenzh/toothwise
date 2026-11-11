@@ -364,7 +364,7 @@ P This section describes how the acceptability of Toothwise was evaluated (the f
 P Two evaluation forms were prepared in Google Forms and answered online: the IT Expert Evaluation Form, on the six ISO/IEC 25010 quality characteristics, and the user survey, on the system's main features. Participation was voluntary: each form opened with a statement explaining the purpose of the study and the handling of the data, and only respondents who agreed to it could continue. The IT experts were sent a video demonstration of Toothwise, the deployed system's address with test accounts, and the form link. In the user survey, each respondent first stated their group and then answered only the parts meant for that group. The user survey was answered from October 19 to 28, 2026 with 103 complete submissions, and the IT Expert Evaluation Form by 2 IT experts.
 P The study used purposive sampling, a non-probability technique in which respondents are chosen because they fit the purpose of the study (Etikan et al., 2016). Two groups were sampled. IT experts had to work in information technology and were personally invited by the researchers, because the software quality evaluation calls for technical knowledge; two took part. User respondents had to be able to judge the system from a user's point of view, as a dental patient or as an IT practitioner, and had to agree to the consent statement. A minimum of 50 user respondents was set, and 103 took part (98 patient respondents and 5 IT practitioners). Because the respondents were not randomly selected, the results describe the respondents of this study and are not generalized to all patients or all IT practitioners. Tables {tab:itprof}, {tab:resp}, and {tab:sectn} show the respondents.
 ### 3.10.2 Research Instrument
-P Two instruments were used. The IT Expert Evaluation Form is reproduced in Appendix A and shown in Appendix F. It asks for the evaluator's profile, then has 30 statements, five for each of the six quality characteristics named in the fourth problem, and three open-ended questions on the system's technical strengths, the problems found, and recommended improvements. The user survey has 14 statements on the three main features, 12 statements on the current manual process and on screening consistency and time (supporting information for the fifth problem), a software quality part for clinic staff and IT practitioners, and three open-ended questions on what respondents liked, the difficulties they met, and the improvements they suggest (Table {tab:chars}).
+P Two instruments were used. The IT Expert Evaluation Form asks for the evaluator's profile, then has 30 statements, five for each of the six quality characteristics named in the fourth problem, and three open-ended questions on the system's technical strengths, the problems found, and recommended improvements. The user survey has 14 statements on the three main features, 12 statements on the current manual process and on screening consistency and time (supporting information for the fifth problem), a software quality part for clinic staff and IT practitioners, and three open-ended questions on what respondents liked, the difficulties they met, and the improvements they suggest (Table {tab:chars}).
 TABLE chars | Sections of the Evaluation Instruments
 W 2.6,0.9,0.6,1.9
 | Instrument and section | Item codes | Items | Problem addressed |
@@ -517,7 +517,7 @@ ENDTABLE
 NOTE Deployed cut-offs: 0.25, and 0.50 for cavity, applied to each model before the two are combined; as in the live system, the combined result keeps a cavity only when both models find it. AUROC does not depend on the cut-off and is given in Tables {tab:imgany} and {tab:imgcond}.
 P At these cut-offs the models are more careful: when they report a problem, they are right about 90% to 93% of the time, but they miss more (recall 71.9% to 78.0%). The live system also keeps a cavity only when both models find it, which makes its cavity findings the most precise (93.1%) but lowers its cavity recall to 71.9%. Because a missed finding matters more than a false alarm in screening, the cut-offs chosen on the validation set (Table {tab:imgany}), which keep recall above 85%, are recommended for the live system. The braces filter of the live system (Section 4.2.1) is not included in these results.
 ### 4.1.5 Results per Condition
-P Table {tab:imgcond} shows the results for each condition with the two models combined, and Table {tab:imgf1} compares the F1-score of YOLOv8, YOLOv12, and the combined models. The full tables for each model are in Appendix D.
+P Table {tab:imgcond} shows the results for each condition with the two models combined, and Table {tab:imgf1} compares the F1-score of YOLOv8, YOLOv12, and the combined models. The full tables for each model are in Appendix B.
 TABLE imgcond | Image-Level Performance per Condition, Fused Ensemble (Clean Test Set)
 W 1.15,0.6,0.72,0.75,0.6,0.78,0.7,0.7
 | Condition | Photos | Accuracy | Precision | Recall | Specificity | F1-score | AUROC |
@@ -539,7 +539,7 @@ W 2.4,1.2,1.2,1.24
 | Tartar | 75.2% | 73.7% | 76.0% |
 | Any finding | 86.7% | 86.3% | 87.4% |
 ENDTABLE
-P **Cavity**, the most serious condition, scored above 80% on all six measures for all three (see also Appendix D). **Tartar** came close, with an F1-score of about 74% to 76%. **Healthy tooth** scored well, but there are only 34 such test photographs, so that result is less certain. **Gum inflammation** (F1-score 41% to 59%) and **plaque** (23% to 31%) were weak; the models missed most plaque photographs.
+P **Cavity**, the most serious condition, scored above 80% on all six measures for all three (see also Appendix B). **Tartar** came close, with an F1-score of about 74% to 76%. **Healthy tooth** scored well, but there are only 34 such test photographs, so that result is less certain. **Gum inflammation** (F1-score 41% to 59%) and **plaque** (23% to 31%) were weak; the models missed most plaque photographs.
 P Plaque is the main weakness. Plaque is a thin, pale film that is hard to tell apart from the tooth and from tartar in an ordinary photograph; only one of the four photo collections marked plaque at all; and there are far fewer plaque examples than cavity examples. These are the same reasons why plaque is hard to judge by eye. Gum inflammation has only 84 clean test photographs, so its results are less certain.
 P Accuracy should be read together with the other scores. Most photographs do not show a given rare condition, so a model that rarely reports it still scores a high accuracy: plaque has an accuracy above 95% even though most plaque photographs are missed. This is why precision, recall, and F1-score are shown for every condition.
 P Table {tab:counts} gives the four counts behind these scores, so that the number of correct finds, false alarms, and missed findings can be seen directly.
@@ -589,7 +589,7 @@ P On the laptop, each model analyzed a photograph in about one fifth of a second
 P The live system runs on a smaller, free cloud server with only 512 MB of memory. To fit, it uses a lighter copy of the same two models (ONNX format) and loads each model only while it is working. On that server, a full screening with both models takes about 3 to 4 seconds, and the system uses about 210 MB of memory at rest and about 400 MB at its busiest. The lighter models gave exactly the same results as the originals on 22 test photographs, so the accuracy results in this chapter also apply to the live system. A wait of a few seconds is acceptable because a photograph is uploaded only once per screening.
 ### 4.1.8 Combining the Two Models
 P In the live system, both models look at every photograph and their findings are combined. When both models mark the same condition in about the same place, the two marks become one, and the finding gets a slightly higher confidence (plus 0.08, up to 0.98), because two models agreeing is stronger evidence than one.
-P The combined models found the most problems: for any finding, their recall was 88.0% against 85.5% for YOLOv8, with the best F1-score (87.4%) and AUROC (90.7%). They also had the highest AUROC of the three for every condition (Table {tab:imgcond} and Appendix D). The cost is slightly more false alarms (specificity 81.5% against 83.9% for YOLOv8). Since a missed finding matters more in screening than a false alarm that the dentist can dismiss, this supports running both models.
+P The combined models found the most problems: for any finding, their recall was 88.0% against 85.5% for YOLOv8, with the best F1-score (87.4%) and AUROC (90.7%). They also had the highest AUROC of the three for every condition (Table {tab:imgcond} and Appendix B). The cost is slightly more false alarms (specificity 81.5% against 83.9% for YOLOv8). Since a missed finding matters more in screening than a false alarm that the dentist can dismiss, this supports running both models.
 ### 4.1.9 Summary of the Model Comparison
 P To answer the first problem: on 2,081 clean test photographs, YOLOv8, YOLOv12, and the combined models all scored above 80% on all six per-photograph measures for finding any dental problem and for finding cavities. Tartar came close, while gum inflammation and plaque were weak because of too few and inconsistently marked training photographs. YOLOv8 was slightly better than YOLOv12, YOLOv12 was smaller and slightly faster, and combining them found the most problems. On the stricter standard YOLO score, both reached about 50% mAP@50. Toothwise is therefore a screening aid, not a replacement for the dentist: its findings are suggestions that the dentist confirms or corrects.
 
@@ -704,7 +704,7 @@ W 0.5,3.35,0.45,0.45,0.55,0.5,1.2
 |  | Usability — mean |  |  | 4.00 | 0.00 | Strongly Agree |
 ENDTABLE
 NOTE N = 2 IT experts. SA = Strongly Agree; A = Agree; WM = weighted mean; SD = standard deviation. No statement was rated Disagree or Strongly Disagree.
-P Usability received an average rating of 4.00 out of 4 (SD 0.00), which means Strongly Agree. Both IT experts chose Strongly Agree for all 5 statements. The experts suggested fewer clicks and less scrolling, less white space, and a layout for all screen sizes (Appendices E and G).
+P Usability received an average rating of 4.00 out of 4 (SD 0.00), which means Strongly Agree. Both IT experts chose Strongly Agree for all 5 statements. The experts suggested fewer clicks and less scrolling, less white space, and a layout for all screen sizes (Appendices C and D).
 TABLE re | Evaluation Results for Reliability
 W 0.5,3.35,0.45,0.45,0.55,0.5,1.2
 | Code | Statement | SA | A | WM | SD | Verbal interpretation |
@@ -935,53 +935,43 @@ REF World Health Organization. (2025, March 17). *Oral health* [Fact sheet]. htt
 REF Wu, P.-Y., Lin, Y.-J., Chang, Y.-J., Wei, S.-T., Chen, C.-A., Li, K.-C., Tu, W.-C., & Abu, P. A. R. (2025). Deep learning-assisted diagnostic system: Apices and odontogenic sinus floor level analysis in dental panoramic radiographs. *Bioengineering, 12*(2), 134. https://doi.org/10.3390/bioengineering12020134
 REF Yue, W., Wang, Z., Zhang, J., & Liu, X. (2021). An overview of recommendation techniques and their applications in healthcare. *IEEE/CAA Journal of Automatica Sinica, 8*(4), 701–717. https://doi.org/10.1109/JAS.2021.1003919
 
-#APP APPENDIX A | IT Expert Evaluation Form
-P The form was answered online through Google Forms (Appendix F). Each statement was rated on a four-point scale: Strongly Agree (4), Agree (3), Disagree (2), and Strongly Disagree (1).
-PN *Part I. Evaluator Profile*
-- Name (optional); current position or job title; field of specialization; years of experience in IT; how the system was evaluated (used the deployed system, watched a demonstration, or both).
-PN *Part II. Security*
-- SE1. Only authorized users can log in and access the system's functions.
-- SE2. Each role (Dentist, Receptionist, Dental Assistant, Patient) can only access the features permitted for that role.
-- SE3. Passwords and login sessions are handled securely.
-- SE4. Sensitive staff actions are recorded in the audit log for administrative review.
-- SE5. Login, registration, and password-reset requests are limited against repeated attempts, and a failed password reset does not reveal whether an account exists.
-PN *Part II. Privacy*
-- PR1. Screening images are not publicly exposed and can only be viewed by authorized users.
-- PR2. Patients can only view their own records through the patient portal.
-- PR3. The system handles personal and health information in line with the Data Privacy Act of 2012.
-- PR4. Users must read and agree to the Data Privacy Notice before they can use the system.
-- PR5. The AI assistant answers general dental and clinic questions without reading or revealing patient records.
-PN *Part II. Usability*
-- US1. The system is easy to learn and use, even for first-time users.
-- US2. Navigation between the dashboard, patient records, and screening pages is clear and logical.
-- US3. Labels, buttons, and messages are easy to understand.
-- US4. The layout and design of the interface are visually pleasing and organized.
-- US5. The system works well in both desktop and mobile web browsers.
-PN *Part II. Reliability*
-- RE1. The system runs consistently without unexpected crashes or failures.
-- RE2. When an error occurs, the system shows a clear message and recovers without losing data.
-- RE3. The system produces consistent results when the same image is screened again.
-- RE4. Screening photos and records remain available after the server restarts.
-- RE5. After the server wakes from an idle period, the system works normally without errors.
-PN *Part II. Performance Efficiency*
-- PE1. The system analyzes an uploaded image and displays the results within an acceptable time.
-- PE2. Pages and patient records load quickly.
-- PE3. The system remains responsive while performing AI detection.
-- PE4. Photos in common formats (JPEG, PNG, WebP, HEIC) of up to 15 MB are uploaded and processed without errors.
-- PE5. The model-comparison view clearly reports the processing time of YOLOv8 and YOLOv12 for each screening.
-PN *Part II. Data Protection*
-- DP1. Patient, screening, and detection records are stored accurately and completely.
-- DP2. Related records (patients, screenings, findings, recommendations, notes) remain consistent with one another.
-- DP3. The system prevents invalid or incomplete data from being saved.
-- DP4. The generated PDF screening report matches the stored screening record.
-- DP5. The system protects data against loss through database backups and stored copies of screening photos.
-PN *Part III. Comments and Recommendations*
-- What are the strengths of Toothwise from a technical point of view?
-- What problems, bugs, or security concerns did you encounter?
-- What improvements or additional features would you recommend?
-#APP APPENDIX B | Frequency Distribution of the IT Experts' Ratings
-P The table lists, for every statement, how many of the IT experts chose each rating, the number who answered it (N), and the weighted mean (WM). Names are not included.
-TABLE freqit | Frequency Distribution — IT Expert Evaluation Form
+#APP APPENDIX A | Letter of Approval from CodiSmile Dental Clinic
+FIG letter1 | appendix_letter_1.png | 5.4 | Letter Requesting Approval to Conduct the Study (page 1 of 2)
+FIG letter2 | appendix_letter_2.png | 5.4 | Letter Requesting Approval to Conduct the Study (page 2 of 2)
+#APP APPENDIX B | Detailed Image-Level Results per Model
+P The tables below give the per-condition results of each model on the 2,081 clean test photographs. The results of the two models combined are in Table {tab:imgcond}.
+TABLE img8 | Image-Level Performance per Condition, YOLOv8 (Clean Test Set)
+W 1.3,0.6,0.5,0.58,0.58,0.58,0.58,0.58,0.68
+| Condition | Photos | Thr. | Acc. | Prec. | Rec. | Spec. | F1-score | AUROC |
+| Healthy tooth | 34 | 0.60 | 98.9% | 63.4% | 76.5% | 99.3% | 69.3% | 96.7% |
+| Cavity | 850 | 0.30 | 88.9% | 86.2% | 86.6% | 90.4% | 86.4% | 92.8% |
+| Gum inflammation | 84 | 0.20 | 96.6% | 58.0% | 60.7% | 98.1% | 59.3% | 91.7% |
+| Plaque | 98 | 0.05 | 95.1% | 46.0% | 23.5% | 98.6% | 31.1% | 61.1% |
+| Tartar | 345 | 0.20 | 92.2% | 79.6% | 71.3% | 96.4% | 75.2% | 89.7% |
+| Any finding | 1,204 | 0.20 | 84.8% | 87.9% | 85.5% | 83.9% | 86.7% | 90.0% |
+| Mean of the five classes | — | — | 94.3% | 66.6% | 63.7% | 96.6% | 64.3% | 86.4% |
+ENDTABLE
+NOTE Photos: test photographs that show the condition (out of 2,081). Thr.: validation-tuned cut-off. Acc.: accuracy; Prec.: precision; Rec.: recall; Spec.: specificity.
+TABLE img12 | Image-Level Performance per Condition, YOLOv12 (Clean Test Set)
+W 1.3,0.6,0.5,0.58,0.58,0.58,0.58,0.58,0.68
+| Condition | Photos | Thr. | Acc. | Prec. | Rec. | Spec. | F1-score | AUROC |
+| Healthy tooth | 34 | 0.60 | 98.9% | 62.8% | 79.4% | 99.2% | 70.1% | 92.3% |
+| Cavity | 850 | 0.25 | 88.0% | 84.5% | 86.6% | 89.0% | 85.5% | 93.0% |
+| Gum inflammation | 84 | 0.25 | 95.6% | 44.4% | 38.1% | 98.0% | 41.0% | 90.4% |
+| Plaque | 98 | 0.15 | 95.4% | 53.8% | 14.3% | 99.4% | 22.6% | 57.2% |
+| Tartar | 345 | 0.15 | 91.4% | 74.3% | 73.0% | 95.0% | 73.7% | 88.6% |
+| Any finding | 1,204 | 0.20 | 84.3% | 87.5% | 85.0% | 83.4% | 86.3% | 89.8% |
+| Mean of the five classes | — | — | 93.8% | 64.0% | 58.3% | 96.1% | 58.6% | 84.3% |
+ENDTABLE
+NOTE Photos: test photographs that show the condition (out of 2,081). Thr.: validation-tuned cut-off. Acc.: accuracy; Prec.: precision; Rec.: recall; Spec.: specificity.
+#APP APPENDIX C | Evaluator Feedback and Panel Consultation
+P The IT experts received a video demonstration of Toothwise and the evaluation form through Facebook Messenger and gave their feedback in the same conversations; their names and photos are blurred. Messages in Filipino are summarized in English in the captions.
+FIGPAIR app_it1a | appendix_it1_a.jpg | 2.6 | IT Expert 1 — Demonstration and Form Sent | The researchers sent the demonstration video and the IT Expert Evaluation Form link. || app_it1b | appendix_it1_b.jpg | 2.6 | IT Expert 1 — Feedback | After submitting the form, the expert found the system good and innovative and noted that the code base could also have been shared for review.
+FIGPAIR app_it2a | appendix_it2_a.jpg | 2.95 | IT Expert 2 — Form Submitted | The expert submitted the form and offered the comments as suggestions for improvement and further advancement. || app_it2b | appendix_it2_b.jpg | 2.95 | IT Expert 2 — Feedback | The expert liked the concept of a website with AI detection, found some white space uncomfortable, suggested a layout responsive to all aspect ratios, and asked if it opens on a phone.
+FIGPAIR app_pan1 | appendix_panel_a.jpg | 2.95 | Panel Consultation — Request for Review | The researchers sent the revised paper to a panel member for checking of the statement of the problem. || app_pan2 | appendix_panel_b.jpg | 2.95 | Panel Consultation — Approval | The panel member found the statement of the problem acceptable, noted that the model metrics were corrected and that the panel's advice to test on more datasets was followed, and saw no problem.
+#APP APPENDIX D | IT Expert Evaluation Results
+P The table gives, for every statement of the IT Expert Evaluation Form, how many of the IT experts chose each rating and the weighted mean (WM); the statements are listed in Tables {tab:se} to {tab:dp}. The figures show the response summary from Google Forms, with the evaluators' names blurred, followed by the experts' written comments.
+TABLE freqit | Frequency Distribution of the IT Experts' Ratings
 W 0.6,0.8,0.65,0.75,0.75,0.8,0.55
 | Code | Strongly Agree (4) | Agree (3) | Disagree (2) | Strongly Disagree (1) | N | WM |
 | SE1 | 1 | 1 | 0 | 0 | 2 | 3.50 |
@@ -1015,48 +1005,6 @@ W 0.6,0.8,0.65,0.75,0.75,0.8,0.55
 | DP4 | 2 | 0 | 0 | 0 | 2 | 4.00 |
 | DP5 | 2 | 0 | 0 | 0 | 2 | 4.00 |
 ENDTABLE
-#APP APPENDIX C | Letter of Approval from CodiSmile Dental Clinic
-FIG letter1 | appendix_letter_1.png | 5.4 | Letter Requesting Approval to Conduct the Study (page 1 of 2)
-FIG letter2 | appendix_letter_2.png | 5.4 | Letter Requesting Approval to Conduct the Study (page 2 of 2)
-#APP APPENDIX D | Detailed Image-Level Results per Model
-P The tables below give the per-condition results of each model on the 2,081 clean test photographs. The results of the two models combined are in Table {tab:imgcond}.
-TABLE img8 | Image-Level Performance per Condition, YOLOv8 (Clean Test Set)
-W 1.3,0.6,0.5,0.58,0.58,0.58,0.58,0.58,0.68
-| Condition | Photos | Thr. | Acc. | Prec. | Rec. | Spec. | F1-score | AUROC |
-| Healthy tooth | 34 | 0.60 | 98.9% | 63.4% | 76.5% | 99.3% | 69.3% | 96.7% |
-| Cavity | 850 | 0.30 | 88.9% | 86.2% | 86.6% | 90.4% | 86.4% | 92.8% |
-| Gum inflammation | 84 | 0.20 | 96.6% | 58.0% | 60.7% | 98.1% | 59.3% | 91.7% |
-| Plaque | 98 | 0.05 | 95.1% | 46.0% | 23.5% | 98.6% | 31.1% | 61.1% |
-| Tartar | 345 | 0.20 | 92.2% | 79.6% | 71.3% | 96.4% | 75.2% | 89.7% |
-| Any finding | 1,204 | 0.20 | 84.8% | 87.9% | 85.5% | 83.9% | 86.7% | 90.0% |
-| Mean of the five classes | — | — | 94.3% | 66.6% | 63.7% | 96.6% | 64.3% | 86.4% |
-ENDTABLE
-NOTE Photos: test photographs that show the condition (out of 2,081). Thr.: validation-tuned cut-off. Acc.: accuracy; Prec.: precision; Rec.: recall; Spec.: specificity.
-TABLE img12 | Image-Level Performance per Condition, YOLOv12 (Clean Test Set)
-W 1.3,0.6,0.5,0.58,0.58,0.58,0.58,0.58,0.68
-| Condition | Photos | Thr. | Acc. | Prec. | Rec. | Spec. | F1-score | AUROC |
-| Healthy tooth | 34 | 0.60 | 98.9% | 62.8% | 79.4% | 99.2% | 70.1% | 92.3% |
-| Cavity | 850 | 0.25 | 88.0% | 84.5% | 86.6% | 89.0% | 85.5% | 93.0% |
-| Gum inflammation | 84 | 0.25 | 95.6% | 44.4% | 38.1% | 98.0% | 41.0% | 90.4% |
-| Plaque | 98 | 0.15 | 95.4% | 53.8% | 14.3% | 99.4% | 22.6% | 57.2% |
-| Tartar | 345 | 0.15 | 91.4% | 74.3% | 73.0% | 95.0% | 73.7% | 88.6% |
-| Any finding | 1,204 | 0.20 | 84.3% | 87.5% | 85.0% | 83.4% | 86.3% | 89.8% |
-| Mean of the five classes | — | — | 93.8% | 64.0% | 58.3% | 96.1% | 58.6% | 84.3% |
-ENDTABLE
-NOTE Photos: test photographs that show the condition (out of 2,081). Thr.: validation-tuned cut-off. Acc.: accuracy; Prec.: precision; Rec.: recall; Spec.: specificity.
-#APP APPENDIX E | Evaluator Feedback and Panel Consultation
-P The IT experts received a video demonstration of Toothwise and the evaluation form through Facebook Messenger and gave their feedback in the same conversations; their names and photos are blurred. Messages in Filipino are summarized in English in the captions.
-FIGPAIR app_it1a | appendix_it1_a.jpg | 2.6 | IT Expert 1 — Demonstration and Form Sent | The researchers sent the demonstration video and the IT Expert Evaluation Form link. || app_it1b | appendix_it1_b.jpg | 2.6 | IT Expert 1 — Feedback | After submitting the form, the expert found the system good and innovative and noted that the code base could also have been shared for review.
-FIGPAIR app_it2a | appendix_it2_a.jpg | 2.95 | IT Expert 2 — Form Submitted | The expert submitted the form and offered the comments as suggestions for improvement and further advancement. || app_it2b | appendix_it2_b.jpg | 2.95 | IT Expert 2 — Feedback | The expert liked the concept of a website with AI detection, found some white space uncomfortable, suggested a layout responsive to all aspect ratios, and asked if it opens on a phone.
-FIGPAIR app_pan1 | appendix_panel_a.jpg | 2.95 | Panel Consultation — Request for Review | The researchers sent the revised paper to a panel member for checking of the statement of the problem. || app_pan2 | appendix_panel_b.jpg | 2.95 | Panel Consultation — Approval | The panel member found the statement of the problem acceptable, noted that the model metrics were corrected and that the panel's advice to test on more datasets was followed, and saw no problem.
-#APP APPENDIX F | Online IT Expert Evaluation Form
-P The figures show every page of the IT Expert Evaluation Form in Google Forms as the IT experts saw it, without answers.
-FIGPAIR form_it_1 | form_it_1.jpg | 2.95 | IT Expert Evaluation Form (1 of 7) | || form_it_2 | form_it_2.jpg | 2.95 | IT Expert Evaluation Form (2 of 7) | 
-FIGPAIR form_it_3 | form_it_3.jpg | 2.95 | IT Expert Evaluation Form (3 of 7) | || form_it_4 | form_it_4.jpg | 2.95 | IT Expert Evaluation Form (4 of 7) | 
-FIGPAIR form_it_5 | form_it_5.jpg | 2.95 | IT Expert Evaluation Form (5 of 7) | || form_it_6 | form_it_6.jpg | 2.95 | IT Expert Evaluation Form (6 of 7) | 
-FIG form_it_7 | form_it_7.jpg | 2.95 | IT Expert Evaluation Form (7 of 7)
-#APP APPENDIX G | IT Expert Evaluation Results
-P The figures show the response summary of the IT Expert Evaluation Form from Google Forms; the evaluators' names are blurred. Tables {tab:se} to {tab:dp} and Appendix B give the same ratings as numbers.
 FIGPAIR res_prof | results_it_profile.png | 2.95 | IT Expert Form Results — Evaluator Profile | || res_q1 | results_it_quality_1.png | 2.95 | IT Expert Form Results — Security, Privacy, and Usability | 
 FIGPAIR res_q2 | results_it_quality_2.png | 2.95 | IT Expert Form Results — Reliability, Performance Efficiency, and Data Protection | || res_com | results_it_comments.png | 2.95 | IT Expert Form Results — Comments and Recommendations | 
 PN **Comments and recommendations, as written**

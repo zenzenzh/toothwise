@@ -255,8 +255,7 @@ def main(path):
       f"not all IT experts, the software quality results in this section come from the IT Expert Evaluation "
       f"Form.")
     w("### 4.3.2 Research Instrument")
-    w(f"P Two instruments were used. The IT Expert Evaluation Form is reproduced in Appendix A and shown in Appendix F. "
-      f"It asks for the evaluator's profile, then has {len(IT_ITEMS)} statements, five "
+    w(f"P Two instruments were used. The IT Expert Evaluation Form asks for the evaluator's profile, then has {len(IT_ITEMS)} statements, five "
       f"for each of the six quality characteristics named in the fourth problem, and three open-ended questions "
       f"on the system's technical strengths, the problems found, and recommended improvements. The user survey "
       f"has {len(feat_items)} statements on the three main features, {len(by_sec[MANUAL]) + len(by_sec[CONSIST])} "
@@ -307,7 +306,7 @@ def main(path):
             "Performance Efficiency": "pe", "Data Protection": "dp"}
     extra = {
         "Usability": " The experts suggested fewer clicks and less scrolling, less white space, and a layout for "
-                     "all screen sizes (Appendices E and G).",
+                     "all screen sizes (Appendices C and D).",
         "Reliability": " This includes RE5, on the system working normally after the free server wakes from an idle "
                        "period, a limitation noted in Chapter I.",
     }
@@ -455,35 +454,12 @@ def main(path):
         "10173). The screening images shown in this paper are demonstration images.",
     ]
 
-    # Appendices (IT expert evaluation only)
-    app = ["#APP APPENDIX A | IT Expert Evaluation Form",
-           f"P The form was answered online through Google Forms (Appendix F). Each statement was rated on a "
-           f"four-point scale: Strongly Agree (4), Agree (3), Disagree (2), and Strongly Disagree (1).",
-           "PN *Part I. Evaluator Profile*",
-           "- Name (optional); current position or job title; field of specialization; years of experience in IT; "
-           "how the system was evaluated (used the deployed system, watched a demonstration, or both)."]
-    for name, code in IT_SECTIONS:
-        app.append(f"PN *Part II. {name}*")
-        for c, (stmt, _) in IT_ITEMS.items():
-            if c.startswith(code):
-                app.append(f"- {c}. {stmt}")
-    app.append("PN *Part III. Comments and Recommendations*")
-    for q in IT_COMMENTS:
-        app.append(f"- {q}")
-    app.append("#APP APPENDIX B | Frequency Distribution of the IT Experts' Ratings")
-    app.append("P The table lists, for every statement, how many of the IT experts chose each rating, the number "
-               "who answered it (N), and the weighted mean (WM). Names are not included.")
-    app.append("TABLE freqit | Frequency Distribution — IT Expert Evaluation Form")
-    app.append("W 0.6,0.8,0.65,0.75,0.75,0.8,0.55")
-    app.append("| Code | Strongly Agree (4) | Agree (3) | Disagree (2) | Strongly Disagree (1) | N | WM |")
-    for c, (_, xs) in IT_ITEMS.items():
-        app.append(f"| {c} | {xs.count(4)} | {xs.count(3)} | {xs.count(2)} | {xs.count(1)} | {len(xs)} | "
-                   f"{f2(st.mean(xs))} |")
-    app.append("ENDTABLE")
-    app.append("#APP APPENDIX C | Letter of Approval from CodiSmile Dental Clinic")
+    # Appendices: A letter, B image-level results (hand-maintained), C feedback, D IT expert results.
+    app = []
+    app.append("#APP APPENDIX A | Letter of Approval from CodiSmile Dental Clinic")
     app.append("FIG letter1 | appendix_letter_1.png | 5.4 | Letter Requesting Approval to Conduct the Study (page 1 of 2)")
     app.append("FIG letter2 | appendix_letter_2.png | 5.4 | Letter Requesting Approval to Conduct the Study (page 2 of 2)")
-    app.append("#APP APPENDIX E | Evaluator Feedback and Panel Consultation")
+    app.append("#APP APPENDIX C | Evaluator Feedback and Panel Consultation")
     app.append("P The IT experts received a video demonstration of Toothwise and the evaluation form through Facebook "
                "Messenger and gave their feedback in the same conversations; their names and photos are blurred. "
                "Messages in Filipino are summarized in English in the captions.")
@@ -504,23 +480,18 @@ def main(path):
                "The panel member found the statement of the problem acceptable, noted that the model metrics were "
                "corrected and that the panel's advice to test on more datasets was followed, and saw no problem.")
 
-    # Appendix F: the IT expert form, captured page by page without answers.
-    app.append("#APP APPENDIX F | Online IT Expert Evaluation Form")
-    app.append("P The figures show every page of the IT Expert Evaluation Form in Google Forms as the IT experts "
-               "saw it, without answers.")
-    n = len(list((HERE / "figures").glob("form_it_*.jpg")))
-    for a in range(1, n + 1, 2):
-        if a < n:
-            app.append(f"FIGPAIR form_it_{a} | form_it_{a}.jpg | 2.95 | IT Expert Evaluation Form ({a} of {n}) | "
-                       f"|| form_it_{a+1} | form_it_{a+1}.jpg | 2.95 | IT Expert Evaluation Form ({a+1} of {n}) | ")
-        else:
-            app.append(f"FIG form_it_{a} | form_it_{a}.jpg | 2.95 | IT Expert Evaluation Form ({a} of {n})")
-
-    # Appendix G: the IT experts' open-ended answers, verbatim.
-    app.append("#APP APPENDIX G | IT Expert Evaluation Results")
-    app.append("P The figures show the response summary of the IT Expert Evaluation Form from Google Forms; the "
-               "evaluators' names are blurred. Tables {tab:se} to {tab:dp} and Appendix B give the same ratings "
-               "as numbers.")
+    app.append("#APP APPENDIX D | IT Expert Evaluation Results")
+    app.append("P The table gives, for every statement of the IT Expert Evaluation Form, how many of the IT experts "
+               "chose each rating and the weighted mean (WM); the statements are listed in Tables {tab:se} to "
+               "{tab:dp}. The figures show the response summary from Google Forms, with the evaluators' names "
+               "blurred, followed by the experts' written comments.")
+    app.append("TABLE freqit | Frequency Distribution of the IT Experts' Ratings")
+    app.append("W 0.6,0.8,0.65,0.75,0.75,0.8,0.55")
+    app.append("| Code | Strongly Agree (4) | Agree (3) | Disagree (2) | Strongly Disagree (1) | N | WM |")
+    for c, (_, xs) in IT_ITEMS.items():
+        app.append(f"| {c} | {xs.count(4)} | {xs.count(3)} | {xs.count(2)} | {xs.count(1)} | {len(xs)} | "
+                   f"{f2(st.mean(xs))} |")
+    app.append("ENDTABLE")
     app.append("FIGPAIR res_prof | results_it_profile.png | 2.95 | IT Expert Form Results — Evaluator Profile | "
                "|| res_q1 | results_it_quality_1.png | 2.95 | IT Expert Form Results — Security, Privacy, and Usability | ")
     app.append("FIGPAIR res_q2 | results_it_quality_2.png | 2.95 | IT Expert Form Results — Reliability, Performance "
@@ -564,10 +535,12 @@ def main(path):
     text = text[:a] + "\n".join(L) + "\n\n" + text[b:]
     # appendices: generated A-C, hand-maintained D (image-level results), generated E onward
     a = text.find("#APP ")
-    d0 = text.index("#APP APPENDIX D | Detailed Image-Level")
+    d0 = re.search(r"#APP APPENDIX [A-Z] \| Detailed Image-Level", text).start()
     d1 = text.find("#APP ", d0 + 5)
     app_d = text[d0:d1 if d1 > 0 else len(text)].rstrip("\n").split("\n")
-    k = app.index(next(x for x in app if x.startswith("#APP APPENDIX E |")))
+    app_d[0] = re.sub(r"APPENDIX [A-Z] \|", "APPENDIX B |", app_d[0])
+    text = re.sub(r"\bAppendix D\b", "Appendix B", text)     # references to the image-level appendix
+    k = app.index(next(x for x in app if x.startswith("#APP APPENDIX C |")))
     app = app[:k] + app_d + app[k:]
     text = text[:a].rstrip("\n") + "\n\n" + "\n".join(app) + "\n"
     CONTENT.write_text(text, encoding="utf-8")
