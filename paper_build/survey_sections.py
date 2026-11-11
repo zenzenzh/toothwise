@@ -530,7 +530,7 @@ def main(path):
     ]
     for pat, rep in hand:
         text, k = re.subn(pat, lambda m: rep, text)
-        assert k == 1, pat
+        assert k == 1 or (k == 0 and rep in text), pat
     # Chapter III evaluation procedure
     a = text.index("## 3.10 Evaluation Procedure")
     b = text.index("## 3.11 Full Current System Screenshots")
