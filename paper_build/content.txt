@@ -34,7 +34,7 @@ P This study seeks to answer the following:
 1. What limitations of visual-only screening make early-stage tartar, plaque, cavity, and gum inflammation and healthy tooth, as well as their relative severity, difficult to detect and distinguish consistently at CodiSmile Dental Clinic?
 2. What gaps exist in how screening findings are recorded and made accessible to dentists and patients, given the absence of a standardized visual record and a way for patients to review their own history?
 3. What barriers prevent patients from receiving timely, finding-specific preventive guidance after screening?
-4. What is the level of acceptability of the Toothwise system in terms of the six ISO/IEC 25010 quality characteristics evaluated in this study (security, privacy, usability, reliability, performance efficiency, and data protection), as evaluated by IT experts, and of its main features, as evaluated by user respondents?
+4. What is the level of acceptability of the Toothwise system in terms of the six ISO/IEC 25010 quality characteristics evaluated in this study (security, privacy, usability, reliability, performance efficiency, and data protection), as evaluated by IT experts and patient respondents?
 5. How do the respondents assess the effect of Toothwise on screening consistency and screening time compared with the current manual process?
 
 ## 1.3 Objectives of the Study
@@ -44,7 +44,7 @@ P This study seeks to answer the following:
 1. To train YOLOv12 and YOLOv8 on annotated still intraoral images to detect tartar, plaque, cavity, gum inflammation, and healthy tooth and compute an associated risk score and risk classification (low, medium, high) from the detected findings, and compare the two models by precision, recall, mAP, and inference speed.
 2. To develop a results interface showing bounding boxes, condition labels, plain-language descriptions, and risk classification, with a per-patient record of findings across visits accessible to dentists and, through a self-service patient portal, to patients themselves.
 3. To develop a KNN-based feature that generates a personalized prevention plan from the detected findings and computed risk classification.
-4. To evaluate Toothwise using six ISO/IEC 25010 quality characteristics with IT experts, and its main features with user respondents.
+4. To evaluate Toothwise using six ISO/IEC 25010 quality characteristics with IT experts and patient respondents.
 5. To assess the effect of Toothwise on screening consistency and screening time compared with the current manual process.
 
 ## 1.4 Scope, Delimitation and Limitation of the Study
