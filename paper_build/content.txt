@@ -2,7 +2,7 @@
 // Lines starting with "=" copy an unchanged paragraph from the earlier PDF (old_text.txt).
 TITLEPAGE
 FRONTH ABSTRACT
-PN Dental screening at CodiSmile Dental Clinic relies on visual inspection, which makes early tartar, plaque, cavity, and gum inflammation hard to detect consistently, leaves no standardized visual record, and gives patients little finding-specific guidance. This study developed Toothwise, a web-based screening support system that detects these four conditions and healthy tooth in still intraoral photographs with a fused YOLOv8 and YOLOv12 ensemble, computes a 0–100 risk score and a low, medium, or high risk tier, and generates a personalized prevention plan with a K-Nearest Neighbors (KNN) classifier. The system was developed with an Agile methodology using React, FastAPI, and PostgreSQL, and deployed on cloud hosting. On a held-out test set of 2,930 images, YOLOv8 reached an mAP@50 of 51.91% and YOLOv12 48.11%, and the fused ensemble 54.24%; cavity was detected best and plaque worst. The KNN classifier reproduced the clinical risk rule with 92.75% accuracy on 2,000 unseen cases, and all 119 automated backend tests passed. The system was evaluated through an online questionnaire answered by 103 respondents (98 patient respondents and 5 IT experts) on a four-point scale. The six ISO/IEC 25010 quality characteristics (security, privacy, usability, reliability, performance efficiency, and data protection), rated by 12 respondents, obtained an overall weighted mean of 3.68, and the system's detection, results, and prevention-plan features, rated by all 103, obtained 3.48; both are interpreted as Highly Acceptable. The study concludes that Toothwise is an acceptable screening and documentation aid that supports, but does not replace, the dentist's diagnosis, and recommends more training data for weak classes such as plaque, the use of an intraoral camera for clearer images, a larger evaluation with dentists and clinic staff, and a controlled comparison of screening time and consistency.
+PN Dental screening at CodiSmile Dental Clinic relies on visual inspection, which makes early tartar, plaque, cavity, and gum inflammation hard to detect consistently, leaves no standardized visual record, and gives patients little finding-specific guidance. This study developed Toothwise, a web-based screening support system that detects these four conditions and healthy tooth in still intraoral photographs with a fused YOLOv8 and YOLOv12 ensemble, computes a 0–100 risk score and a low, medium, or high risk tier, and generates a personalized prevention plan with a K-Nearest Neighbors (KNN) classifier. The system was developed with an Agile methodology using React, FastAPI, and PostgreSQL, and deployed on cloud hosting. On a held-out test set of 2,930 images, YOLOv8 reached an mAP@50 of 51.91% and YOLOv12 48.11%, and the fused ensemble 54.24%; cavity was detected best and plaque worst. The KNN classifier reproduced the clinical risk rule with 92.75% accuracy on 2,000 unseen cases, and all 119 automated backend tests passed. The system was evaluated through two online forms answered on a four-point scale. The six ISO/IEC 25010 quality characteristics (security, privacy, usability, reliability, performance efficiency, and data protection), rated by 2 IT experts, obtained an overall weighted mean of 3.97, and the system's detection, results, and prevention-plan features, rated by 103 user respondents (98 patient respondents and 5 IT practitioners), obtained 3.48; both are interpreted as Highly Acceptable. The study concludes that Toothwise is an acceptable screening and documentation aid that supports, but does not replace, the dentist's diagnosis, and recommends more training data for weak classes such as plaque, the use of an intraoral camera for clearer images, a larger evaluation with dentists and clinic staff, and a controlled comparison of screening time and consistency.
 PN ***Keywords:*** dental screening, YOLOv8, YOLOv12, ensemble object detection, K-Nearest Neighbors, prevention plan, ISO/IEC 25010
 PAGEBREAK
 TOC
@@ -34,7 +34,7 @@ P This study seeks to answer the following:
 1. What limitations of visual-only screening make early-stage tartar, plaque, cavity, and gum inflammation and healthy tooth, as well as their relative severity, difficult to detect and distinguish consistently at CodiSmile Dental Clinic?
 2. What gaps exist in how screening findings are recorded and made accessible to dentists and patients, given the absence of a standardized visual record and a way for patients to review their own history?
 3. What barriers prevent patients from receiving timely, finding-specific preventive guidance after screening?
-4. What is the level of acceptability of the Toothwise system in terms of the six ISO/IEC 25010 quality characteristics evaluated in this study (security, privacy, usability, reliability, performance efficiency, and data protection), as evaluated by IT experts and patient respondents?
+4. What is the level of acceptability of the Toothwise system in terms of the six ISO/IEC 25010 quality characteristics evaluated in this study (security, privacy, usability, reliability, performance efficiency, and data protection), as evaluated by IT experts, and of its main features, as evaluated by user respondents?
 5. How do the respondents assess the effect of Toothwise on screening consistency and screening time compared with the current manual process?
 
 ## 1.3 Objectives of the Study
@@ -44,7 +44,7 @@ P This study seeks to answer the following:
 1. To train YOLOv12 and YOLOv8 on annotated still intraoral images to detect tartar, plaque, cavity, gum inflammation, and healthy tooth and compute an associated risk score and risk classification (low, medium, high) from the detected findings, and compare the two models by precision, recall, mAP, and inference speed.
 2. To develop a results interface showing bounding boxes, condition labels, plain-language descriptions, and risk classification, with a per-patient record of findings across visits accessible to dentists and, through a self-service patient portal, to patients themselves.
 3. To develop a KNN-based feature that generates a personalized prevention plan from the detected findings and computed risk classification.
-4. To evaluate Toothwise using six ISO/IEC 25010 quality characteristics with IT experts and patient respondents.
+4. To evaluate Toothwise using six ISO/IEC 25010 quality characteristics with IT experts, and its main features with user respondents.
 5. To assess the effect of Toothwise on screening consistency and screening time compared with the current manual process.
 
 ## 1.4 Scope, Delimitation and Limitation of the Study
@@ -52,7 +52,7 @@ P This study seeks to answer the following:
 = This study covers the design, development, training
 ~ Using still images captured through a standard device camera, such as a smartphone or webcam, and uploaded to the system, >>> Using still photographs taken with a standard device camera, such as a smartphone, and uploaded to the system as JPEG, PNG, or WebP files,
 ~ The intended users are licensed dentists >>> Toothwise is a browser-based web application; for the study it is deployed on cloud hosting (the React frontend on Vercel, the FastAPI backend on Render, and the PostgreSQL database on Neon), so clinic staff and patients can open it from any device with a modern web browser and an Internet connection. The intended users are licensed dentists
-~ The system is evaluated by IT experts and clinical end users using the six quality characteristics of ISO/IEC 25010, and its effect on screening consistency and screening time is compared with the current manual process, using the dentist's findings as the reference. >>> The system is evaluated by IT experts and patient respondents through an online questionnaire based on six ISO/IEC 25010 quality characteristics, and the respondents also assess its effect on screening consistency and screening time compared with the current manual process.
+~ The system is evaluated by IT experts and clinical end users using the six quality characteristics of ISO/IEC 25010, and its effect on screening consistency and screening time is compared with the current manual process, using the dentist's findings as the reference. >>> The system's software quality is evaluated by IT experts through an online form based on six ISO/IEC 25010 quality characteristics, its main features are evaluated by user respondents through an online survey, and the respondents also assess its effect on screening consistency and screening time compared with the current manual process.
 ### Delimitations
 = Toothwise is a support tool and not a replacement
 ~ The system works only with still photographic images captured through a standard device camera or uploaded from an existing file, and does not process X-rays or any other radiographic input, nor does it require specialized intraoral camera hardware. >>> The system works only with still photographs that are uploaded as image files (for example, a photograph taken with a smartphone camera); it does not analyze live video, does not process X-rays or any other radiographic input, and does not require specialized intraoral camera hardware.
@@ -354,25 +354,26 @@ P The system was implemented as a three-tier web application: a React.js single-
 ## 3.10 Evaluation Procedure
 P This section describes how the acceptability of Toothwise was evaluated (the fourth and fifth problems of the study): who the respondents were, the instrument they answered, how the data were gathered, and how the responses were treated. The results are presented in Sections 4.3 and 4.4.
 ### 3.10.1 Respondents and Data Gathering
-P The evaluation questionnaire was prepared in Google Forms and shared online. Participation was voluntary: the form opened with a statement explaining the purpose of the study and the handling of the data, and only respondents who agreed to it could continue. Each respondent first stated their group, either patient respondent (a member of the public evaluating the system from a patient's point of view) or IT expert (IT practitioner), and then answered the parts of the questionnaire intended for them. The software quality part (ISO/IEC 25010) was written for dentists, clinic staff, and IT experts, while the parts on the system's features were written for all respondents. Responses were collected from October 19 to 28, 2026, and 103 complete submissions were received.
-P The study used purposive sampling, a non-probability technique in which respondents are chosen because they fit the purpose of the study (Etikan et al., 2016). Two groups were sampled. User respondents had to meet two criteria: they belonged to the group the system serves through its patient portal, that is, dental patients, and they agreed to the consent statement after reading the purpose of the study. A minimum of 50 user respondents was set, and 98 took part. IT experts had to work in information technology and were personally invited by the researchers, because the software quality part of the questionnaire calls for technical knowledge. The form link was shared online, and the form showed each respondent only the parts meant for their group. Because the respondents were not randomly selected, the results describe the respondents of this study and are not generalized to all patients or all IT practitioners. Tables {tab:resp} and {tab:sectn} show how many respondents answered each section.
+P Two evaluation forms were prepared in Google Forms and answered online: the IT Expert Evaluation Form, on the six ISO/IEC 25010 quality characteristics, and the user survey, on the system's main features. Participation was voluntary: each form opened with a statement explaining the purpose of the study and the handling of the data, and only respondents who agreed to it could continue. The IT experts were sent a video demonstration of Toothwise, the deployed system's address with test accounts, and the form link. In the user survey, each respondent first stated their group and then answered only the parts meant for that group. The user survey was answered from October 19 to 28, 2026 with 103 complete submissions, and the IT Expert Evaluation Form by 2 IT experts.
+P The study used purposive sampling, a non-probability technique in which respondents are chosen because they fit the purpose of the study (Etikan et al., 2016). Two groups were sampled. IT experts had to work in information technology and were personally invited by the researchers, because the software quality evaluation calls for technical knowledge; two took part. User respondents had to be able to judge the system from a user's point of view, as a dental patient or as an IT practitioner, and had to agree to the consent statement. A minimum of 50 user respondents was set, and 103 took part (98 patient respondents and 5 IT practitioners). Because the respondents were not randomly selected, the results describe the respondents of this study and are not generalized to all patients or all IT practitioners. Tables {tab:itprof}, {tab:resp}, and {tab:sectn} show the respondents.
 ### 3.10.2 Research Instrument
-P The instrument has eleven sections with 46 statements, listed in Table {tab:chars} and reproduced in full in Appendix A, plus three open-ended questions on what respondents liked, the difficulties they met, and the improvements they suggest. Six sections follow the quality characteristics named in the fourth problem of the study, three evaluate the system's main features, and two concern the current manual screening process and Toothwise's effect on screening consistency and time (the fifth problem).
-TABLE chars | Sections of the Evaluation Instrument
+P Two instruments were used; both are reproduced in Appendix A and shown as online forms in Appendix E. The IT Expert Evaluation Form asks for the evaluator's profile, then has 30 statements, five for each of the six quality characteristics named in the fourth problem, and three open-ended questions on the system's technical strengths, the problems found, and recommended improvements. The user survey has 14 statements on the three main features, 12 statements on the current manual process and on screening consistency and time (the fifth problem), a software quality part for clinic staff and IT practitioners, and three open-ended questions on what respondents liked, the difficulties they met, and the improvements they suggest (Table {tab:chars}).
+TABLE chars | Sections of the Evaluation Instruments
 W 2.6,0.9,0.6,1.9
-| Section | Item codes | Items | Problem addressed |
-| Security | SE1–SE4 | 4 | Problem 4 (quality characteristic) |
-| Privacy | PR1–PR3 | 3 | Problem 4 (quality characteristic) |
-| Usability | US1–US4 | 4 | Problem 4 (quality characteristic) |
-| Reliability | RE1–RE3 | 3 | Problem 4 (quality characteristic) |
-| Performance Efficiency | PE1–PE3 | 3 | Problem 4 (quality characteristic) |
-| Data Protection | DP1–DP3 | 3 | Problem 4 (quality characteristic) |
-| AI Detection and Risk Classification | AD1–AD5 | 5 | Problems 1 and 4 |
-| Results Interface and Patient Records | RI1–RI5 | 5 | Problems 2 and 4 |
-| KNN-Based Personalized Prevention Plan | PP1–PP4 | 4 | Problems 3 and 4 |
-| Current Manual Screening Process | MS1–MS7 | 7 | Problem 1 (current process) |
-| Screening Consistency and Time | SC1–SC5 | 5 | Problem 5 |
-| Total |  | 46 |  |
+| Instrument and section | Item codes | Items | Problem addressed |
+| IT Expert Form — Security | SE1–SE5 | 5 | Problem 4 (quality characteristic) |
+| IT Expert Form — Privacy | PR1–PR5 | 5 | Problem 4 (quality characteristic) |
+| IT Expert Form — Usability | US1–US5 | 5 | Problem 4 (quality characteristic) |
+| IT Expert Form — Reliability | RE1–RE5 | 5 | Problem 4 (quality characteristic) |
+| IT Expert Form — Performance Efficiency | PE1–PE5 | 5 | Problem 4 (quality characteristic) |
+| IT Expert Form — Data Protection | DP1–DP5 | 5 | Problem 4 (quality characteristic) |
+| User Survey — AI Detection and Risk Classification | AD1–AD5 | 5 | Problems 1 and 4 |
+| User Survey — Results Interface and Patient Records | RI1–RI5 | 5 | Problems 2 and 4 |
+| User Survey — KNN-Based Personalized Prevention Plan | PP1–PP4 | 4 | Problems 3 and 4 |
+| User Survey — Current Manual Screening Process | MS1–MS7 | 7 | Problem 1 (current process) |
+| User Survey — Screening Consistency and Time | SC1–SC5 | 5 | Problem 5 |
+| User Survey — Software Quality (Part B3) | SE1–DP3 | 20 | Problem 4 (supplementary) |
+| Total |  | 76 |  |
 ENDTABLE
 ### 3.10.3 Rating Scale and Interpretation
 P Each statement is rated on a four-point Likert scale with no neutral option, so every respondent states either agreement or disagreement. The weighted mean of each statement and section is interpreted using the ranges in Table {tab:likert}, which divide the 1-to-4 range into four equal intervals of 0.75.
@@ -387,7 +388,7 @@ ENDTABLE
 ### 3.10.4 Statistical Treatment
 P The weighted mean of each statement is computed as WM = Σ(f × x) / N, where f is the number of respondents who chose a rating, x is the rating (1 to 4), and N is the number of respondents who answered the statement. The mean of a section is the average of its statement means, and the overall mean is the average of the section means. The standard deviation (SD) of the ratings shows how closely the respondents agreed with one another: the smaller the SD, the more uniform the ratings.
 ### 3.10.5 Ethical Considerations
-P All respondents gave their informed consent before answering. The questionnaire asked for a name only as an optional field; names are not reported anywhere in this paper, and results are presented only as group statistics. No patient records or photographs from CodiSmile Dental Clinic were collected for the evaluation, and all data were handled in accordance with the Data Privacy Act of 2012 (Republic Act No. 10173). The screening images shown in this paper are demonstration images.
+P All respondents gave their informed consent before answering. The user survey asked for the respondent's name and the IT Expert Evaluation Form asked for it as an optional field; names are not reported anywhere in this paper, and results are presented only as group statistics. No patient records or photographs from CodiSmile Dental Clinic were collected for the evaluation, and all data were handled in accordance with the Data Privacy Act of 2012 (Republic Act No. 10173). The screening images shown in this paper are demonstration images.
 
 ## 3.11 Full Current System Screenshots
 P This section documents the current Toothwise system as implemented, one screen per numbered figure, in the order a user would encounter them: the public landing page, the staff and patient sign-in pages, password recovery and change, the dashboard, patient management, the screening workflow and results, staff management, the audit log, the rest of the patient portal, and the PDF screening report. The screenshots were captured from a running instance of the current system in light mode, using demonstration accounts, demonstration patients, and sample intraoral photographs taken from CodiSmile Dental Clinic's own published before-and-after images; no patient records are shown.
@@ -406,7 +407,7 @@ FIG s_phome | shot_portal_home.png | 3.4 | Patient Portal — Home | Latest risk
 FIGPAIR s_pscreen | shot_portal_screening.png | 2.75 | Patient Portal — Screening Details | One screening: the photograph with its findings and the prevention plan. || s_report | shot_report_1.png | 2.75 | PDF Screening Report | First page of the report: patient details, risk level, image, findings, and prevention plan.
 
 #CH CHAPTER IV | RESULTS AND DISCUSSION
-P This chapter presents the results of the study. It follows the five problems in Chapter I: how well the trained models detect the five dental conditions (Section 4.1, Problem 1), how the finished system records findings and gives prevention advice (Section 4.2, Problems 2 and 3), how the respondents rated the system (Section 4.3, Problem 4), and how the respondents judged its effect on screening consistency and time (Section 4.4, Problem 5). Sections 4.3 and 4.4 are based on the answers of 103 respondents.
+P This chapter presents the results of the study. It follows the five problems in Chapter I: how well the trained models detect the five dental conditions (Section 4.1, Problem 1), how the finished system records findings and gives prevention advice (Section 4.2, Problems 2 and 3), how the respondents rated the system (Section 4.3, Problem 4), and how the respondents judged its effect on screening consistency and time (Section 4.4, Problem 5). Sections 4.3 and 4.4 are based on the answers of 2 IT experts and 103 user respondents.
 ## 4.1 Results of the Trained Datasets
 P This section answers the first problem: how accurately can the trained models find tartar, plaque, cavity, gum inflammation, and healthy tooth in an ordinary photograph of the teeth, and which of the two models, YOLOv8 or YOLOv12, does it better and faster?
 ### 4.1.1 Dataset Preparation
@@ -637,98 +638,118 @@ NOTE Landing (mobile) is the median of three runs (67, 86, 92); other rows are s
 P Accessibility and best practices scored a perfect 100 on every page. Speed scored 99 to 100 on desktop and 86 to 98 on phones. The lowest, the home page on a phone, is caused by the amount of code and pictures the redesigned page loads; its score also changed the most between runs. Splitting the website's code into smaller parts cut the main download from 231 KB to 95 KB. The staff pages, which Lighthouse cannot open because they need a login, were checked separately with axe-core against the WCAG 2.0 and 2.1 accessibility rules (Levels A and AA) on all eight staff pages and five pop-up windows, in both light and dark mode; no problems were found.
 
 ## 4.3 Software Quality Evaluation Based on ISO/IEC 25010
-P This section answers the fourth problem: how acceptable is Toothwise to the people who used it? 103 respondents answered the online questionnaire (Google Forms) from October 19 to 28, 2026, after agreeing to take part. None of them was a patient of CodiSmile Dental Clinic, and no clinic records were used.
+P This section answers the fourth problem: how acceptable is Toothwise? Two groups evaluated the system. Two IT experts rated its software quality on the six ISO/IEC 25010 characteristics using the IT Expert Evaluation Form, and 103 user respondents rated its main features using the user survey from October 19 to 28, 2026. Both forms were answered online (Google Forms) after the respondents agreed to take part. None of the respondents was a patient of CodiSmile Dental Clinic, and no clinic records were used.
 ### 4.3.1 Respondents
-P The respondents were in two groups (Table {tab:resp}): 98 patient respondents, who tried the system from a patient's point of view, and 5 IT experts. Different parts of the questionnaire were meant for different groups, so not every section was answered by the same number of people (Table {tab:sectn}).
-TABLE resp | Distribution of Respondents
+P The two IT experts both specialize in software and web development; one has 1 to 3 years and the other 4 to 6 years of experience in IT, and they work as a senior AI engineer and an IT practitioner (Table {tab:itprof}). The 103 user respondents were 98 patient respondents, who tried the system from a patient's point of view, and 5 IT practitioners (Table {tab:resp}). Not every part of the user survey was meant for every respondent, so the parts were answered by different numbers of people (Table {tab:sectn}).
+TABLE itprof | Profile of the IT Expert Evaluators
+W 2.2,2.6,1.0
+| Profile item | Category | Frequency |
+| Field of specialization | Software / Web Development | 2 |
+| Years of experience in IT | 1–3 years | 1 |
+| Years of experience in IT | 4–6 years | 1 |
+| Current position | Senior AI Engineer | 1 |
+| Current position | IT | 1 |
+ENDTABLE
+NOTE N = 2.
+TABLE resp | Distribution of User Respondents
 W 2.8,1.4,1.4
 | Respondent group | Frequency | Percentage |
 | Patient respondents | 98 | 95.15% |
-| IT experts / IT practitioners | 5 | 4.85% |
+| IT practitioners | 5 | 4.85% |
 | Total | 103 | 100.00% |
 ENDTABLE
-TABLE sectn | Respondents per Questionnaire Section
-W 3.2,0.9,0.95,0.95
-| Questionnaire section | Patient respondents | IT experts | Total |
-| Current Manual Screening Process | 2 | 0 | 2 |
-| Screening Consistency and Time | 2 | 0 | 2 |
-| Security | 7 | 5 | 12 |
-| Privacy | 7 | 5 | 12 |
-| Usability | 7 | 5 | 12 |
-| Reliability | 7 | 5 | 12 |
-| Performance Efficiency | 7 | 5 | 12 |
-| Data Protection | 7 | 5 | 12 |
+TABLE sectn | User Respondents per Survey Part
+W 2.75,1.25,1.25,0.75
+| Survey part | Patient respondents | IT practitioners | Total |
 | AI Detection and Risk Classification | 98 | 5 | 103 |
 | Results Interface and Patient Records | 98 | 5 | 103 |
 | KNN-Based Personalized Prevention Plan | 98 | 5 | 103 |
+| Current Manual Screening Process | 2 | 0 | 2 |
+| Screening Consistency and Time | 2 | 0 | 2 |
+| Security (Part B3) | 7 | 5 | 12 |
+| Privacy (Part B3) | 7 | 5 | 12 |
+| Usability (Part B3) | 7 | 5 | 12 |
+| Reliability (Part B3) | 7 | 5 | 12 |
+| Performance Efficiency (Part B3) | 7 | 5 | 12 |
+| Data Protection (Part B3) | 7 | 5 | 12 |
 ENDTABLE
-P All 103 respondents rated the system's three main features: AI detection and risk classification, the results and patient records, and the prevention plan. The six ISO/IEC 25010 quality sections (Part B3) were meant only for dentists, clinic staff, and IT experts, as the form's instructions say, because they ask about staff-side features that patients never see, such as user roles, the staff audit log, and how records stay consistent. All 5 IT experts answered them. No dentist or clinic staff member took part, so the only other answers came from 7 patient respondents who answered the part anyway, for a total of 12. The two sections on the manual screening process and on screening consistency and time were answered by 2 respondents. Of the respondents who gave their work experience, 8 reported less than 1 year, 2 reported 1-3 years.
+P All 103 user respondents rated the three main features. The user survey also had a software quality part (Part B3) meant for dentists, clinic staff, and IT practitioners. No dentist or clinic staff member took part, so it was answered by 12 respondents (5 IT practitioners and 7 patient respondents), with an overall mean of 3.68 (Strongly Agree). Because these respondents were not all IT experts, the software quality results in this section come from the IT Expert Evaluation Form; the Part B3 answers are listed in Appendices B and F. The two parts on the manual screening process and on screening consistency and time were answered by 2 respondents (Section 4.4).
 ### 4.3.2 Evaluation Results per Quality Characteristic
-P Tables {tab:se} to {tab:dp} show the results for the six quality characteristics, rated by 12 respondents. In each table, WM is the average rating (4 = Strongly Agree, 1 = Strongly Disagree), and SD shows how much the answers varied: a small SD means the respondents mostly agreed with one another.
+P Tables {tab:se} to {tab:dp} show how the 2 IT experts rated the six quality characteristics. In each table, SA and A are the number of experts who chose Strongly Agree (4) and Agree (3), WM is the average rating, and SD shows how much the two ratings differed (0 means both experts gave the same rating).
 TABLE se | Evaluation Results for Security
-W 0.55,3.25,0.6,0.6,1.3
-| Code | Statement | WM | SD | Verbal interpretation |
-| SE1 | Only authorized users can log in and access the system's functions. | 3.67 | 0.47 | Strongly Agree |
-| SE2 | Each role (Dentist, Receptionist, Dental Assistant, Patient) can only access the features permitted for that role. | 3.67 | 0.47 | Strongly Agree |
-| SE3 | Passwords and login sessions are handled securely. | 3.75 | 0.43 | Strongly Agree |
-| SE4 | Sensitive staff actions are recorded in the audit log for administrative review. | 3.67 | 0.47 | Strongly Agree |
-|  | Security — mean | 3.69 | 0.46 | Strongly Agree |
+W 0.5,3.35,0.45,0.45,0.55,0.5,1.2
+| Code | Statement | SA | A | WM | SD | Verbal interpretation |
+| SE1 | Only authorized users can log in and access the system's functions. | 1 | 1 | 3.50 | 0.50 | Strongly Agree |
+| SE2 | Each role (Dentist, Receptionist, Dental Assistant, Patient) can only access the features permitted for that role. | 1 | 1 | 3.50 | 0.50 | Strongly Agree |
+| SE3 | Passwords and login sessions are handled securely. | 2 | 0 | 4.00 | 0.00 | Strongly Agree |
+| SE4 | Sensitive staff actions are recorded in the audit log for administrative review. | 2 | 0 | 4.00 | 0.00 | Strongly Agree |
+| SE5 | Login, registration, and password-reset requests are limited against repeated attempts, and a failed password reset does not reveal whether an account exists. | 2 | 0 | 4.00 | 0.00 | Strongly Agree |
+|  | Security — mean |  |  | 3.80 | 0.40 | Strongly Agree |
 ENDTABLE
-NOTE N = 12 (5 IT experts, 7 patient respondents). WM = weighted mean; SD = standard deviation.
-P Security received an average rating of 3.69 out of 4 (SD 0.46), which means Strongly Agree. The best-rated statement was SE3, “Passwords and login sessions are handled securely” (3.75). The lowest was SE4, “Sensitive staff actions are recorded in the audit log for administrative review” (3.67), which is still Strongly Agree. IT experts gave lower ratings than patient respondents (3.45 against 3.86). Nobody disagreed with any statement in this section. One respondent suggested an extra security step for staff accounts, which is included in the recommendations.
+NOTE N = 2 IT experts. SA = Strongly Agree; A = Agree; WM = weighted mean; SD = standard deviation. No statement was rated Disagree or Strongly Disagree.
+P Security received an average rating of 3.80 out of 4 (SD 0.40), which means Strongly Agree. One expert chose Agree for SE1 and SE2, on who can sign in and what each role may open, so these two statements averaged 3.50, still Strongly Agree; every other statement was rated Strongly Agree by both experts. No security concern was reported in the written comments.
 TABLE pr | Evaluation Results for Privacy
-W 0.55,3.25,0.6,0.6,1.3
-| Code | Statement | WM | SD | Verbal interpretation |
-| PR1 | Screening images are not publicly exposed and can only be viewed by authorized users. | 3.75 | 0.43 | Strongly Agree |
-| PR2 | Patients can only view their own records through the patient portal. | 3.75 | 0.43 | Strongly Agree |
-| PR3 | The system handles personal and health information in line with the Data Privacy Act of 2012. | 3.67 | 0.47 | Strongly Agree |
-|  | Privacy — mean | 3.72 | 0.45 | Strongly Agree |
+W 0.5,3.35,0.45,0.45,0.55,0.5,1.2
+| Code | Statement | SA | A | WM | SD | Verbal interpretation |
+| PR1 | Screening images are not publicly exposed and can only be viewed by authorized users. | 2 | 0 | 4.00 | 0.00 | Strongly Agree |
+| PR2 | Patients can only view their own records through the patient portal. | 2 | 0 | 4.00 | 0.00 | Strongly Agree |
+| PR3 | The system handles personal and health information in line with the Data Privacy Act of 2012. | 2 | 0 | 4.00 | 0.00 | Strongly Agree |
+| PR4 | Users must read and agree to the Data Privacy Notice before they can use the system. | 2 | 0 | 4.00 | 0.00 | Strongly Agree |
+| PR5 | The AI assistant answers general dental and clinic questions without reading or revealing patient records. | 2 | 0 | 4.00 | 0.00 | Strongly Agree |
+|  | Privacy — mean |  |  | 4.00 | 0.00 | Strongly Agree |
 ENDTABLE
-NOTE N = 12 (5 IT experts, 7 patient respondents). WM = weighted mean; SD = standard deviation.
-P Privacy received an average rating of 3.72 out of 4 (SD 0.45), which means Strongly Agree. The best-rated statement was PR1, “Screening images are not publicly exposed and can only be viewed by authorized users” (3.75). The lowest was PR3, “The system handles personal and health information in line with the Data Privacy Act of 2012” (3.67), which is still Strongly Agree. IT experts gave lower ratings than patient respondents (3.53 against 3.86). Nobody disagreed with any statement in this section.
+NOTE N = 2 IT experts. SA = Strongly Agree; A = Agree; WM = weighted mean; SD = standard deviation. No statement was rated Disagree or Strongly Disagree.
+P Privacy received an average rating of 4.00 out of 4 (SD 0.00), which means Strongly Agree. Both IT experts chose Strongly Agree for all 5 statements.
 TABLE us | Evaluation Results for Usability
-W 0.55,3.25,0.6,0.6,1.3
-| Code | Statement | WM | SD | Verbal interpretation |
-| US1 | The system is easy to learn and use, even for first-time users. | 3.67 | 0.47 | Strongly Agree |
-| US2 | Navigation between the dashboard, patient records, and screening pages is clear and logical. | 3.67 | 0.47 | Strongly Agree |
-| US3 | Labels, buttons, and messages are easy to understand. | 3.83 | 0.37 | Strongly Agree |
-| US4 | The layout and design of the interface are visually pleasing and organized. | 3.67 | 0.47 | Strongly Agree |
-|  | Usability — mean | 3.71 | 0.45 | Strongly Agree |
+W 0.5,3.35,0.45,0.45,0.55,0.5,1.2
+| Code | Statement | SA | A | WM | SD | Verbal interpretation |
+| US1 | The system is easy to learn and use, even for first-time users. | 2 | 0 | 4.00 | 0.00 | Strongly Agree |
+| US2 | Navigation between the dashboard, patient records, and screening pages is clear and logical. | 2 | 0 | 4.00 | 0.00 | Strongly Agree |
+| US3 | Labels, buttons, and messages are easy to understand. | 2 | 0 | 4.00 | 0.00 | Strongly Agree |
+| US4 | The layout and design of the interface are visually pleasing and organized. | 2 | 0 | 4.00 | 0.00 | Strongly Agree |
+| US5 | The system works well in both desktop and mobile web browsers. | 2 | 0 | 4.00 | 0.00 | Strongly Agree |
+|  | Usability — mean |  |  | 4.00 | 0.00 | Strongly Agree |
 ENDTABLE
-NOTE N = 12 (5 IT experts, 7 patient respondents). WM = weighted mean; SD = standard deviation.
-P Usability received an average rating of 3.71 out of 4 (SD 0.45), which means Strongly Agree. The best-rated statement was US3, “Labels, buttons, and messages are easy to understand” (3.83). The lowest was US4, “The layout and design of the interface are visually pleasing and organized” (3.67), which is still Strongly Agree. IT experts gave lower ratings than patient respondents (3.50 against 3.86). Nobody disagreed with any statement in this section. In the written comments, ease of use and the look of the interface were praised most, while a few respondents found some pages too long or some features hard to find.
+NOTE N = 2 IT experts. SA = Strongly Agree; A = Agree; WM = weighted mean; SD = standard deviation. No statement was rated Disagree or Strongly Disagree.
+P Usability received an average rating of 4.00 out of 4 (SD 0.00), which means Strongly Agree. Both IT experts chose Strongly Agree for all 5 statements. In their comments, one expert recommended “less click less scroll”, and in the Messenger conversation (Appendix D) one found some white space uncomfortable and suggested a layout that adapts to all screen sizes; these are included in the recommendations.
 TABLE re | Evaluation Results for Reliability
-W 0.55,3.25,0.6,0.6,1.3
-| Code | Statement | WM | SD | Verbal interpretation |
-| RE1 | The system runs consistently without unexpected crashes or failures. | 3.50 | 0.50 | Strongly Agree |
-| RE2 | When an error occurs, the system shows a clear message and recovers without losing data. | 3.75 | 0.43 | Strongly Agree |
-| RE3 | The system produces consistent results when the same image is screened again. | 3.58 | 0.49 | Strongly Agree |
-|  | Reliability — mean | 3.61 | 0.49 | Strongly Agree |
+W 0.5,3.35,0.45,0.45,0.55,0.5,1.2
+| Code | Statement | SA | A | WM | SD | Verbal interpretation |
+| RE1 | The system runs consistently without unexpected crashes or failures. | 2 | 0 | 4.00 | 0.00 | Strongly Agree |
+| RE2 | When an error occurs, the system shows a clear message and recovers without losing data. | 2 | 0 | 4.00 | 0.00 | Strongly Agree |
+| RE3 | The system produces consistent results when the same image is screened again. | 2 | 0 | 4.00 | 0.00 | Strongly Agree |
+| RE4 | Screening photos and records remain available after the server restarts. | 2 | 0 | 4.00 | 0.00 | Strongly Agree |
+| RE5 | After the server wakes from an idle period, the system works normally without errors. | 2 | 0 | 4.00 | 0.00 | Strongly Agree |
+|  | Reliability — mean |  |  | 4.00 | 0.00 | Strongly Agree |
 ENDTABLE
-NOTE N = 12 (5 IT experts, 7 patient respondents). WM = weighted mean; SD = standard deviation.
-P Reliability received an average rating of 3.61 out of 4 (SD 0.49), which means Strongly Agree. The best-rated statement was RE2, “When an error occurs, the system shows a clear message and recovers without losing data” (3.75). The lowest was RE1, “The system runs consistently without unexpected crashes or failures” (3.50), which is still Strongly Agree. IT experts gave lower ratings than patient respondents (3.27 against 3.86). Nobody disagreed with any statement in this section. IT experts also rated RE1 lowest. In the written comments, two respondents mentioned slow first loading and bugs that had to be fixed; one reason is that the free server used for the study goes to sleep after 15 minutes without use and takes time to wake up (Chapter I, Limitations).
+NOTE N = 2 IT experts. SA = Strongly Agree; A = Agree; WM = weighted mean; SD = standard deviation. No statement was rated Disagree or Strongly Disagree.
+P Reliability received an average rating of 4.00 out of 4 (SD 0.00), which means Strongly Agree. Both IT experts chose Strongly Agree for all 5 statements. This includes RE5, on the system working normally after the free server wakes from an idle period, a limitation noted in Chapter I.
 TABLE pe | Evaluation Results for Performance Efficiency
-W 0.55,3.25,0.6,0.6,1.3
-| Code | Statement | WM | SD | Verbal interpretation |
-| PE1 | The system analyzes an uploaded image and displays the results within an acceptable time. | 3.67 | 0.47 | Strongly Agree |
-| PE2 | Pages and patient records load quickly. | 3.67 | 0.47 | Strongly Agree |
-| PE3 | The system remains responsive while performing AI detection. | 3.67 | 0.47 | Strongly Agree |
-|  | Performance Efficiency — mean | 3.67 | 0.47 | Strongly Agree |
+W 0.5,3.35,0.45,0.45,0.55,0.5,1.2
+| Code | Statement | SA | A | WM | SD | Verbal interpretation |
+| PE1 | The system analyzes an uploaded image and displays the results within an acceptable time. | 2 | 0 | 4.00 | 0.00 | Strongly Agree |
+| PE2 | Pages and patient records load quickly. | 2 | 0 | 4.00 | 0.00 | Strongly Agree |
+| PE3 | The system remains responsive while performing AI detection. | 2 | 0 | 4.00 | 0.00 | Strongly Agree |
+| PE4 | Photos in common formats (JPEG, PNG, WebP, HEIC) of up to 15 MB are uploaded and processed without errors. | 2 | 0 | 4.00 | 0.00 | Strongly Agree |
+| PE5 | The model-comparison view clearly reports the processing time of YOLOv8 and YOLOv12 for each screening. | 2 | 0 | 4.00 | 0.00 | Strongly Agree |
+|  | Performance Efficiency — mean |  |  | 4.00 | 0.00 | Strongly Agree |
 ENDTABLE
-NOTE N = 12 (5 IT experts, 7 patient respondents). WM = weighted mean; SD = standard deviation.
-P Performance Efficiency received an average rating of 3.67 out of 4 (SD 0.47), which means Strongly Agree. Every statement in this section received the same average. IT experts gave lower ratings than patient respondents (3.40 against 3.86). Nobody disagreed with any statement in this section.
+NOTE N = 2 IT experts. SA = Strongly Agree; A = Agree; WM = weighted mean; SD = standard deviation. No statement was rated Disagree or Strongly Disagree.
+P Performance Efficiency received an average rating of 4.00 out of 4 (SD 0.00), which means Strongly Agree. Both IT experts chose Strongly Agree for all 5 statements.
 TABLE dp | Evaluation Results for Data Protection
-W 0.55,3.25,0.6,0.6,1.3
-| Code | Statement | WM | SD | Verbal interpretation |
-| DP1 | Patient, screening, and detection records are stored accurately and completely. | 3.75 | 0.43 | Strongly Agree |
-| DP2 | Related records (patients, screenings, findings, recommendations, notes) remain consistent with one another. | 3.58 | 0.49 | Strongly Agree |
-| DP3 | The system prevents invalid or incomplete data from being saved. | 3.75 | 0.43 | Strongly Agree |
-|  | Data Protection — mean | 3.69 | 0.46 | Strongly Agree |
+W 0.5,3.35,0.45,0.45,0.55,0.5,1.2
+| Code | Statement | SA | A | WM | SD | Verbal interpretation |
+| DP1 | Patient, screening, and detection records are stored accurately and completely. | 2 | 0 | 4.00 | 0.00 | Strongly Agree |
+| DP2 | Related records (patients, screenings, findings, recommendations, notes) remain consistent with one another. | 2 | 0 | 4.00 | 0.00 | Strongly Agree |
+| DP3 | The system prevents invalid or incomplete data from being saved. | 2 | 0 | 4.00 | 0.00 | Strongly Agree |
+| DP4 | The generated PDF screening report matches the stored screening record. | 2 | 0 | 4.00 | 0.00 | Strongly Agree |
+| DP5 | The system protects data against loss through database backups and stored copies of screening photos. | 2 | 0 | 4.00 | 0.00 | Strongly Agree |
+|  | Data Protection — mean |  |  | 4.00 | 0.00 | Strongly Agree |
 ENDTABLE
-NOTE N = 12 (5 IT experts, 7 patient respondents). WM = weighted mean; SD = standard deviation.
-P Data Protection received an average rating of 3.69 out of 4 (SD 0.46), which means Strongly Agree. The best-rated statement was DP1, “Patient, screening, and detection records are stored accurately and completely” (3.75). The lowest was DP2, “Related records (patients, screenings, findings, recommendations, notes) remain consistent with one another” (3.58), which is still Strongly Agree. IT experts gave lower ratings than patient respondents (3.47 against 3.86). Nobody disagreed with any statement in this section.
+NOTE N = 2 IT experts. SA = Strongly Agree; A = Agree; WM = weighted mean; SD = standard deviation. No statement was rated Disagree or Strongly Disagree.
+P Data Protection received an average rating of 4.00 out of 4 (SD 0.00), which means Strongly Agree. Both IT experts chose Strongly Agree for all 5 statements.
 ### 4.3.3 Evaluation Results for the System Features
-P Tables {tab:ad} to {tab:pp} show the results for the system's three main features, rated by all 103 respondents.
+P Tables {tab:ad} to {tab:pp} show the results for the system's three main features, rated by all 103 user respondents.
 TABLE ad | Evaluation Results for AI Detection and Risk Classification
 W 0.55,3.25,0.6,0.6,1.3
 | Code | Statement | WM | SD | Verbal interpretation |
@@ -739,7 +760,7 @@ W 0.55,3.25,0.6,0.6,1.3
 | AD5 | The detection results are a helpful reference that supports, but does not replace, the dentist's judgment. | 3.40 | 0.56 | Strongly Agree |
 |  | AI Detection and Risk Classification — mean | 3.45 | 0.53 | Strongly Agree |
 ENDTABLE
-NOTE N = 103 (5 IT experts, 98 patient respondents). WM = weighted mean; SD = standard deviation.
+NOTE N = 103 (98 patient respondents, 5 IT practitioners). WM = weighted mean; SD = standard deviation.
 P AI Detection and Risk Classification received an average rating of 3.45 out of 4 (SD 0.53), which means Strongly Agree. The best-rated statement was AD3, “The computed risk score and risk classification (Low, Medium, High) reflect the detected findings appropriately” (3.50), and the lowest was AD5, “The detection results are a helpful reference that supports, but does not replace, the dentist's judgment” (3.40). Only 9 of the 515 answers in this section were Disagree or Strongly Disagree. Note that this rating shows how accurate the detection seemed to the respondents, not how accurate it measured: the measured accuracy in Section 4.1 is moderate, and plaque is often missed. One respondent wrote that results may be wrong when the photograph is blurry and should still be checked by a dentist, which is how the system is meant to be used.
 TABLE ri | Evaluation Results for Results Interface and Patient Records
 W 0.55,3.25,0.6,0.6,1.3
@@ -751,7 +772,7 @@ W 0.55,3.25,0.6,0.6,1.3
 | RI5 | The self-service patient portal lets patients conveniently view their own screening history and past findings. | 3.48 | 0.59 | Strongly Agree |
 |  | Results Interface and Patient Records — mean | 3.47 | 0.54 | Strongly Agree |
 ENDTABLE
-NOTE N = 103 (5 IT experts, 98 patient respondents). WM = weighted mean; SD = standard deviation.
+NOTE N = 103 (98 patient respondents, 5 IT practitioners). WM = weighted mean; SD = standard deviation.
 P Results Interface and Patient Records received an average rating of 3.47 out of 4 (SD 0.54), which means Strongly Agree. The best-rated statement was RI1, “The bounding boxes and condition labels clearly show where each finding is located on the image” (3.49), and the lowest was RI2, “The plain-language descriptions make the findings easy to understand” (3.45). Only 7 of the 515 answers in this section were Disagree or Strongly Disagree. In their written comments, respondents especially liked the plain-language explanations and how clearly the results are shown.
 TABLE pp | Evaluation Results for KNN-Based Personalized Prevention Plan
 W 0.55,3.25,0.6,0.6,1.3
@@ -762,28 +783,28 @@ W 0.55,3.25,0.6,0.6,1.3
 | PP4 | The prevention plan appropriately serves as guidance and not as a formal medical prescription. | 3.49 | 0.50 | Strongly Agree |
 |  | KNN-Based Personalized Prevention Plan — mean | 3.50 | 0.51 | Strongly Agree |
 ENDTABLE
-NOTE N = 103 (5 IT experts, 98 patient respondents). WM = weighted mean; SD = standard deviation.
+NOTE N = 103 (98 patient respondents, 5 IT practitioners). WM = weighted mean; SD = standard deviation.
 P KNN-Based Personalized Prevention Plan received an average rating of 3.50 out of 4 (SD 0.51), which means Strongly Agree. The best-rated statement was PP1, “The prevention plan is relevant to the patient's detected findings and risk classification” (3.54), and the lowest was PP2, “The recommendations are clear and easy for patients to follow” (3.47). Only 2 of the 412 answers in this section were Disagree or Strongly Disagree. This was the best-rated of the three features. Respondents wrote that the tips were clear and reminded them to care for their teeth, and several asked for more dental tips, check-up reminders, and short videos.
 ### 4.3.4 Summary of the Evaluation
 TABLE iso | Summary of Evaluation Results
-W 2.3,0.85,0.95,0.75,0.55,1.1
-| Section | IT experts (WM) | Patient respondents (WM) | Overall WM | SD | Interpretation |
-| Security | 3.45 | 3.86 | 3.69 | 0.46 | Highly Acceptable |
-| Privacy | 3.53 | 3.86 | 3.72 | 0.45 | Highly Acceptable |
-| Usability | 3.50 | 3.86 | 3.71 | 0.45 | Highly Acceptable |
-| Reliability | 3.27 | 3.86 | 3.61 | 0.49 | Highly Acceptable |
-| Performance Efficiency | 3.40 | 3.86 | 3.67 | 0.47 | Highly Acceptable |
-| Data Protection | 3.47 | 3.86 | 3.69 | 0.46 | Highly Acceptable |
-| AI Detection and Risk Classification | 3.36 | 3.46 | 3.45 | 0.53 | Highly Acceptable |
-| Results Interface and Patient Records | 3.36 | 3.48 | 3.47 | 0.54 | Highly Acceptable |
-| KNN-Based Personalized Prevention Plan | 3.35 | 3.51 | 3.50 | 0.51 | Highly Acceptable |
-| Quality characteristics (mean of six) |  |  | 3.68 | 0.47 | Highly Acceptable |
-| System features (mean of three) |  |  | 3.48 | 0.53 | Highly Acceptable |
+W 2.7,1.5,0.7,0.6,1.3
+| Section | Rated by | WM | SD | Interpretation |
+| Security | 2 IT experts | 3.80 | 0.40 | Highly Acceptable |
+| Privacy | 2 IT experts | 4.00 | 0.00 | Highly Acceptable |
+| Usability | 2 IT experts | 4.00 | 0.00 | Highly Acceptable |
+| Reliability | 2 IT experts | 4.00 | 0.00 | Highly Acceptable |
+| Performance Efficiency | 2 IT experts | 4.00 | 0.00 | Highly Acceptable |
+| Data Protection | 2 IT experts | 4.00 | 0.00 | Highly Acceptable |
+| Quality characteristics (mean of six) | 2 IT experts | 3.97 | 0.18 | Highly Acceptable |
+| AI Detection and Risk Classification | 103 user respondents | 3.45 | 0.53 | Highly Acceptable |
+| Results Interface and Patient Records | 103 user respondents | 3.47 | 0.54 | Highly Acceptable |
+| KNN-Based Personalized Prevention Plan | 103 user respondents | 3.50 | 0.51 | Highly Acceptable |
+| System features (mean of three) | 103 user respondents | 3.48 | 0.53 | Highly Acceptable |
 ENDTABLE
-NOTE Quality characteristics: N = 12; system features: N = 103.
-P All nine sections were rated Strongly Agree, so Toothwise is Highly Acceptable to its respondents. The six quality characteristics averaged 3.68 out of 4, and the three features 3.48. Among the quality characteristics, Privacy was rated highest (3.72) and Reliability lowest (3.61). IT experts gave lower ratings than patient respondents in every section, but still Strongly Agree; this is expected, because IT experts judge the system against technical standards. Disagreement was rare: 0 of 240 quality answers and 18 of 1442 feature answers were Disagree or Strongly Disagree.
-P Two cautions apply. First, only 12 of the 103 respondents rated the six quality characteristics, and only 5 were IT experts, so these ratings come from a small group. This is because that part was meant for dentists, clinic staff, and IT experts, and no dentists or clinic staff took part. Second, the ratings show what the respondents thought of the system; they should be read together with the measured results in Sections 4.1 and 4.2.
-P In the written comments, respondents most often praised how easy the system is to use, its clear design, and its simple explanations. The problems they mentioned were slow loading the first time, pages with too much information at once, some features being hard to find, and wrong results from blurry photographs. Their suggestions were reminders for brushing and check-ups, more dental tips and short videos, an easier search, more conditions to detect with better accuracy, and an extra security step for staff accounts.
+P All nine sections were rated Strongly Agree, so Toothwise is Highly Acceptable to its evaluators. The IT experts rated the six quality characteristics 3.97 out of 4: 58 of their 60 ratings were Strongly Agree and the other 2 were Agree, both on Security. The user respondents rated the three features 3.48, and only 18 of their 1,442 answers were Disagree or Strongly Disagree.
+P Two cautions apply. First, the software quality results come from 2 IT experts, so they describe the judgment of a small group; the 12 user respondents who answered the quality part of the user survey gave a similar result (3.68). Second, the ratings show what the evaluators thought of the system; they should be read together with the measured results in Sections 4.1 and 4.2.
+P In their written comments, the IT experts described the system as innovative and praised that it keeps the clinic's records in one place, shows each user only what they need, and is simple enough to use without much training. Neither reported a problem, bug, or security concern. They recommended fewer clicks and less scrolling, and noted that the web-based design is a good base for features such as billing and inventory.
+P The user respondents most often praised how easy the system is to use, its clear design, and its simple explanations. The problems they mentioned were slow loading the first time, pages with too much information at once, some features being hard to find, and wrong results from blurry photographs. Their suggestions were reminders for brushing and check-ups, more dental tips and short videos, an easier search, more conditions to detect with better accuracy, and an extra security step for staff accounts.
 ## 4.4 Screening Consistency and Screening Time
 P This section answers the fifth problem: does Toothwise make screening more consistent and faster? The original plan was to time the same patients' screenings with and without Toothwise and compare both with the dentist's findings, but this could not be done because the study did not involve the clinic's patients. Instead, this section uses the respondents' ratings of the current manual process and of Toothwise (Tables {tab:ms} and {tab:sc}), together with the measured processing time in Section 4.1.6.
 TABLE ms | Respondents' Assessment of the Current Manual Screening Process
@@ -819,7 +840,7 @@ P The findings are summarized according to the five problems stated in Chapter I
 1. **Detection of the five conditions (Problem 1).** YOLOv8 and YOLOv12 were trained on 40,271 images merged from four public datasets and tested on 2,930 unseen images. On the test split, YOLOv8 obtained a precision of 54.32%, a recall of 52.34%, and an mAP@50 of 51.91%; YOLOv12 obtained 52.94%, 50.06%, and 48.11%, with about 24% fewer parameters and slightly faster inference (about 206 ms against 216 ms per image on CPU). Fusing the two models raised the mAP@50 to 54.24%. Healthy tooth and cavity were detected best, and plaque worst (mAP@50 below 10%). Detection accuracy at the deployed threshold was 43.77% for YOLOv8, 41.85% for YOLOv12, and 43.02% for the ensemble. In the deployed system, a screening takes about 3 to 4 seconds, and metal brackets are filtered out so that they are not reported as cavities. The respondents who evaluated the current manual process agreed that it has the limitations described in the first problem (mean 3.21).
 2. **Recording and access to findings (Problem 2).** Every screening is saved as a standardized visual record with the photograph, labeled bounding boxes, the risk result, the prevention plan, and the dentist's notes; it can be compared across visits, exported as a PDF report, and viewed by the patient through the self-service portal, which now also shows the latest results, a risk-over-time chart, and the next check-up date. Respondents rated the results interface and patient records 3.47, Strongly Agree.
 3. **Finding-specific preventive guidance (Problem 3).** The rule-based risk engine and the KNN classifier (K = 5) produce a risk tier and an ordered prevention plan for every screening. On 2,000 unseen synthetic cases, the classifier reproduced the clinical rule with 92.75% accuracy; its weakest tier was HIGH (recall 58.18%). Respondents rated the prevention plan 3.50, Strongly Agree, the highest of the three feature sections.
-4. **Acceptability (Problem 4).** On the six quality characteristics, answered by 12 respondents, the overall mean was 3.68 (Highly Acceptable), with Privacy highest (3.72) and Reliability lowest (3.61). The three feature sections, answered by all 103 respondents, obtained an overall mean of 3.48 (Highly Acceptable). IT experts rated every section lower than patient respondents, but still Strongly Agree. Technically, the web application scored 100 in Lighthouse accessibility and best practices on all audited pages and passed all 119 automated backend tests.
+4. **Acceptability (Problem 4).** The 2 IT experts rated the six ISO/IEC 25010 quality characteristics with an overall mean of 3.97 (Highly Acceptable): every characteristic received 4.00 except Security (3.80), where one expert chose Agree for two statements. The three feature sections, rated by all 103 user respondents, obtained an overall mean of 3.48 (Highly Acceptable). Technically, the web application scored 100 in Lighthouse accessibility and best practices on all audited pages and passed all 119 automated backend tests.
 5. **Screening consistency and time (Problem 5).** A controlled, timed comparison against the dentist's findings was not conducted. The 2 respondents who answered the related section agreed that Toothwise makes screening more consistent and faster to document (mean 3.40), and the measured processing time of the deployed system is about 3 to 4 seconds per screening.
 ## 5.2 Conclusions
 P Based on the findings, the following conclusions are drawn.
@@ -827,7 +848,7 @@ P Based on the findings, the following conclusions are drawn.
 2. The difference between YOLOv8 and YOLOv12 is small compared with the differences between conditions, so the quality, balance, and consistency of the training data matter more than the choice of architecture. Combining both models improved detection over either model alone, which supports the ensemble design.
 3. Storing each screening as a standardized visual record, with patient portal access, addresses the absence of comparable records across visits identified in the second problem.
 4. Finding-specific prevention plans can be generated automatically for every screening without adding to the dentist's work, and the respondents found them relevant and easy to follow.
-5. Toothwise is highly acceptable to its evaluators on all six quality characteristics and on its main features (overall means of 3.68 and 3.48 on a four-point scale). Because the quality characteristics were intended for dentists, clinic staff, and IT experts and were rated by 12 respondents, of whom 5 were IT experts, this conclusion should be confirmed with a larger group of IT experts, dentists, and clinic staff.
+5. Toothwise is highly acceptable to its evaluators on all six quality characteristics and on its main features (overall means of 3.97 and 3.48 on a four-point scale). Because the quality characteristics were rated by 2 IT experts, this conclusion should be confirmed with a larger group of IT experts, dentists, and clinic staff.
 6. Toothwise shortens the documentation of a screening, since results, risk, and the prevention plan are produced and recorded in seconds, and the respondents expect it to make screening more consistent. Whether it improves agreement with the dentist and shortens the whole screening in practice could not be established without a controlled comparison.
 ## 5.3 Recommendations
 P In light of the findings and conclusions, the following are recommended.
@@ -839,7 +860,7 @@ PN **For the further development of Toothwise**
 1. Improve detection of plaque and other weak classes by adding more and better-annotated photographs, including consented photographs from the clinic, and add a braces class instead of filtering brackets.
 2. Add the features requested by respondents: reminders for brushing and check-ups, more dental health tips and short videos, a faster and simpler search, and lighter pages for slow Internet connections.
 3. Add a second authentication factor for staff accounts, as one respondent suggested, and keep the audit and privacy controls aligned with the Data Privacy Act of 2012.
-4. Simplify pages that present much information at once and make less-used features easier to find.
+4. Simplify pages that present much information at once, reduce the clicks and scrolling needed to finish a task, reduce unneeded white space, make the layout adapt to all screen sizes and aspect ratios, and make less-used features easier to find, as the IT experts and user respondents suggested. In the longer term, billing and inventory modules can be added, as one IT expert noted.
 PN **For future researchers**
 1. Conduct the controlled comparison planned for the fifth problem: time the same screenings with and without Toothwise and measure agreement with the dentist's findings (for example, with Cohen's kappa).
 2. Repeat the ISO/IEC 25010 evaluation with a larger and more balanced group of IT experts, dentists, and clinic staff, the groups for which the quality evaluation was designed.
@@ -877,8 +898,52 @@ REF World Health Organization. (2025, March 17). *Oral health* [Fact sheet]. htt
 REF Wu, P.-Y., Lin, Y.-J., Chang, Y.-J., Wei, S.-T., Chen, C.-A., Li, K.-C., Tu, W.-C., & Abu, P. A. R. (2025). Deep learning-assisted diagnostic system: Apices and odontogenic sinus floor level analysis in dental panoramic radiographs. *Bioengineering, 12*(2), 134. https://doi.org/10.3390/bioengineering12020134
 REF Yue, W., Wang, Z., Zhang, J., & Liu, X. (2021). An overview of recommendation techniques and their applications in healthcare. *IEEE/CAA Journal of Automatica Sinica, 8*(4), 701–717. https://doi.org/10.1109/JAS.2021.1003919
 
-#APP APPENDIX A | Evaluation Questionnaire
-P The questionnaire was answered online through Google Forms. Each statement was rated on a four-point scale: Strongly Agree (4), Agree (3), Disagree (2), and Strongly Disagree (1).
+#APP APPENDIX A | Evaluation Instruments
+P Both instruments were answered online through Google Forms (Appendix E). Each statement was rated on a four-point scale: Strongly Agree (4), Agree (3), Disagree (2), and Strongly Disagree (1).
+PN **IT Expert Evaluation Form: Software Quality Evaluation Based on ISO/IEC 25010**
+PN *Part I. Evaluator Profile*
+- Name (optional); current position or job title; field of specialization; years of experience in IT; how the system was evaluated (used the deployed system, watched a demonstration, or both).
+PN *Part II. Security*
+- SE1. Only authorized users can log in and access the system's functions.
+- SE2. Each role (Dentist, Receptionist, Dental Assistant, Patient) can only access the features permitted for that role.
+- SE3. Passwords and login sessions are handled securely.
+- SE4. Sensitive staff actions are recorded in the audit log for administrative review.
+- SE5. Login, registration, and password-reset requests are limited against repeated attempts, and a failed password reset does not reveal whether an account exists.
+PN *Part II. Privacy*
+- PR1. Screening images are not publicly exposed and can only be viewed by authorized users.
+- PR2. Patients can only view their own records through the patient portal.
+- PR3. The system handles personal and health information in line with the Data Privacy Act of 2012.
+- PR4. Users must read and agree to the Data Privacy Notice before they can use the system.
+- PR5. The AI assistant answers general dental and clinic questions without reading or revealing patient records.
+PN *Part II. Usability*
+- US1. The system is easy to learn and use, even for first-time users.
+- US2. Navigation between the dashboard, patient records, and screening pages is clear and logical.
+- US3. Labels, buttons, and messages are easy to understand.
+- US4. The layout and design of the interface are visually pleasing and organized.
+- US5. The system works well in both desktop and mobile web browsers.
+PN *Part II. Reliability*
+- RE1. The system runs consistently without unexpected crashes or failures.
+- RE2. When an error occurs, the system shows a clear message and recovers without losing data.
+- RE3. The system produces consistent results when the same image is screened again.
+- RE4. Screening photos and records remain available after the server restarts.
+- RE5. After the server wakes from an idle period, the system works normally without errors.
+PN *Part II. Performance Efficiency*
+- PE1. The system analyzes an uploaded image and displays the results within an acceptable time.
+- PE2. Pages and patient records load quickly.
+- PE3. The system remains responsive while performing AI detection.
+- PE4. Photos in common formats (JPEG, PNG, WebP, HEIC) of up to 15 MB are uploaded and processed without errors.
+- PE5. The model-comparison view clearly reports the processing time of YOLOv8 and YOLOv12 for each screening.
+PN *Part II. Data Protection*
+- DP1. Patient, screening, and detection records are stored accurately and completely.
+- DP2. Related records (patients, screenings, findings, recommendations, notes) remain consistent with one another.
+- DP3. The system prevents invalid or incomplete data from being saved.
+- DP4. The generated PDF screening report matches the stored screening record.
+- DP5. The system protects data against loss through database backups and stored copies of screening photos.
+PN *Part III. Comments and Recommendations*
+- What are the strengths of Toothwise from a technical point of view?
+- What problems, bugs, or security concerns did you encounter?
+- What improvements or additional features would you recommend?
+PN **User Survey: Toothwise Survey Questionnaire**
 PN **Part A. Current Process and Expected Effect**
 PN *Current Manual Screening Process*
 - MS1. Early-stage tartar, plaque, cavity, and gum inflammation are difficult to detect consistently through visual inspection alone.
@@ -944,8 +1009,42 @@ PN **Part C. Open-ended Questions**
 - What problems or difficulties did you encounter while using Toothwise?
 - What improvements or additional features would you suggest?
 #APP APPENDIX B | Frequency Distribution of Responses
-P The table lists, for every statement, how many respondents chose each rating, the number of respondents who answered it (N), and the weighted mean (WM). Respondent names are not included.
-TABLE freq | Frequency Distribution of Responses per Statement
+P The tables list, for every statement of both instruments, how many respondents chose each rating, the number of respondents who answered it (N), and the weighted mean (WM). Respondent names are not included.
+TABLE freqit | Frequency Distribution — IT Expert Evaluation Form
+W 0.6,0.8,0.65,0.75,0.75,0.8,0.55
+| Code | Strongly Agree (4) | Agree (3) | Disagree (2) | Strongly Disagree (1) | N | WM |
+| SE1 | 1 | 1 | 0 | 0 | 2 | 3.50 |
+| SE2 | 1 | 1 | 0 | 0 | 2 | 3.50 |
+| SE3 | 2 | 0 | 0 | 0 | 2 | 4.00 |
+| SE4 | 2 | 0 | 0 | 0 | 2 | 4.00 |
+| SE5 | 2 | 0 | 0 | 0 | 2 | 4.00 |
+| PR1 | 2 | 0 | 0 | 0 | 2 | 4.00 |
+| PR2 | 2 | 0 | 0 | 0 | 2 | 4.00 |
+| PR3 | 2 | 0 | 0 | 0 | 2 | 4.00 |
+| PR4 | 2 | 0 | 0 | 0 | 2 | 4.00 |
+| PR5 | 2 | 0 | 0 | 0 | 2 | 4.00 |
+| US1 | 2 | 0 | 0 | 0 | 2 | 4.00 |
+| US2 | 2 | 0 | 0 | 0 | 2 | 4.00 |
+| US3 | 2 | 0 | 0 | 0 | 2 | 4.00 |
+| US4 | 2 | 0 | 0 | 0 | 2 | 4.00 |
+| US5 | 2 | 0 | 0 | 0 | 2 | 4.00 |
+| RE1 | 2 | 0 | 0 | 0 | 2 | 4.00 |
+| RE2 | 2 | 0 | 0 | 0 | 2 | 4.00 |
+| RE3 | 2 | 0 | 0 | 0 | 2 | 4.00 |
+| RE4 | 2 | 0 | 0 | 0 | 2 | 4.00 |
+| RE5 | 2 | 0 | 0 | 0 | 2 | 4.00 |
+| PE1 | 2 | 0 | 0 | 0 | 2 | 4.00 |
+| PE2 | 2 | 0 | 0 | 0 | 2 | 4.00 |
+| PE3 | 2 | 0 | 0 | 0 | 2 | 4.00 |
+| PE4 | 2 | 0 | 0 | 0 | 2 | 4.00 |
+| PE5 | 2 | 0 | 0 | 0 | 2 | 4.00 |
+| DP1 | 2 | 0 | 0 | 0 | 2 | 4.00 |
+| DP2 | 2 | 0 | 0 | 0 | 2 | 4.00 |
+| DP3 | 2 | 0 | 0 | 0 | 2 | 4.00 |
+| DP4 | 2 | 0 | 0 | 0 | 2 | 4.00 |
+| DP5 | 2 | 0 | 0 | 0 | 2 | 4.00 |
+ENDTABLE
+TABLE freq | Frequency Distribution — User Survey
 W 0.6,0.8,0.65,0.75,0.75,0.8,0.55,0.6
 | Code | Strongly Agree (4) | Agree (3) | Disagree (2) | Strongly Disagree (1) | N | WM | Section |
 | MS1 | 0 | 2 | 0 | 0 | 2 | 3.00 | MS |
@@ -1014,7 +1113,7 @@ FIGPAIR form_it_1 | form_it_1.jpg | 2.95 | Toothwise IT Expert Evaluation Form (
 FIGPAIR form_it_3 | form_it_3.jpg | 2.95 | Toothwise IT Expert Evaluation Form (3 of 6) | || form_it_4 | form_it_4.jpg | 2.95 | Toothwise IT Expert Evaluation Form (4 of 6) | 
 FIGPAIR form_it_5 | form_it_5.jpg | 2.95 | Toothwise IT Expert Evaluation Form (5 of 6) | || form_it_6 | form_it_6.jpg | 2.95 | Toothwise IT Expert Evaluation Form (6 of 6) | 
 #APP APPENDIX F | Individual Responses
-P Each row is one respondent, numbered in the order the responses were received (R001 to R103); names are not shown. Type: P = patient respondent, IT = IT expert. Ratings: 4 = Strongly Agree, 3 = Agree, 2 = Disagree, 1 = Strongly Disagree. Item codes are those of Appendix A.
+P The tables list the user survey responses. Each row is one respondent, numbered in the order the responses were received (R001 to R103); names are not shown. Type: P = patient respondent, IT = IT practitioner. Ratings: 4 = Strongly Agree, 3 = Agree, 2 = Disagree, 1 = Strongly Disagree. Item codes are those of the user survey in Appendix A. The ratings of the two IT experts on the IT Expert Evaluation Form are given per statement in Appendix B.
 TABLE indA | Individual Ratings — System Features (n = 103)
 W 0.55,0.4,0.36,0.36,0.36,0.36,0.36,0.36,0.36,0.36,0.36,0.36,0.36,0.36,0.36,0.36
 | Resp. | Type | AD1 | AD2 | AD3 | AD4 | AD5 | RI1 | RI2 | RI3 | RI4 | RI5 | PP1 | PP2 | PP3 | PP4 |
@@ -1122,7 +1221,7 @@ W 0.55,0.4,0.36,0.36,0.36,0.36,0.36,0.36,0.36,0.36,0.36,0.36,0.36,0.36,0.36,0.36
 | R102 | P | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 |
 | R103 | P | 3 | 4 | 4 | 4 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 |
 ENDTABLE
-TABLE indB1 | Individual Ratings — Security, Privacy, and Usability (n = 12)
+TABLE indB1 | Individual Ratings — Part B3: Security, Privacy, and Usability (n = 12)
 W 0.55,0.4,0.36,0.36,0.36,0.36,0.36,0.36,0.36,0.36,0.36,0.36,0.36
 | Resp. | Type | SE1 | SE2 | SE3 | SE4 | PR1 | PR2 | PR3 | US1 | US2 | US3 | US4 |
 | R008 | P | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 |
@@ -1138,7 +1237,7 @@ W 0.55,0.4,0.36,0.36,0.36,0.36,0.36,0.36,0.36,0.36,0.36,0.36,0.36
 | R059 | IT | 3 | 3 | 3 | 3 | 4 | 3 | 4 | 4 | 3 | 4 | 4 |
 | R072 | IT | 4 | 4 | 4 | 4 | 4 | 4 | 3 | 3 | 3 | 4 | 3 |
 ENDTABLE
-TABLE indB2 | Individual Ratings — Reliability, Performance Efficiency, and Data Protection (n = 12)
+TABLE indB2 | Individual Ratings — Part B3: Reliability, Performance Efficiency, and Data Protection (n = 12)
 W 0.55,0.4,0.36,0.36,0.36,0.36,0.36,0.36,0.36,0.36,0.36
 | Resp. | Type | RE1 | RE2 | RE3 | PE1 | PE2 | PE3 | DP1 | DP2 | DP3 |
 | R008 | P | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 |
@@ -1162,6 +1261,17 @@ W 0.55,0.4,0.36,0.36,0.36,0.36,0.36,0.36,0.36,0.36,0.36,0.36,0.36,0.36
 ENDTABLE
 #APP APPENDIX G | Respondents' Comments and Suggestions
 P The answers to the three open-ended questions are reproduced as written, without corrections; blank answers and answers such as "none" are omitted.
+PN **IT Expert Evaluation Form**
+PN *What are the strengths of Toothwise from a technical point of view?*
+- IT expert 1: “Innovative”
+- IT expert 2: “Biggest strength is that, it puts everything a dental clinic needs in one place. Patient records, dental history, and appointments are all stored in one system instead of on paper, so information is easier to find and less likely to get lost. Patients can book online, which helps the clinic avoid double bookings and manage its schedule better. Each user only sees what they need, so patient data stays protected. The system is also simple enough that even non-tech savy people can use it without much training.”
+PN *What problems, bugs, or security concerns did you encounter?*
+- IT expert 1: “none that I know of”
+- IT expert 2: “none”
+PN *What improvements or additional features would you recommend?*
+- IT expert 1: “UI/UX, less click less scroll”
+- IT expert 2: “Since it’s web-based, it has a solid foundation for adding features like billing or inventory.”
+PN **User Survey**
 PN **What did you like most about Toothwise?**
 - R007 (P): “what i like most about toothwise is that it can detect dental problems and show the results clearly. it is also easy to use and helpful in checking possible dental conditions.”
 - R008 (P): “Everything about Toothwise is very good”

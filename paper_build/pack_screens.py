@@ -41,7 +41,7 @@ def main():
     base = bp.parse(bp.CONTENT.read_text(encoding="utf-8"))
     blocks = apply(base, layout)
     idx = [i for i, b in enumerate(blocks)
-           if (b["kind"] == "FIG" and b["key"].startswith("s_")) or b["kind"] == "FIGPAIR"]
+           if (b["kind"] == "FIG" and b["key"].startswith("s_")) or (b["kind"] == "FIGPAIR" and b["figs"][0]["key"].startswith("s_"))]
     out = bp.ROOT / f"{bp.NAME}.docx"
     bp.write(blocks).save(out)
     doc = pymupdf.open(bp.to_pdf(out))
