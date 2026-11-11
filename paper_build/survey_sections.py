@@ -474,6 +474,12 @@ def main(path):
                "|| app_it2b | appendix_it2_b.jpg | 2.95 | IT Expert 2 — Feedback | "
                "The expert liked the concept of a website with AI detection, found some white space "
                "uncomfortable, suggested a layout responsive to all aspect ratios, and asked if it opens on a phone.")
+    app.append("FIGPAIR app_it3a | appendix_it3_a.jpg | 2.95 | IT Expert 3 — Form and Demonstration Sent | "
+               "The researchers sent the evaluation form and, when the expert could not play the video, sent the "
+               "demonstration video again. "
+               "|| app_it3b | appendix_it3_b.jpg | 2.95 | IT Expert 3 — Evaluation Completed | "
+               "The expert watched the demonstration, noting that the video played somewhat slowly, and then "
+               "answered the evaluation form.")
     app.append("FIGPAIR app_pan1 | appendix_panel_a.jpg | 2.95 | Panel Consultation — Request for Review | "
                "The researchers sent the revised paper to a panel member for checking of the statement of the problem. "
                "|| app_pan2 | appendix_panel_b.jpg | 2.95 | Panel Consultation — Approval | "
