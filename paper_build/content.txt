@@ -355,7 +355,7 @@ P The system was implemented as a three-tier web application: a React.js single-
 P This section describes how the acceptability of Toothwise was evaluated (the fourth and fifth problems of the study): who the respondents were, the instrument they answered, how the data were gathered, and how the responses were treated. The results are presented in Sections 4.3 and 4.4.
 ### 3.10.1 Respondents and Data Gathering
 P The evaluation questionnaire was prepared in Google Forms and shared online. Participation was voluntary: the form opened with a statement explaining the purpose of the study and the handling of the data, and only respondents who agreed to it could continue. Each respondent first stated their group, either patient respondent (a member of the public evaluating the system from a patient's point of view) or IT expert (IT practitioner), and then answered the parts of the questionnaire intended for them. The software quality part (ISO/IEC 25010) was written for dentists, clinic staff, and IT experts, while the parts on the system's features were written for all respondents. Responses were collected from October 19 to 28, 2026, and 103 complete submissions were received.
-P The study used non-probability sampling, since there was no fixed list of the people who could evaluate the system from which a random sample could be drawn. Patient respondents were reached through convenience sampling: the link to the form was shared online, for example on social media and in group chats, and anyone who received it and agreed to take part could answer. IT experts were chosen through purposive sampling: the researchers personally invited people who work in information technology, because the software quality part of the questionnaire calls for technical knowledge (Etikan et al., 2016). Because the population was not fixed, no sample-size formula was applied, and since the respondents were not randomly selected, the results describe the respondents of this study and are not generalized to all patients or all IT practitioners. Tables {tab:resp} and {tab:sectn} show how many respondents answered each section.
+P The study used purposive sampling, a non-probability technique in which respondents are chosen because they fit the purpose of the study (Etikan et al., 2016). Two groups were sampled. User respondents had to meet two criteria: they belonged to the group the system serves through its patient portal, that is, dental patients, and they agreed to the consent statement after reading the purpose of the study. A minimum of 50 user respondents was set, and 98 took part. IT experts had to work in information technology and were personally invited by the researchers, because the software quality part of the questionnaire calls for technical knowledge. The form link was shared online, and the form showed each respondent only the parts meant for their group. Because the respondents were not randomly selected, the results describe the respondents of this study and are not generalized to all patients or all IT practitioners. Tables {tab:resp} and {tab:sectn} show how many respondents answered each section.
 ### 3.10.2 Research Instrument
 P The instrument has eleven sections with 46 statements, listed in Table {tab:chars} and reproduced in full in Appendix A, plus three open-ended questions on what respondents liked, the difficulties they met, and the improvements they suggest. Six sections follow the quality characteristics named in the fourth problem of the study, three evaluate the system's main features, and two concern the current manual screening process and Toothwise's effect on screening consistency and time (the fifth problem).
 TABLE chars | Sections of the Evaluation Instrument
@@ -1004,3 +1004,212 @@ P The IT experts received a video demonstration of Toothwise and the evaluation 
 FIGPAIR app_it1a | appendix_it1_a.jpg | 2.6 | IT Expert 1 — Demonstration and Form Sent | The researchers sent the demonstration video and the IT Expert Evaluation Form link. || app_it1b | appendix_it1_b.jpg | 2.6 | IT Expert 1 — Feedback | After submitting the form, the expert found the system good and innovative and noted that the code base could also have been shared for review.
 FIGPAIR app_it2a | appendix_it2_a.jpg | 2.95 | IT Expert 2 — Form Submitted | The expert submitted the form and offered the comments as suggestions for improvement and further advancement. || app_it2b | appendix_it2_b.jpg | 2.95 | IT Expert 2 — Feedback | The expert liked the concept of a website with AI detection, found some white space uncomfortable, suggested a layout responsive to all aspect ratios, and asked if it opens on a phone.
 FIGPAIR app_pan1 | appendix_panel_a.jpg | 2.95 | Panel Consultation — Request for Review | The researchers sent the revised paper to a panel member for checking of the statement of the problem. || app_pan2 | appendix_panel_b.jpg | 2.95 | Panel Consultation — Approval | The panel member found the statement of the problem acceptable, noted that the model metrics were corrected and that the panel's advice to test on more datasets was followed, and saw no problem.
+#APP APPENDIX E | Online Evaluation Forms
+P The evaluation forms were prepared in Google Forms. The figures show every page of each form as a respondent sees it, without answers; the main survey shows each part to the respondent groups named at the top of the part.
+FIGPAIR form_main_1 | form_main_1.jpg | 2.95 | Toothwise Survey Questionnaire (1 of 8) | || form_main_2 | form_main_2.jpg | 2.95 | Toothwise Survey Questionnaire (2 of 8) | 
+FIGPAIR form_main_3 | form_main_3.jpg | 2.95 | Toothwise Survey Questionnaire (3 of 8) | || form_main_4 | form_main_4.jpg | 2.95 | Toothwise Survey Questionnaire (4 of 8) | 
+FIGPAIR form_main_5 | form_main_5.jpg | 2.95 | Toothwise Survey Questionnaire (5 of 8) | || form_main_6 | form_main_6.jpg | 2.95 | Toothwise Survey Questionnaire (6 of 8) | 
+FIGPAIR form_main_7 | form_main_7.jpg | 2.95 | Toothwise Survey Questionnaire (7 of 8) | || form_main_8 | form_main_8.jpg | 2.95 | Toothwise Survey Questionnaire (8 of 8) | 
+FIGPAIR form_it_1 | form_it_1.jpg | 2.95 | Toothwise IT Expert Evaluation Form (1 of 6) | || form_it_2 | form_it_2.jpg | 2.95 | Toothwise IT Expert Evaluation Form (2 of 6) | 
+FIGPAIR form_it_3 | form_it_3.jpg | 2.95 | Toothwise IT Expert Evaluation Form (3 of 6) | || form_it_4 | form_it_4.jpg | 2.95 | Toothwise IT Expert Evaluation Form (4 of 6) | 
+FIGPAIR form_it_5 | form_it_5.jpg | 2.95 | Toothwise IT Expert Evaluation Form (5 of 6) | || form_it_6 | form_it_6.jpg | 2.95 | Toothwise IT Expert Evaluation Form (6 of 6) | 
+#APP APPENDIX F | Individual Responses
+P Each row is one respondent, numbered in the order the responses were received (R001 to R103); names are not shown. Type: P = patient respondent, IT = IT expert. Ratings: 4 = Strongly Agree, 3 = Agree, 2 = Disagree, 1 = Strongly Disagree. Item codes are those of Appendix A.
+TABLE indA | Individual Ratings — System Features (n = 103)
+W 0.55,0.4,0.36,0.36,0.36,0.36,0.36,0.36,0.36,0.36,0.36,0.36,0.36,0.36,0.36,0.36
+| Resp. | Type | AD1 | AD2 | AD3 | AD4 | AD5 | RI1 | RI2 | RI3 | RI4 | RI5 | PP1 | PP2 | PP3 | PP4 |
+| R001 | P | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 |
+| R002 | P | 4 | 4 | 4 | 4 | 4 | 4 | 3 | 4 | 4 | 4 | 4 | 4 | 4 | 4 |
+| R003 | P | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 |
+| R004 | P | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 |
+| R005 | P | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 4 | 4 |
+| R006 | P | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 |
+| R007 | P | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 |
+| R008 | P | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 |
+| R009 | P | 3 | 3 | 4 | 4 | 3 | 4 | 3 | 3 | 4 | 4 | 4 | 3 | 4 | 3 |
+| R010 | P | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 |
+| R011 | P | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 |
+| R012 | P | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 |
+| R013 | P | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 |
+| R014 | P | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 |
+| R015 | P | 3 | 3 | 3 | 3 | 3 | 3 | 4 | 3 | 3 | 3 | 3 | 3 | 3 | 3 |
+| R016 | P | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 |
+| R017 | P | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 |
+| R018 | P | 3 | 3 | 3 | 3 | 3 | 3 | 4 | 4 | 3 | 4 | 3 | 3 | 3 | 4 |
+| R019 | P | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 |
+| R020 | P | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 |
+| R021 | P | 4 | 4 | 4 | 4 | 4 | 4 | 3 | 3 | 3 | 3 | 4 | 4 | 4 | 3 |
+| R022 | P | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 2 | 3 | 3 |
+| R023 | P | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 2 | 3 | 3 | 3 | 3 |
+| R024 | P | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 |
+| R025 | P | 2 | 3 | 3 | 4 | 2 | 3 | 3 | 3 | 3 | 3 | 4 | 4 | 4 | 3 |
+| R026 | P | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 |
+| R027 | P | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 |
+| R028 | P | 4 | 3 | 3 | 4 | 3 | 3 | 3 | 4 | 3 | 3 | 4 | 3 | 3 | 4 |
+| R029 | P | 3 | 3 | 3 | 3 | 3 | 4 | 4 | 4 | 4 | 3 | 3 | 4 | 4 | 4 |
+| R030 | P | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 4 | 4 | 4 | 3 | 3 | 3 | 4 |
+| R031 | P | 3 | 3 | 4 | 3 | 3 | 3 | 3 | 4 | 3 | 3 | 3 | 4 | 3 | 4 |
+| R032 | P | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 |
+| R033 | P | 3 | 2 | 4 | 3 | 2 | 3 | 3 | 2 | 1 | 1 | 3 | 3 | 2 | 3 |
+| R034 | P | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 |
+| R035 | P | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 |
+| R036 | P | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 |
+| R037 | P | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 |
+| R038 | P | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 |
+| R039 | P | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 |
+| R040 | P | 3 | 3 | 3 | 4 | 3 | 4 | 4 | 4 | 4 | 4 | 3 | 4 | 3 | 4 |
+| R041 | P | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 |
+| R042 | P | 3 | 4 | 3 | 4 | 3 | 4 | 4 | 3 | 3 | 4 | 4 | 4 | 4 | 3 |
+| R043 | P | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 |
+| R044 | P | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 |
+| R045 | P | 4 | 3 | 4 | 3 | 4 | 4 | 3 | 4 | 3 | 4 | 4 | 3 | 4 | 3 |
+| R046 | P | 3 | 3 | 4 | 4 | 4 | 3 | 2 | 4 | 3 | 2 | 3 | 4 | 3 | 4 |
+| R047 | P | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 |
+| R048 | P | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 |
+| R049 | IT | 4 | 4 | 4 | 4 | 4 | 3 | 3 | 4 | 4 | 3 | 4 | 3 | 4 | 4 |
+| R050 | IT | 2 | 3 | 3 | 3 | 3 | 4 | 4 | 3 | 4 | 3 | 3 | 4 | 3 | 3 |
+| R051 | P | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 4 | 4 | 4 | 4 |
+| R052 | P | 3 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 |
+| R053 | P | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 |
+| R054 | P | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 |
+| R055 | P | 4 | 3 | 4 | 3 | 4 | 3 | 3 | 3 | 3 | 3 | 4 | 3 | 3 | 3 |
+| R056 | IT | 3 | 3 | 4 | 3 | 3 | 3 | 4 | 3 | 3 | 3 | 3 | 3 | 4 | 3 |
+| R057 | P | 3 | 3 | 3 | 3 | 2 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 |
+| R058 | P | 4 | 4 | 4 | 4 | 4 | 4 | 3 | 3 | 4 | 4 | 4 | 3 | 4 | 3 |
+| R059 | IT | 4 | 3 | 4 | 4 | 4 | 4 | 3 | 4 | 3 | 4 | 4 | 3 | 3 | 4 |
+| R060 | P | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 |
+| R061 | P | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 |
+| R062 | P | 4 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 |
+| R063 | P | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 |
+| R064 | P | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 3 | 3 | 3 | 3 |
+| R065 | P | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 |
+| R066 | P | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 |
+| R067 | P | 3 | 3 | 3 | 3 | 3 | 3 | 4 | 3 | 4 | 4 | 3 | 3 | 3 | 3 |
+| R068 | P | 3 | 3 | 3 | 4 | 4 | 3 | 3 | 3 | 3 | 3 | 4 | 3 | 4 | 3 |
+| R069 | P | 4 | 4 | 4 | 3 | 3 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 |
+| R070 | P | 3 | 4 | 4 | 3 | 3 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 |
+| R071 | P | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 |
+| R072 | IT | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 |
+| R073 | P | 3 | 2 | 3 | 2 | 3 | 3 | 3 | 2 | 3 | 4 | 4 | 3 | 3 | 3 |
+| R074 | P | 4 | 3 | 4 | 4 | 2 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 3 |
+| R075 | P | 3 | 3 | 4 | 3 | 3 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 |
+| R076 | P | 3 | 4 | 3 | 4 | 3 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 |
+| R077 | P | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 |
+| R078 | P | 4 | 3 | 4 | 3 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 3 | 3 | 3 |
+| R079 | P | 4 | 3 | 3 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 |
+| R080 | P | 3 | 4 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 |
+| R081 | P | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 |
+| R082 | P | 4 | 3 | 4 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 |
+| R083 | P | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 |
+| R084 | P | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 |
+| R085 | P | 4 | 4 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 |
+| R086 | P | 4 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 |
+| R087 | P | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 |
+| R088 | P | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 |
+| R089 | P | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 |
+| R090 | P | 4 | 4 | 4 | 4 | 4 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 |
+| R091 | P | 4 | 4 | 3 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 |
+| R092 | P | 4 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 4 | 3 | 4 | 3 |
+| R093 | P | 4 | 3 | 4 | 3 | 4 | 3 | 3 | 3 | 3 | 4 | 4 | 4 | 4 | 4 |
+| R094 | P | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 |
+| R095 | P | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 |
+| R096 | P | 4 | 4 | 3 | 3 | 3 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 |
+| R097 | P | 3 | 4 | 4 | 3 | 3 | 4 | 3 | 4 | 4 | 4 | 4 | 4 | 4 | 4 |
+| R098 | P | 4 | 4 | 3 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 |
+| R099 | P | 4 | 4 | 4 | 4 | 4 | 3 | 3 | 3 | 4 | 4 | 4 | 3 | 4 | 3 |
+| R100 | P | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 |
+| R101 | P | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 |
+| R102 | P | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 |
+| R103 | P | 3 | 4 | 4 | 4 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 |
+ENDTABLE
+TABLE indB1 | Individual Ratings — Security, Privacy, and Usability (n = 12)
+W 0.55,0.4,0.36,0.36,0.36,0.36,0.36,0.36,0.36,0.36,0.36,0.36,0.36
+| Resp. | Type | SE1 | SE2 | SE3 | SE4 | PR1 | PR2 | PR3 | US1 | US2 | US3 | US4 |
+| R008 | P | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 |
+| R016 | P | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 |
+| R020 | P | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 |
+| R027 | P | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 |
+| R037 | P | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 |
+| R045 | P | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 |
+| R049 | IT | 4 | 4 | 4 | 4 | 4 | 3 | 4 | 4 | 3 | 4 | 3 |
+| R050 | IT | 3 | 3 | 3 | 3 | 3 | 4 | 3 | 3 | 4 | 3 | 4 |
+| R055 | P | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 |
+| R056 | IT | 3 | 3 | 4 | 3 | 3 | 4 | 3 | 3 | 4 | 4 | 3 |
+| R059 | IT | 3 | 3 | 3 | 3 | 4 | 3 | 4 | 4 | 3 | 4 | 4 |
+| R072 | IT | 4 | 4 | 4 | 4 | 4 | 4 | 3 | 3 | 3 | 4 | 3 |
+ENDTABLE
+TABLE indB2 | Individual Ratings — Reliability, Performance Efficiency, and Data Protection (n = 12)
+W 0.55,0.4,0.36,0.36,0.36,0.36,0.36,0.36,0.36,0.36,0.36
+| Resp. | Type | RE1 | RE2 | RE3 | PE1 | PE2 | PE3 | DP1 | DP2 | DP3 |
+| R008 | P | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 |
+| R016 | P | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 |
+| R020 | P | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 |
+| R027 | P | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 |
+| R037 | P | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 |
+| R045 | P | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 4 |
+| R049 | IT | 3 | 4 | 3 | 4 | 3 | 4 | 4 | 3 | 4 |
+| R050 | IT | 3 | 4 | 3 | 3 | 4 | 3 | 4 | 3 | 4 |
+| R055 | P | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 |
+| R056 | IT | 3 | 4 | 3 | 3 | 3 | 4 | 3 | 4 | 3 |
+| R059 | IT | 3 | 3 | 4 | 4 | 4 | 3 | 4 | 3 | 4 |
+| R072 | IT | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 |
+ENDTABLE
+TABLE indC | Individual Ratings — Current Process and Screening Consistency (n = 2)
+W 0.55,0.4,0.36,0.36,0.36,0.36,0.36,0.36,0.36,0.36,0.36,0.36,0.36,0.36
+| Resp. | Type | MS1 | MS2 | MS3 | MS4 | MS5 | MS6 | MS7 | SC1 | SC2 | SC3 | SC4 | SC5 |
+| R016 | P | 3 | 4 | 4 | 3 | 4 | 2 | 4 | 4 | 4 | 4 | 3 | 4 |
+| R055 | P | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 3 |
+ENDTABLE
+#APP APPENDIX G | Respondents' Comments and Suggestions
+P The answers to the three open-ended questions are reproduced as written, without corrections; blank answers and answers such as "none" are omitted.
+PN **What did you like most about Toothwise?**
+- R007 (P): “what i like most about toothwise is that it can detect dental problems and show the results clearly. it is also easy to use and helpful in checking possible dental conditions.”
+- R008 (P): “Everything about Toothwise is very good”
+- R011 (P): “I liked how simple and easy it was to understand. The tips were clear, and it helped me remember to take better care of my teeth every day.”
+- R017 (P): “Experties”
+- R020 (P): “Simplicity and easy for the eyes”
+- R021 (P): “easily understand”
+- R024 (P): “As patient i love the convenience of booking”
+- R025 (P): “They are more gentle and painless care for their patient.”
+- R026 (P): “What I liked most about Toothwise was how easy and convenient it was to use. It made understanding dental health simpler and more accessible, while providing a comfortable and user-friendly experience.”
+- R029 (P): “Good”
+- R035 (P): “the web system”
+- R036 (P): “The plain-language descriptions make the findings easy to understand”
+- R038 (P): “I love how it made learning about dental health simple, interesting, and easy to understand”
+- R039 (P): “Their services”
+- R040 (P): “Very helpful”
+- R042 (P): “UI/UX”
+- R043 (P): “everything”
+- R044 (P): “Reliable”
+- R047 (P): “everything”
+- R059 (IT): “User interface”
+- R071 (P): “I like the UI”
+- R073 (P): “Nice”
+- R074 (P): “I liked Toothwise because it is easy to use, helpful, and provides useful information about dental health.”
+PN **What problems or difficulties did you encounter while using Toothwise?**
+- R007 (P): “sometimes, the results may not be accurate if the picture is blurry or not clear enough. i also think the results should still be checked by a dentist.”
+- R011 (P): “Sometimes the buttons were a little hard to tap, and it took a few seconds to load when I first opened it. A few sections also felt a bit too long.”
+- R013 (P): “Late”
+- R024 (P): “Broken down into known performance bugs that the developers have had to patch”
+- R025 (P): “They should more aware about the patient anxiety through emphasizing comfort rather than major procedural difficulties.”
+- R026 (P): “Sometimes, I found it a little confusing to use some features. It could be easier to navigate.”
+- R038 (P): “The only one difficulty I had was that some pages had a lot information all the once, which felt a little overwhelming at a times.”
+- R039 (P): “Tooth on my "bagang" area which rotten”
+- R047 (P): “as of now, nothing”
+- R071 (P): “Nothing the system is perfect”
+- R073 (P): “Some questions”
+- R074 (P): “I did not encounter any major problems while using Toothwise because it was simple and easy to understand”
+PN **What improvements or additional features would you suggest?**
+- R007 (P): “i suggest improving the accuracy of the results and adding more dental conditions that the system can detect. it would also be nice if it could give more helpful recommendations for each condition.”
+- R011 (P): “I would suggest adding fun reminders or rewards for brushing on time, and maybe short videos instead of just text. It would also be great if it worked faster even with slow internet.”
+- R017 (P): “More drs.”
+- R020 (P): “For authorized personal add an additional security measure”
+- R023 (P): “More advance technique using toothwise”
+- R024 (P): “Several strategic features and improvement can be integrated”
+- R026 (P): “I suggest making the app easier to use and adding reminders for brushing teeth and dental checkups. More simple tips about taking care of our teeth would also be helpful”
+- R029 (P): “Idont know”
+- R038 (P): “Make search function easier to use so I can quickly find the topic I need.”
+- R039 (P): “The websites are all good especially the offers and services of it.”
+- R044 (P): “Nothing unless if it is out dated”
+- R059 (IT): “Improve user experience on app”
+- R074 (P): “I suggest adding more dental health tips, reminders for dental checkups, and a more user-friendly design.”

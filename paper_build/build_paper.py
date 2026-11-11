@@ -486,7 +486,7 @@ def write_table(doc, b):
     tblPr.append(parse_xml(f'<w:tblLayout {nsdecls("w")} w:type="fixed"/>'))
     for gc, wdt in zip(t._tbl.tblGrid.findall(qn("w:gridCol")), widths):
         gc.set(qn("w:w"), str(int(wdt * scale * 1440)))
-    size = 11 if ncol <= 4 else 10
+    size = 11 if ncol <= 4 else 10 if ncol <= 8 else 8
     for i, row in enumerate(rows):
         tr = t.rows[i]._tr
         trPr = tr.get_or_add_trPr()

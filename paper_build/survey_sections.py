@@ -470,16 +470,17 @@ def main(path):
         f"software quality part (ISO/IEC 25010) was written for dentists, clinic staff, and IT experts, while the "
         f"parts on the system's features were written for all respondents. Responses were collected from "
         f"{first} to {last}, and {N} complete submissions were received.",
-        f"P The study used non-probability sampling, since there was no fixed list of the people who could "
-        f"evaluate the system from which a random sample could be drawn. Patient respondents were reached "
-        f"through convenience sampling: the link to the form was shared online, for example on social media "
-        f"and in group chats, and anyone who received it and agreed to take part could answer. IT experts were "
-        f"chosen through purposive sampling: the researchers personally invited people who work in information "
-        f"technology, because the software quality part of the questionnaire calls for technical knowledge "
-        f"(Etikan et al., 2016). Because the population was not fixed, no sample-size formula was applied, and "
-        f"since the respondents were not randomly selected, the results describe the respondents of this study "
-        f"and are not generalized to all patients or all IT practitioners. Tables {{tab:resp}} and {{tab:sectn}} show how many "
-        f"respondents answered each section.",
+        f"P The study used purposive sampling, a non-probability technique in which respondents are chosen "
+        f"because they fit the purpose of the study (Etikan et al., 2016). Two groups were sampled. User "
+        f"respondents had to meet two criteria: they belonged to the group the system serves through its "
+        f"patient portal, that is, dental patients, and they agreed to the consent statement after reading the "
+        f"purpose of the study. A minimum of 50 user respondents was set, and {nPT} took part. IT experts had "
+        f"to work in information technology and were personally invited by the researchers, because the "
+        f"software quality part of the questionnaire calls for technical knowledge. The form link was shared "
+        f"online, and the form showed each respondent only the parts meant for their group. Because the "
+        f"respondents were not randomly selected, the results describe the respondents of this study and are "
+        f"not generalized to all patients or all IT practitioners. Tables {{tab:resp}} and {{tab:sectn}} show "
+        f"how many respondents answered each section.",
     ] + method + [
         "### 3.10.5 Ethical Considerations",
         "P All respondents gave their informed consent before answering. The questionnaire asked for a name only "
@@ -569,6 +570,56 @@ def main(path):
                "|| app_pan2 | appendix_panel_b.jpg | 2.95 | Panel Consultation — Approval | "
                "The panel member found the statement of the problem acceptable, noted that the model metrics were "
                "corrected and that the panel's advice to test on more datasets was followed, and saw no problem.")
+
+    # Appendix E: the online forms, captured page by page without answers.
+    app.append("#APP APPENDIX E | Online Evaluation Forms")
+    app.append("P The evaluation forms were prepared in Google Forms. The figures show every page of each form as "
+               "a respondent sees it, without answers; the main survey shows each part to the respondent groups "
+               "named at the top of the part.")
+    for key, title, n in (("main", "Toothwise Survey Questionnaire", 8),
+                          ("it", "Toothwise IT Expert Evaluation Form", 6)):
+        for a in range(1, n + 1, 2):
+            app.append(f"FIGPAIR form_{key}_{a} | form_{key}_{a}.jpg | 2.95 | {title} ({a} of {n}) | "
+                       f"|| form_{key}_{a+1} | form_{key}_{a+1}.jpg | 2.95 | {title} ({a+1} of {n}) | ")
+
+    # Appendix F: every respondent's ratings (no names).
+    rid = {id(r): f"R{i:03d}" for i, r in enumerate(data, 1)}
+    typ = lambda r: "IT" if str(r[role]).startswith("IT") else "P"
+    def resp_table(key, title, secs):
+        its = [it for it in items if it["section"] in secs]
+        rows = [r for r in data if any(score(r[it["col"]]) is not None for it in its)]
+        app.append(f"TABLE {key} | {title} (n = {len(rows)})")
+        app.append("W " + ",".join(["0.55", "0.4"] + ["0.36"] * len(its)))
+        app.append("| " + " | ".join(["Resp.", "Type"] + [it["code"] for it in its]) + " |")
+        for r in rows:
+            vals = [str(score(r[it["col"]]) or "–") for it in its]
+            app.append("| " + " | ".join([rid[id(r)], typ(r)] + vals) + " |")
+        app.append("ENDTABLE")
+    app.append("#APP APPENDIX F | Individual Responses")
+    app.append("P Each row is one respondent, numbered in the order the responses were received (R001 to "
+               f"R{len(data):03d}); names are not shown. Type: P = patient respondent, IT = IT expert. Ratings: "
+               "4 = Strongly Agree, 3 = Agree, 2 = Disagree, 1 = Strongly Disagree. Item codes are those of "
+               "Appendix A.")
+    resp_table("indA", "Individual Ratings — System Features", FEATURE)
+    resp_table("indB1", "Individual Ratings — Security, Privacy, and Usability", ISO[:3])
+    resp_table("indB2", "Individual Ratings — Reliability, Performance Efficiency, and Data Protection", ISO[3:])
+    resp_table("indC", "Individual Ratings — Current Process and Screening Consistency", [MANUAL, CONSIST])
+
+    # Appendix G: open-ended answers, verbatim.
+    junk = {"", "-", ".", "none", "n/a", "na", "nothing", "wala", "no", "n.a.", "none so far", "not applicable"}
+    app.append("#APP APPENDIX G | Respondents' Comments and Suggestions")
+    app.append("P The answers to the three open-ended questions are reproduced as written, without corrections; "
+               "blank answers and answers such as \"none\" are omitted.")
+    for c in range(len(head)):
+        h = str(head[c] or "")
+        if not h.startswith(("What did you like", "What problems", "What improvements")):
+            continue
+        app.append(f"PN **{h}**")
+        for r in data:
+            v = re.sub(r"\s+", " ", str(r[c] or "")).strip()
+            if v.lower() not in junk:
+                v = v.replace("*", "∗").replace("|", "/")
+                app.append(f"- {rid[id(r)]} ({typ(r)}): “{v}”")
 
     text = CONTENT.read_text(encoding="utf-8")
     # abstract: between TITLEPAGE and TOC
