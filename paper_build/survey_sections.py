@@ -82,11 +82,17 @@ IT_COMMENTS = {
         "history, and appointments are all stored in one system instead of on paper, so information is easier to "
         "find and less likely to get lost. Patients can book online, which helps the clinic avoid double bookings "
         "and manage its schedule better. Each user only sees what they need, so patient data stays protected. The "
-        "system is also simple enough that even non-tech savy people can use it without much training."],
-    "What problems, bugs, or security concerns did you encounter?": ["none that I know of", "none"],
+        "system is also simple enough that even non-tech savy people can use it without much training.",
+        "the AI is good able to answer related to tooth inquiry"],
+    "What problems, bugs, or security concerns did you encounter?": [
+        "none that I know of", "none",
+        "although it answer tooth related inquiry it still answer unrelated inquiry with teeth"],
     "What improvements or additional features would you recommend?": [
         "UI/UX, less click less scroll",
-        "Since it’s web-based, it has a solid foundation for adding features like billing or inventory."],
+        "Since it’s web-based, it has a solid foundation for adding features like billing or inventory.",
+        "limit the answer to related teeth inquiry and if possible if the visitor is asking the AI it should only "
+        "answer the basic info of the clinic and teeth related inquiry will only be entertained if they are "
+        "registered user"],
 }
 
 def score(v):
@@ -307,8 +313,6 @@ def main(path):
     extra = {
         "Usability": " The experts suggested fewer clicks and less scrolling, less white space, and a layout for "
                      "all screen sizes (Appendices C and D).",
-        "Reliability": " This includes RE5, on the system working normally after the free server wakes from an idle "
-                       "period, a limitation noted in Chapter I.",
     }
     for name, code in IT_SECTIONS:
         v = itS[name]
@@ -383,9 +387,11 @@ def main(path):
       f"thought of the system; they should be read together with the measured results in Sections 4.1 and 4.2.")
     w("P In their written comments, the IT experts described the system as innovative and praised that it keeps "
       "the clinic's records in one place, shows each user only what they need, and is simple enough to use "
-      "without much training. Neither reported a problem, bug, or security concern. They recommended fewer clicks "
-      "and less scrolling, and noted that the web-based design is a good base for features such as billing and "
-      "inventory.")
+      "without much training. They recommended fewer clicks and less scrolling, and noted that the web-based "
+      "design is a good base for features such as billing and inventory. A third IT expert found that the AI "
+      "assistant answers tooth-related questions well but also unrelated ones, and recommended limiting it to "
+      "dental questions, with visitors given only the clinic's basic information (Section 4.2.6). No other "
+      "problem, bug, or security concern was reported.")
     w("P The user respondents most often praised how easy the system is to use, its clear design, and its "
       "simple explanations. The problems they mentioned were slow loading the first time, pages with too much "
       "information at once, some features being hard to find, and wrong results from blurry photographs. Their "
@@ -503,6 +509,7 @@ def main(path):
     app.append("FIGPAIR res_q2 | results_it_quality_2.png | 2.95 | IT Expert Form Results — Reliability, Performance "
                "Efficiency, and Data Protection | || res_com | results_it_comments.png | 2.95 | IT Expert Form "
                "Results — Comments and Recommendations | ")
+    app.append("FIG res_it3 | results_it3_comments.png | 4.4 | IT Expert 3 — Comments and Recommendations")
     app.append("PN **Comments and recommendations, as written**")
     for q, ans in IT_COMMENTS.items():
         app.append(f"PN *{q}*")

@@ -717,7 +717,7 @@ W 0.5,3.35,0.45,0.45,0.55,0.5,1.2
 |  | Reliability — mean |  |  | 4.00 | 0.00 | Strongly Agree |
 ENDTABLE
 NOTE N = 2 IT experts. SA = Strongly Agree; A = Agree; WM = weighted mean; SD = standard deviation. No statement was rated Disagree or Strongly Disagree.
-P Reliability received an average rating of 4.00 out of 4 (SD 0.00), which means Strongly Agree. Both IT experts chose Strongly Agree for all 5 statements. This includes RE5, on the system working normally after the free server wakes from an idle period, a limitation noted in Chapter I.
+P Reliability received an average rating of 4.00 out of 4 (SD 0.00), which means Strongly Agree. Both IT experts chose Strongly Agree for all 5 statements.
 TABLE pe | Evaluation Results for Performance Efficiency
 W 0.5,3.35,0.45,0.45,0.55,0.5,1.2
 | Code | Statement | SA | A | WM | SD | Verbal interpretation |
@@ -797,7 +797,7 @@ W 2.7,1.5,0.7,0.6,1.3
 ENDTABLE
 P All nine sections were rated Strongly Agree, so Toothwise is Highly Acceptable to its evaluators. The IT experts rated the six quality characteristics 3.97 out of 4: 58 of their 60 ratings were Strongly Agree and the other 2 were Agree, both on Security. The user respondents rated the three features 3.48, and only 18 of their 1,442 answers were Disagree or Strongly Disagree.
 P Two cautions apply. First, the software quality results come from 2 IT experts, so they describe the judgment of a small group. Second, the ratings show what the evaluators thought of the system; they should be read together with the measured results in Sections 4.1 and 4.2.
-P In their written comments, the IT experts described the system as innovative and praised that it keeps the clinic's records in one place, shows each user only what they need, and is simple enough to use without much training. Neither reported a problem, bug, or security concern. They recommended fewer clicks and less scrolling, and noted that the web-based design is a good base for features such as billing and inventory.
+P In their written comments, the IT experts described the system as innovative and praised that it keeps the clinic's records in one place, shows each user only what they need, and is simple enough to use without much training. They recommended fewer clicks and less scrolling, and noted that the web-based design is a good base for features such as billing and inventory. A third IT expert found that the AI assistant answers tooth-related questions well but also unrelated ones, and recommended limiting it to dental questions, with visitors given only the clinic's basic information (Section 4.2.6). No other problem, bug, or security concern was reported.
 P The user respondents most often praised how easy the system is to use, its clear design, and its simple explanations. The problems they mentioned were slow loading the first time, pages with too much information at once, some features being hard to find, and wrong results from blurry photographs. Their suggestions were reminders for brushing and check-ups, more dental tips and short videos, an easier search, more conditions to detect with better accuracy, and an extra security step for staff accounts.
 
 ## 4.4 Speed and Reliability of the System
@@ -1010,13 +1010,17 @@ W 0.6,0.8,0.65,0.75,0.75,0.8,0.55
 ENDTABLE
 FIGPAIR res_prof | results_it_profile.png | 2.95 | IT Expert Form Results — Evaluator Profile | || res_q1 | results_it_quality_1.png | 2.95 | IT Expert Form Results — Security, Privacy, and Usability | 
 FIGPAIR res_q2 | results_it_quality_2.png | 2.95 | IT Expert Form Results — Reliability, Performance Efficiency, and Data Protection | || res_com | results_it_comments.png | 2.95 | IT Expert Form Results — Comments and Recommendations | 
+FIG res_it3 | results_it3_comments.png | 4.4 | IT Expert 3 — Comments and Recommendations
 PN **Comments and recommendations, as written**
 PN *What are the strengths of Toothwise from a technical point of view?*
 - IT expert 1: “Innovative”
 - IT expert 2: “Biggest strength is that, it puts everything a dental clinic needs in one place. Patient records, dental history, and appointments are all stored in one system instead of on paper, so information is easier to find and less likely to get lost. Patients can book online, which helps the clinic avoid double bookings and manage its schedule better. Each user only sees what they need, so patient data stays protected. The system is also simple enough that even non-tech savy people can use it without much training.”
+- IT expert 3: “the AI is good able to answer related to tooth inquiry”
 PN *What problems, bugs, or security concerns did you encounter?*
 - IT expert 1: “none that I know of”
 - IT expert 2: “none”
+- IT expert 3: “although it answer tooth related inquiry it still answer unrelated inquiry with teeth”
 PN *What improvements or additional features would you recommend?*
 - IT expert 1: “UI/UX, less click less scroll”
 - IT expert 2: “Since it’s web-based, it has a solid foundation for adding features like billing or inventory.”
+- IT expert 3: “limit the answer to related teeth inquiry and if possible if the visitor is asking the AI it should only answer the basic info of the clinic and teeth related inquiry will only be entertained if they are registered user”
