@@ -549,6 +549,26 @@ def main(path):
     app.append("#APP APPENDIX C | Letter of Approval from CodiSmile Dental Clinic")
     app.append("FIG letter1 | appendix_letter_1.png | 5.4 | Letter Requesting Approval to Conduct the Study (page 1 of 2)")
     app.append("FIG letter2 | appendix_letter_2.png | 5.4 | Letter Requesting Approval to Conduct the Study (page 2 of 2)")
+    app.append("#APP APPENDIX D | Evaluator Feedback and Panel Consultation")
+    app.append("P The IT experts received a video demonstration of Toothwise and the evaluation form through Facebook "
+               "Messenger and gave their feedback in the same conversations; their names and photos are blurred. "
+               "Messages in Filipino are summarized in English in the captions.")
+    app.append("FIGPAIR app_it1a | appendix_it1_a.jpg | 2.6 | IT Expert 1 — Demonstration and Form Sent | "
+               "The researchers sent the demonstration video and the IT Expert Evaluation Form link. "
+               "|| app_it1b | appendix_it1_b.jpg | 2.6 | IT Expert 1 — Feedback | "
+               "After submitting the form, the expert found the system good and innovative and noted that the "
+               "code base could also have been shared for review.")
+    app.append("FIGPAIR app_it2a | appendix_it2_a.jpg | 2.95 | IT Expert 2 — Form Submitted | "
+               "The expert submitted the form and offered the comments as suggestions for improvement and "
+               "further advancement. "
+               "|| app_it2b | appendix_it2_b.jpg | 2.95 | IT Expert 2 — Feedback | "
+               "The expert liked the concept of a website with AI detection, found some white space "
+               "uncomfortable, suggested a layout responsive to all aspect ratios, and asked if it opens on a phone.")
+    app.append("FIGPAIR app_pan1 | appendix_panel_a.jpg | 2.95 | Panel Consultation — Request for Review | "
+               "The researchers sent the revised paper to a panel member for checking of the statement of the problem. "
+               "|| app_pan2 | appendix_panel_b.jpg | 2.95 | Panel Consultation — Approval | "
+               "The panel member found the statement of the problem acceptable, noted that the model metrics were "
+               "corrected and that the panel's advice to test on more datasets was followed, and saw no problem.")
 
     text = CONTENT.read_text(encoding="utf-8")
     # abstract: between TITLEPAGE and TOC
