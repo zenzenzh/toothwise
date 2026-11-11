@@ -253,11 +253,10 @@ def main(path):
       f"took part, so it was answered by {n_iso} respondents ({it_iso} IT practitioners and {pt_iso} patient "
       f"respondents), with an overall mean of {f2(iso_mean)} (Strongly Agree). Because these respondents were "
       f"not all IT experts, the software quality results in this section come from the IT Expert Evaluation "
-      f"Form; the Part B3 answers are listed in Appendices B and G. The two parts on the manual screening "
-      f"process and on screening consistency and time were answered by {n_man} respondents (Section 4.4).")
+      f"Form.")
     w("### 4.3.2 Research Instrument")
-    w(f"P Two instruments were used; both are reproduced in Appendix A and shown as online forms in Appendix F. "
-      f"The IT Expert Evaluation Form asks for the evaluator's profile, then has {len(IT_ITEMS)} statements, five "
+    w(f"P Two instruments were used. The IT Expert Evaluation Form is reproduced in Appendix A and shown in Appendix F. "
+      f"It asks for the evaluator's profile, then has {len(IT_ITEMS)} statements, five "
       f"for each of the six quality characteristics named in the fourth problem, and three open-ended questions "
       f"on the system's technical strengths, the problems found, and recommended improvements. The user survey "
       f"has {len(feat_items)} statements on the three main features, {len(by_sec[MANUAL]) + len(by_sec[CONSIST])} "
@@ -307,9 +306,8 @@ def main(path):
     keys = {"Security": "se", "Privacy": "pr", "Usability": "us", "Reliability": "re",
             "Performance Efficiency": "pe", "Data Protection": "dp"}
     extra = {
-        "Usability": " In their comments, one expert recommended “less click less scroll”, and in the Messenger "
-                     "conversation (Appendix E) one found some white space uncomfortable and suggested a layout "
-                     "that adapts to all screen sizes; these are included in the recommendations.",
+        "Usability": " The experts suggested fewer clicks and less scrolling, less white space, and a layout for "
+                     "all screen sizes (Appendices E and G).",
         "Reliability": " This includes RE5, on the system working normally after the free server wakes from an idle "
                        "period, a limitation noted in Chapter I.",
     }
@@ -457,11 +455,10 @@ def main(path):
         "10173). The screening images shown in this paper are demonstration images.",
     ]
 
-    # Appendices
-    app = ["#APP APPENDIX A | Evaluation Instruments",
-           f"P Both instruments were answered online through Google Forms (Appendix F). Each statement was rated on "
-           f"a four-point scale: Strongly Agree (4), Agree (3), Disagree (2), and Strongly Disagree (1).",
-           "PN **IT Expert Evaluation Form: Software Quality Evaluation Based on ISO/IEC 25010**",
+    # Appendices (IT expert evaluation only)
+    app = ["#APP APPENDIX A | IT Expert Evaluation Form",
+           f"P The form was answered online through Google Forms (Appendix F). Each statement was rated on a "
+           f"four-point scale: Strongly Agree (4), Agree (3), Disagree (2), and Strongly Disagree (1).",
            "PN *Part I. Evaluator Profile*",
            "- Name (optional); current position or job title; field of specialization; years of experience in IT; "
            "how the system was evaluated (used the deployed system, watched a demonstration, or both)."]
@@ -473,25 +470,9 @@ def main(path):
     app.append("PN *Part III. Comments and Recommendations*")
     for q in IT_COMMENTS:
         app.append(f"- {q}")
-    app.append("PN **User Survey: Toothwise Survey Questionnaire**")
-    part_of = lambda sec: ("Part A. Current Process and Expected Effect" if sec in (MANUAL, CONSIST) else
-                           "Part B3. Software Quality Evaluation (ISO/IEC 25010) — for dentists, clinic staff, and IT experts"
-                           if sec in ISO else "Part B. System Features — for all respondents")
-    last_part = None
-    for sec, its in by_sec.items():
-        if part_of(sec) != last_part:
-            last_part = part_of(sec)
-            app.append(f"PN **{last_part}**")
-        app.append(f"PN *{label(sec)}*")
-        for it in its:
-            app.append(f"- {it['code']}. {it['stmt']}")
-    app.append("PN **Part C. Open-ended Questions**")
-    for q in ("What did you like most about Toothwise?", "What problems or difficulties did you encounter while "
-              "using Toothwise?", "What improvements or additional features would you suggest?"):
-        app.append(f"- {q}")
-    app.append("#APP APPENDIX B | Frequency Distribution of Responses")
-    app.append("P The tables list, for every statement of both instruments, how many respondents chose each rating, the number of "
-               "respondents who answered it (N), and the weighted mean (WM). Respondent names are not included.")
+    app.append("#APP APPENDIX B | Frequency Distribution of the IT Experts' Ratings")
+    app.append("P The table lists, for every statement, how many of the IT experts chose each rating, the number "
+               "who answered it (N), and the weighted mean (WM). Names are not included.")
     app.append("TABLE freqit | Frequency Distribution — IT Expert Evaluation Form")
     app.append("W 0.6,0.8,0.65,0.75,0.75,0.8,0.55")
     app.append("| Code | Strongly Agree (4) | Agree (3) | Disagree (2) | Strongly Disagree (1) | N | WM |")
@@ -499,15 +480,6 @@ def main(path):
         app.append(f"| {c} | {xs.count(4)} | {xs.count(3)} | {xs.count(2)} | {xs.count(1)} | {len(xs)} | "
                    f"{f2(st.mean(xs))} |")
     app.append("ENDTABLE")
-    app.append("TABLE freq | Frequency Distribution — User Survey")
-    app.append("W 0.6,0.8,0.65,0.75,0.75,0.8,0.55,0.6")
-    app.append("| Code | Strongly Agree (4) | Agree (3) | Disagree (2) | Strongly Disagree (1) | N | WM | Section |")
-    for it in items:
-        xs = it["all"]["xs"]
-        app.append(f"| {it['code']} | {xs.count(4)} | {xs.count(3)} | {xs.count(2)} | {xs.count(1)} | {len(xs)} | "
-                   f"{f2(it['all']['wm'])} | {CODES[it['section']]} |")
-    app.append("ENDTABLE")
-    app.append("NOTE Section codes: " + "; ".join(f"{CODES[s]} = {label(s)}" for s in by_sec) + ".")
     app.append("#APP APPENDIX C | Letter of Approval from CodiSmile Dental Clinic")
     app.append("FIG letter1 | appendix_letter_1.png | 5.4 | Letter Requesting Approval to Conduct the Study (page 1 of 2)")
     app.append("FIG letter2 | appendix_letter_2.png | 5.4 | Letter Requesting Approval to Conduct the Study (page 2 of 2)")
@@ -532,62 +504,33 @@ def main(path):
                "The panel member found the statement of the problem acceptable, noted that the model metrics were "
                "corrected and that the panel's advice to test on more datasets was followed, and saw no problem.")
 
-    # Appendix E: the online forms, captured page by page without answers.
-    app.append("#APP APPENDIX F | Online Evaluation Forms")
-    app.append("P The evaluation forms were prepared in Google Forms. The figures show every page of each form as "
-               "a respondent sees it, without answers; the main survey shows each part to the respondent groups "
-               "named at the top of the part.")
-    for key, title, n in (("main", "Toothwise Survey Questionnaire", 8),
-                          ("it", "Toothwise IT Expert Evaluation Form", 6)):
-        for a in range(1, n + 1, 2):
-            app.append(f"FIGPAIR form_{key}_{a} | form_{key}_{a}.jpg | 2.95 | {title} ({a} of {n}) | "
-                       f"|| form_{key}_{a+1} | form_{key}_{a+1}.jpg | 2.95 | {title} ({a+1} of {n}) | ")
+    # Appendix F: the IT expert form, captured page by page without answers.
+    app.append("#APP APPENDIX F | Online IT Expert Evaluation Form")
+    app.append("P The figures show every page of the IT Expert Evaluation Form in Google Forms as the IT experts "
+               "saw it, without answers.")
+    n = len(list((HERE / "figures").glob("form_it_*.jpg")))
+    for a in range(1, n + 1, 2):
+        if a < n:
+            app.append(f"FIGPAIR form_it_{a} | form_it_{a}.jpg | 2.95 | IT Expert Evaluation Form ({a} of {n}) | "
+                       f"|| form_it_{a+1} | form_it_{a+1}.jpg | 2.95 | IT Expert Evaluation Form ({a+1} of {n}) | ")
+        else:
+            app.append(f"FIG form_it_{a} | form_it_{a}.jpg | 2.95 | IT Expert Evaluation Form ({a} of {n})")
 
-    # Appendix F: every respondent's ratings (no names).
-    rid = {id(r): f"R{i:03d}" for i, r in enumerate(data, 1)}
-    typ = lambda r: "IT" if str(r[role]).startswith("IT") else "P"
-    def resp_table(key, title, secs):
-        its = [it for it in items if it["section"] in secs]
-        rows = [r for r in data if any(score(r[it["col"]]) is not None for it in its)]
-        app.append(f"TABLE {key} | {title} (n = {len(rows)})")
-        app.append("W " + ",".join(["0.55", "0.4"] + ["0.36"] * len(its)))
-        app.append("| " + " | ".join(["Resp.", "Type"] + [it["code"] for it in its]) + " |")
-        for r in rows:
-            vals = [str(score(r[it["col"]]) or "–") for it in its]
-            app.append("| " + " | ".join([rid[id(r)], typ(r)] + vals) + " |")
-        app.append("ENDTABLE")
-    app.append("#APP APPENDIX G | Individual Responses")
-    app.append("P The tables list the user survey responses. Each row is one respondent, numbered in the order the "
-               f"responses were received (R001 to R{len(data):03d}); names are not shown. Type: P = patient "
-               "respondent, IT = IT practitioner. Ratings: 4 = Strongly Agree, 3 = Agree, 2 = Disagree, 1 = "
-               "Strongly Disagree. Item codes are those of the user survey in Appendix A. The ratings of the two "
-               "IT experts on the IT Expert Evaluation Form are given per statement in Appendix B.")
-    resp_table("indA", "Individual Ratings — System Features", FEATURE)
-    resp_table("indB1", "Individual Ratings — Part B3: Security, Privacy, and Usability", ISO[:3])
-    resp_table("indB2", "Individual Ratings — Part B3: Reliability, Performance Efficiency, and Data Protection", ISO[3:])
-    resp_table("indC", "Individual Ratings — Current Process and Screening Consistency", [MANUAL, CONSIST])
-
-    # Appendix G: open-ended answers, verbatim.
-    junk = {"", "-", ".", "none", "n/a", "na", "nothing", "wala", "no", "n.a.", "none so far", "not applicable"}
-    app.append("#APP APPENDIX H | Respondents' Comments and Suggestions")
-    app.append("P The answers to the three open-ended questions are reproduced as written, without corrections; "
-               "blank answers and answers such as \"none\" are omitted.")
-    app.append("PN **IT Expert Evaluation Form**")
+    # Appendix G: the IT experts' open-ended answers, verbatim.
+    app.append("#APP APPENDIX G | IT Expert Evaluation Results")
+    app.append("P The figures show the response summary of the IT Expert Evaluation Form from Google Forms; the "
+               "evaluators' names are blurred. Tables {tab:se} to {tab:dp} and Appendix B give the same ratings "
+               "as numbers.")
+    app.append("FIGPAIR res_prof | results_it_profile.png | 2.95 | IT Expert Form Results — Evaluator Profile | "
+               "|| res_q1 | results_it_quality_1.png | 2.95 | IT Expert Form Results — Security, Privacy, and Usability | ")
+    app.append("FIGPAIR res_q2 | results_it_quality_2.png | 2.95 | IT Expert Form Results — Reliability, Performance "
+               "Efficiency, and Data Protection | || res_com | results_it_comments.png | 2.95 | IT Expert Form "
+               "Results — Comments and Recommendations | ")
+    app.append("PN **Comments and recommendations, as written**")
     for q, ans in IT_COMMENTS.items():
         app.append(f"PN *{q}*")
         for k, v in enumerate(ans, 1):
             app.append(f"- IT expert {k}: “{v}”")
-    app.append("PN **User Survey**")
-    for c in range(len(head)):
-        h = str(head[c] or "")
-        if not h.startswith(("What did you like", "What problems", "What improvements")):
-            continue
-        app.append(f"PN **{h}**")
-        for r in data:
-            v = re.sub(r"\s+", " ", str(r[c] or "")).strip()
-            if v.lower() not in junk:
-                v = v.replace("*", "∗").replace("|", "/")
-                app.append(f"- {rid[id(r)]} ({typ(r)}): “{v}”")
 
     text = CONTENT.read_text(encoding="utf-8")
     # Section 4.4, Chapter V, the abstract, and Appendix D are maintained by hand in content.txt; only
